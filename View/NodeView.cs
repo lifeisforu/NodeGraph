@@ -13,7 +13,7 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		private NodeViewModel _ViewModel;
+		protected NodeViewModel _ViewModel;
 
 		#endregion // Fields
 
@@ -101,5 +101,14 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Selection
+
+		#region Connections
+
+		public virtual void OnPortConnectionChanged()
+		{
+
+		}
+
+		#endregion // Connections
 	}
 }

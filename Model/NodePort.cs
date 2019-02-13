@@ -6,12 +6,6 @@ namespace NodeGraph.Model
 {
 	public class NodePort : ModelBase
 	{
-		#region Events
-
-		public event EventHandler ConnectionChanged;
-
-		#endregion // Events
-
 		#region Fields
 
 		public NodePortViewModel ViewModel;
@@ -67,7 +61,6 @@ namespace NodeGraph.Model
 			DisplayName = attr.DisplayName;
 			IsInput = attr.IsInput;
 			AllowMultipleInput = attr.AllowMultipleInput;
-			Connectors.CollectionChanged += Connectors_CollectionChanged;
 		}
 
 		#endregion // Constructor
@@ -79,14 +72,5 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Destructor
-
-		#region Connection
-
-		private void Connectors_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
-		{
-			ConnectionChanged?.Invoke( this, null );
-		}
-
-		#endregion // Connection.
 	}
 }

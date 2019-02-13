@@ -307,14 +307,12 @@ namespace NodeGraph
 			{
 				if( null != connector.StartPort )
 				{
-					connector.StartPort.ViewModel.ConnectorViewModels.Remove( connector.ViewModel );
 					connector.StartPort.Connectors.Remove( connector );
 					connector.StartPort = null;
 				}
 
 				if( null != connector.EndPort )
 				{
-					connector.EndPort.ViewModel.ConnectorViewModels.Remove( connector.ViewModel );
 					connector.EndPort.Connectors.Remove( connector );
 					connector.EndPort = null;
 				}

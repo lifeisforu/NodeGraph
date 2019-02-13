@@ -14,9 +14,10 @@ namespace NodeGraph.Model
 		public bool IsInput = false;
 		public bool AllowMultipleInput = false;
 
-		public NodePortAttribute( string displayName )
+		public NodePortAttribute( string displayName, bool isInput )
 		{
 			DisplayName = displayName;
+			IsInput = isInput;
 		}
 	}
 }

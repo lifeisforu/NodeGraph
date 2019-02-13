@@ -14,7 +14,7 @@ namespace NodeGraph.Model
 
 		#region Properties
 
-		private ConnectorViewModel _ViewModel;
+		protected ConnectorViewModel _ViewModel;
 		public ConnectorViewModel ViewModel
 		{
 			get { return _ViewModel; }
@@ -28,7 +28,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private NodePort _StartPort;
+		protected NodePort _StartPort;
 		public NodePort StartPort
 		{
 			get { return _StartPort; }
@@ -42,7 +42,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private NodePort _EndPort;
+		protected NodePort _EndPort;
 		public NodePort EndPort
 		{
 			get { return _EndPort; }

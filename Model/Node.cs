@@ -18,7 +18,7 @@ namespace NodeGraph.Model
 
 		#region Properties
 
-		private NodeViewModel _ViewModel;
+		protected NodeViewModel _ViewModel;
 		public NodeViewModel ViewModel
 		{
 			get { return _ViewModel; }
@@ -32,7 +32,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private string _Header;
+		protected string _Header;
 		public string Header
 		{
 			get { return _Header; }
@@ -46,7 +46,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private SolidColorBrush _HeaderBackgroundColor;
+		protected SolidColorBrush _HeaderBackgroundColor;
 		public SolidColorBrush HeaderBackgroundColor
 		{
 			get { return _HeaderBackgroundColor; }
@@ -60,7 +60,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private SolidColorBrush _HeaderFontColor;
+		protected SolidColorBrush _HeaderFontColor;
 		public SolidColorBrush HeaderFontColor
 		{
 			get { return _HeaderFontColor; }
@@ -74,7 +74,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private double _X;
+		protected double _X;
 		public double X
 		{
 			get { return _X; }
@@ -88,7 +88,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private double _Y;
+		protected double _Y;
 		public double Y
 		{
 			get { return _Y; }
@@ -102,7 +102,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private int _ZIndex;
+		protected int _ZIndex;
 		public int ZIndex
 		{
 			get { return _ZIndex; }
@@ -116,7 +116,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<NodeFlowPort> _InputFlowPorts = new ObservableCollection<NodeFlowPort>();
+		protected ObservableCollection<NodeFlowPort> _InputFlowPorts = new ObservableCollection<NodeFlowPort>();
 		public ObservableCollection<NodeFlowPort> InputFlowPorts
 		{
 			get { return _InputFlowPorts; }
@@ -130,7 +130,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<NodeFlowPort> _OutputFlowPorts = new ObservableCollection<NodeFlowPort>();
+		protected ObservableCollection<NodeFlowPort> _OutputFlowPorts = new ObservableCollection<NodeFlowPort>();
 		public ObservableCollection<NodeFlowPort> OutputFlowPorts
 		{
 			get { return _OutputFlowPorts; }
@@ -144,7 +144,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<NodePropertyPort> _InputPropertyPorts = new ObservableCollection<NodePropertyPort>();
+		protected ObservableCollection<NodePropertyPort> _InputPropertyPorts = new ObservableCollection<NodePropertyPort>();
 		public ObservableCollection<NodePropertyPort> InputPropertyPorts
 		{
 			get { return _InputPropertyPorts; }
@@ -158,7 +158,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<NodePropertyPort> _OutputPropertyPorts = new ObservableCollection<NodePropertyPort>();
+		protected ObservableCollection<NodePropertyPort> _OutputPropertyPorts = new ObservableCollection<NodePropertyPort>();
 		public ObservableCollection<NodePropertyPort> OutputPropertyPorts
 		{
 			get { return _OutputPropertyPorts; }

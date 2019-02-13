@@ -12,7 +12,7 @@ namespace NodeGraph.Model
 	{
 		public Type ViewModelType = typeof( NodeFlowPortViewModel );
 
-		public NodeFlowPortAttribute( string name, string displayName ) : base( displayName )
+		public NodeFlowPortAttribute( string name, string displayName, bool isInput ) : base( displayName, isInput )
 		{
 			Name = name;
 			AllowMultipleInput = true;

@@ -141,5 +141,25 @@ namespace NodeGraph.ViewModel
 		}
 
 		#endregion // Constructors
+		
+		#region Connection Events
+
+		public virtual void OnConnectionRemoved( NodePortViewModel portViewModel )
+		{
+			if( null != View )
+			{
+				View.OnPortConnectionChanged();
+			}
+		}
+
+		public virtual void OnConnectionAdded( NodePortViewModel portViewModel )
+		{
+			if( null != View )
+			{
+				View.OnPortConnectionChanged();
+			}
+		}
+
+		#endregion // Connection Events
 	}
 }

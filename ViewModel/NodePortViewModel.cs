@@ -34,20 +34,6 @@ namespace NodeGraph.ViewModel
 			}
 		}
 
-		private ObservableCollection<ConnectorViewModel> _ConnectorViewModels = new ObservableCollection<ConnectorViewModel>();
-		public ObservableCollection<ConnectorViewModel> ConnectorViewModels
-		{
-			get { return _ConnectorViewModels; }
-			set
-			{
-				if( value != _ConnectorViewModels )
-				{
-					_ConnectorViewModels = value;
-					RaisePropertyChanged( "ConnectorViewModels" );
-				}
-			}
-		}
-
 		#endregion // Properties
 
 		#region Constructor
@@ -55,8 +41,41 @@ namespace NodeGraph.ViewModel
 		public NodePortViewModel( NodePort nodePort )
 		{
 			Model = nodePort ?? throw new ArgumentNullException( "NodePort can not be null in NodePortViewModel constructor." );
+			Model.Connectors.CollectionChanged += _ConnectorViewModels_CollectionChanged;
 		}
 
 		#endregion // Constructor
+
+		#region Collection Events
+
+		private void _ConnectorViewModels_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
+		{
+			Node node = Model.Owner;
+
+			if( null != e.OldItems )
+			{
+				foreach( var item in e.OldItems )
+				{
+					var removedConnector = item as Connector;
+					node.ViewModel.OnConnectionRemoved( this );
+				}
+			}
+
+			if( null != e.NewItems )
+			{
+				foreach( var item in e.NewItems )
+				{
+					var addedConnector = item as Connector;
+					node.ViewModel.OnConnectionAdded( this );
+				}
+			}
+
+			if( null != View )
+			{
+				View.OnConnectionChanged();
+			}
+		}
+
+		#endregion // Collection Events
 	}
 }

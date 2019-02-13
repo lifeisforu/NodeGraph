@@ -16,7 +16,7 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		private FlowChartViewModel _ViewModel;
+		protected FlowChartViewModel _ViewModel;
 
 		#endregion // Fields
 

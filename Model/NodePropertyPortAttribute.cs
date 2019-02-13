@@ -10,7 +10,7 @@ namespace NodeGraph.Model
 		public Type ViewModelType = typeof( NodePropertyPortViewModel );
 		public object DefaultValue;
 
-		public NodePropertyPortAttribute( string displayName, Type type, bool isInput ) : base( displayName )
+		public NodePropertyPortAttribute( string displayName, Type type, bool isInput ) : base( displayName, isInput )
 		{
 			Type = type;
 			IsInput = isInput;

@@ -21,7 +21,7 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		ConnectorViewModel _ViewModel;
+		protected ConnectorViewModel _ViewModel;
 
 		#endregion // Fields
 

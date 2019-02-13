@@ -13,7 +13,7 @@ namespace NodeGraph.Model
 	{
 		#region Properties
 
-		private FlowChartViewModel _ViewModel;
+		protected FlowChartViewModel _ViewModel;
 		public FlowChartViewModel ViewModel
 		{
 			get { return _ViewModel; }
@@ -27,7 +27,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<Node> _Nodes = new ObservableCollection<Node>();
+		protected ObservableCollection<Node> _Nodes = new ObservableCollection<Node>();
 		public ObservableCollection<Node> Nodes
 		{
 			get { return _Nodes; }
@@ -41,7 +41,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		private ObservableCollection<Connector> _Connectors = new ObservableCollection<Connector>();
+		protected ObservableCollection<Connector> _Connectors = new ObservableCollection<Connector>();
 		public ObservableCollection<Connector> Connectors
 		{
 			get { return _Connectors; }

@@ -23,7 +23,7 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		private NodePortViewModel _ViewModel;
+		protected NodePortViewModel _ViewModel;
 
 		#endregion // Fields
 
@@ -81,7 +81,6 @@ namespace NodeGraph.View
 			if( null == _ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodePortView." );
 			_ViewModel.View = this;
-			_ViewModel.Model.ConnectionChanged += Model_ConnectionChanged;
 		}
 
 		#endregion // Constructor
@@ -170,7 +169,7 @@ namespace NodeGraph.View
 
 		#region Connections
 
-		private void Model_ConnectionChanged( object sender, EventArgs e )
+		public virtual void OnConnectionChanged()
 		{
 			IsFilledPort = ( 0 < _ViewModel.Model.Connectors.Count );
 		}

@@ -1,0 +1,69 @@
+﻿using NodeGraph.ViewModel;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NodeGraph.Model
+{
+	[FlowChart()]
+	public class FlowChart : ModelBase
+	{
+		#region Properties
+
+		private FlowChartViewModel _ViewModel;
+		public FlowChartViewModel ViewModel
+		{
+			get { return _ViewModel; }
+			set
+			{
+				if( value != _ViewModel )
+				{
+					_ViewModel = value;
+					RaisePropertyChanged( "ViewModel" );
+				}
+			}
+		}
+
+		private ObservableCollection<Node> _Nodes = new ObservableCollection<Node>();
+		public ObservableCollection<Node> Nodes
+		{
+			get { return _Nodes; }
+			set
+			{
+				if( value != _Nodes )
+				{
+					_Nodes = value;
+					RaisePropertyChanged( "Nodes" );
+				}
+			}
+		}
+
+		private ObservableCollection<Connector> _Connectors = new ObservableCollection<Connector>();
+		public ObservableCollection<Connector> Connectors
+		{
+			get { return _Connectors; }
+			set
+			{
+				if( value != _Connectors )
+				{
+					_Connectors = value;
+					RaisePropertyChanged( "Connectors" );
+				}
+			}
+		}
+
+		#endregion // Properties
+
+		#region Constructor
+
+		public FlowChart( Guid guid ) : base( guid )
+		{
+			
+		}
+
+		#endregion // Constructor
+	}
+}

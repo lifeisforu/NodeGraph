@@ -172,6 +172,8 @@ namespace NodeGraph.Model
 			}
 		}
 
+		public bool AllowCircularConnection { get; private set; }
+
 		#endregion // Properties
 
 		#region Constructor
@@ -179,9 +181,11 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use Node.Create() method.
 		/// </summary>
-		public Node( Guid guid, FlowChart flowChart ) : base( guid )
+		public Node( Guid guid, FlowChart flowChart, NodeAttribute attr ) : base( guid )
 		{
 			Owner = flowChart;
+
+			AllowCircularConnection = attr.AllowCircularConnection;
 		}
 
 		#endregion // Constructor

@@ -87,39 +87,6 @@ namespace NodeGraph.Model
 			ConnectionChanged?.Invoke( this, null );
 		}
 
-		public bool IsConnectable( NodePort otherPort )
-		{
-			Type thisType = GetType();
-			Type otherType = otherPort.GetType();
-
-			if( IsInput == otherPort.IsInput )
-				return false;
-
-			if( this == otherPort )
-				return false;
-
-			foreach( var connector in Connectors )
-			{
-				if( ( connector.StartPort == otherPort ) ||
-					( connector.EndPort == otherPort ) )
-				{
-					return false;
-				}
-			}
-
-			if( Owner == otherPort.Owner )
-				return false;
-
-			bool hasSameBaseClass = ( typeof( NodePropertyPort ).IsAssignableFrom( thisType ) && typeof( NodePropertyPort ).IsAssignableFrom( otherType ) ) ||
-				( typeof( NodeFlowPort ).IsAssignableFrom( thisType ) && typeof( NodeFlowPort ).IsAssignableFrom( otherType ) );
-
-
-			if( !hasSameBaseClass )
-				return false;
-
-			return true;
-		}
-
 		#endregion // Connection.
 	}
 }

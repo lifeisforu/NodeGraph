@@ -114,7 +114,7 @@ namespace NodeGraph
 			var nodeAttr = nodeAttrs[ 0 ];
 
 			// create node model.
-			Node node = Activator.CreateInstance( nodeType, new object[]{ guid, flowChart } ) as Node;
+			Node node = Activator.CreateInstance( nodeType, new object[]{ guid, flowChart, nodeAttr } ) as Node;
 			Nodes.Add( guid, node );
 			// create node viewmodel.
 			node.ViewModel = Activator.CreateInstance( nodeAttr.ViewModelType, new object[] { node } ) as NodeViewModel;
@@ -484,9 +484,115 @@ namespace NodeGraph
 			}
 		}
 
+		private List<Node> _AlreadyCheckedNodes;
+
 		public bool CheckIfConnectable( NodePort otherPort )
 		{
-			return _FirstPort.IsConnectable( otherPort );
+			Type firstType = _FirstPort.GetType();
+			Type otherType = otherPort.GetType();
+
+			Node firstNode = _FirstPort.Owner;
+			Node otherNode = otherPort.Owner;
+
+			// same port.
+			if( _FirstPort == otherPort )
+			{
+				return false;
+			}
+
+			// same node.
+			if( firstNode == otherNode )
+			{
+				return false;
+			}
+
+			bool areAllPropertyPorts = ( typeof( NodePropertyPort ).IsAssignableFrom( firstType ) && typeof( NodePropertyPort ).IsAssignableFrom( otherType ) );
+			bool areAllFlowPorts = ( typeof( NodeFlowPort ).IsAssignableFrom( firstType ) && typeof( NodeFlowPort ).IsAssignableFrom( otherType ) );
+
+			// different type of ports
+			if( !areAllPropertyPorts && !areAllFlowPorts )
+			{
+				return false;
+			}
+
+			// same orientation.
+			if( _FirstPort.IsInput == otherPort.IsInput )
+			{
+				return false;
+			}
+
+			// already connectecd.
+			foreach( var connector in _FirstPort.Connectors )
+			{
+				if( connector.StartPort == otherPort )
+				{
+					return false;
+				}
+			}
+
+			// different type of value.
+			if( areAllPropertyPorts )
+			{
+				NodePropertyPort firstPropPort = _FirstPort as NodePropertyPort;
+				NodePropertyPort otherPropPort = otherPort as NodePropertyPort;
+
+				if( firstPropPort.TypeOfValue != otherPropPort.TypeOfValue )
+				{
+					return false;
+				}
+			}
+
+			// circular test
+			if( !otherPort.Owner.AllowCircularConnection )
+			{
+				_AlreadyCheckedNodes = new List<Node>();
+				if( IsReachable(
+					_FirstPort.IsInput ? firstNode : otherNode, 
+					_FirstPort.IsInput ? otherNode : firstNode ) )
+				{
+					_AlreadyCheckedNodes = null;
+					return false;
+				}
+				_AlreadyCheckedNodes = null;
+			}
+
+			return true;
+		}
+
+		private bool IsReachable( Node nodeFrom, Node nodeTo )
+		{
+			if( _AlreadyCheckedNodes.Contains( nodeFrom ) )
+				return false;
+
+			_AlreadyCheckedNodes.Add( nodeFrom );
+
+			foreach( var port in nodeFrom.OutputFlowPorts )
+			{
+				foreach( var connector in port.Connectors )
+				{
+					Node nextNode = connector.EndPort.Owner;
+					if( nextNode == nodeTo )
+						return true;
+
+					if( IsReachable( nextNode, nodeTo ) )
+						return true;
+				}
+			}
+
+			foreach( var port in nodeFrom.OutputPropertyPorts )
+			{
+				foreach( var connector in port.Connectors )
+				{
+					Node nextNode = connector.EndPort.Owner;
+					if( nextNode == nodeTo )
+						return true;
+
+					if( IsReachable( nextNode, nodeTo ) )
+						return true;
+				}
+			}
+
+			return false;
 		}
 
 		public void EndConnection()

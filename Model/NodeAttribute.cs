@@ -10,6 +10,7 @@ namespace NodeGraph.Model
 		public string Header;
 		public string HeaderBackgroundColor = "Black";
 		public string HeaderFontColor = "White";
+		public bool AllowCircularConnection = false;
 
 		public NodeAttribute( string header )
 		{

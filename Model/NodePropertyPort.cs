@@ -21,6 +21,8 @@ namespace NodeGraph.Model
 			}
 		}
 
+		public Type TypeOfValue { get; private set; }
+
 		#endregion // Properties
 
 		#region Constructors
@@ -29,6 +31,8 @@ namespace NodeGraph.Model
 		{
 			if( null != attr.DefaultValue )
 				Value = attr.DefaultValue;
+
+			TypeOfValue = attr.Type;
 		}
 
 		#endregion // Constructors

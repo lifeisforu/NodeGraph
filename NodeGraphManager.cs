@@ -51,6 +51,8 @@ namespace NodeGraph
 
 			SelectedNodes.Add( flowChart.Guid, new List<Guid>() );
 
+			flowChart.InvokeCreateEvent();
+
 			//----- return.
 
 			return flowChart;
@@ -114,7 +116,7 @@ namespace NodeGraph
 			var nodeAttr = nodeAttrs[ 0 ];
 
 			// create node model.
-			Node node = Activator.CreateInstance( nodeType, new object[]{ guid, flowChart, nodeAttr } ) as Node;
+			Node node = Activator.CreateInstance( nodeType, new object[]{ guid, flowChart, nodeAttr.AllowCircularConnection } ) as Node;
 			Nodes.Add( guid, node );
 			// create node viewmodel.
 			node.ViewModel = Activator.CreateInstance( nodeAttr.ViewModelType, new object[] { node } ) as NodeViewModel;
@@ -130,22 +132,8 @@ namespace NodeGraph
 			var flowPortAttrs = nodeType.GetCustomAttributes( typeof( NodeFlowPortAttribute ), false ) as NodeFlowPortAttribute[];
 			foreach( var attr in flowPortAttrs )
 			{
-				// create flowPort model.
-				NodeFlowPort port = new NodeFlowPort( Guid.NewGuid(), node, attr );
-				NodeFlowPorts.Add( port.Guid, port );
-				// create flowPort viewmodel.
-				var portVM = Activator.CreateInstance( attr.ViewModelType, new object[] { port } ) as NodeFlowPortViewModel;
-				port.ViewModel = portVM;
-				if( attr.IsInput )
-				{
-					node.InputFlowPorts.Add( port );
-					node.ViewModel.InputFlowPortViewModels.Add( portVM );
-				}
-				else
-				{
-					node.OutputFlowPorts.Add( port );
-					node.ViewModel.OutputFlowPortViewModels.Add( portVM );
-				}
+				NodeFlowPort port = CreateNodeFlowPort( 
+					Guid.NewGuid(), node, attr.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.ViewModelType );
 			}
 
 			//----- create nodePropertyPorts( property ) from NodePropertyAttribute.
@@ -158,23 +146,8 @@ namespace NodeGraph
 				{
 					foreach( var attr in nodePropertyAttrs )
 					{
-						attr.Name = propertyInfo.Name;
-						// create propertyPort model.
-						NodePropertyPort port = new NodePropertyPort( Guid.NewGuid(), node, attr );
-						NodePropertyPorts.Add( port.Guid, port );
-						// create propertyPort viewmodel.
-						var portVM = Activator.CreateInstance( attr.ViewModelType, new object[] { port } ) as NodePropertyPortViewModel;
-						port.ViewModel = portVM;
-						if( port.IsInput )
-						{
-							node.InputPropertyPorts.Add( port );
-							node.ViewModel.InputPropertyPortViewModels.Add( portVM );
-						}
-						else
-						{
-							node.OutputPropertyPorts.Add( port );
-							node.ViewModel.OutputPropertyPortViewModels.Add( portVM );
-						}
+						NodePropertyPort port = CreateNodePropertyPort( Guid.NewGuid(), node,
+							propertyInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.Type, attr.DefaultValue, attr.ViewModelType );
 					}
 				}
 			}
@@ -189,26 +162,15 @@ namespace NodeGraph
 				{
 					foreach( var attr in nodePropertyAttrs )
 					{
-						attr.Name = fieldInfo.Name;
-						// create propertyPort model.
-						NodePropertyPort port = new NodePropertyPort( Guid.NewGuid(), node, attr );
-						NodePropertyPorts.Add( port.Guid, port );
-						// create propertyPort viewmodel.
-						var portVM = Activator.CreateInstance( attr.ViewModelType, new object[] { port } ) as NodePropertyPortViewModel;
-						port.ViewModel = portVM;
-						if( port.IsInput )
-						{
-							node.InputPropertyPorts.Add( port );
-							node.ViewModel.InputPropertyPortViewModels.Add( portVM );
-						}
-						else
-						{
-							node.OutputPropertyPorts.Add( port );
-							node.ViewModel.OutputPropertyPortViewModels.Add( portVM );
-						}
+						NodePropertyPort port = CreateNodePropertyPort( Guid.NewGuid(), node,
+							fieldInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.Type, attr.DefaultValue, attr.ViewModelType );
 					}
 				}
 			}
+
+			//----- invoke Create event.
+
+			node.InvokeCreateEvent();
 
 			//----- return.
 
@@ -295,6 +257,8 @@ namespace NodeGraph
 			flowChart.ViewModel.ConnectorViewModels.Add( connector.ViewModel );
 			flowChart.Connectors.Add( connector );
 
+			connector.InvokeCreateEvent();
+
 			//----- return.
 
 			return connector;
@@ -333,7 +297,39 @@ namespace NodeGraph
 
 		#endregion // Connector
 
-		#region FlwoPort
+		#region FlowPort
+
+		public NodeFlowPort CreateNodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type viewModelType = null )
+		{
+			if( null == node )
+				throw new ArgumentNullException( "owner cannot be null in CreateNodeFlowPort()" );
+
+			// create flowPort model.
+			NodeFlowPort port = Activator.CreateInstance( typeof( NodeFlowPort ),
+				new object[] { guid, node, name, displayName, isInput, allowMultipleInput } ) as NodeFlowPort;
+			NodeFlowPorts.Add( port.Guid, port );
+			
+			// create flowPort viewmodel.
+			var portVM = Activator.CreateInstance( ( null != viewModelType ) ? viewModelType : typeof( NodeFlowPortViewModel ),
+				new object[] { port } ) as NodeFlowPortViewModel;
+
+			// add port to node.
+			port.ViewModel = portVM;
+			if( isInput )
+			{
+				node.InputFlowPorts.Add( port );
+				node.ViewModel.InputFlowPortViewModels.Add( portVM );
+			}
+			else
+			{
+				node.OutputFlowPorts.Add( port );
+				node.ViewModel.OutputFlowPortViewModels.Add( portVM );
+			}
+
+			port.InvokeCreateEvent();
+
+			return port;
+		}
 
 		public NodeFlowPort FindNodeFlowPort( Guid guid )
 		{
@@ -375,6 +371,38 @@ namespace NodeGraph
 		#endregion // FlowPort
 
 		#region PropertyPort
+
+		public NodePropertyPort CreateNodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type valueType, object defaultValue, Type viewModelType = null )
+		{
+			if( null == node )
+				throw new ArgumentNullException( "owner cannot be null in CreateNodeFlowPort()" );
+
+			// create propertyPort model.
+			NodePropertyPort port = Activator.CreateInstance( typeof( NodePropertyPort ), new object[]{ guid, node,
+							name, displayName, isInput, allowMultipleInput, valueType, defaultValue } ) as NodePropertyPort;
+			NodePropertyPorts.Add( port.Guid, port );
+
+			// create propertyPort viewmodel.
+			var portVM = Activator.CreateInstance( ( null != viewModelType ) ? viewModelType : typeof( NodePropertyPortViewModel ),
+				new object[] { port } ) as NodePropertyPortViewModel;
+			port.ViewModel = portVM;
+
+			// add to node.
+			if( port.IsInput )
+			{
+				node.InputPropertyPorts.Add( port );
+				node.ViewModel.InputPropertyPortViewModels.Add( portVM );
+			}
+			else
+			{
+				node.OutputPropertyPorts.Add( port );
+				node.ViewModel.OutputPropertyPortViewModels.Add( portVM );
+			}
+
+			port.InvokeCreateEvent();
+
+			return port;
+		}
 
 		public NodePropertyPort FindNodePropertyPort( Guid guid )
 		{

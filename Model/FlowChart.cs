@@ -59,11 +59,34 @@ namespace NodeGraph.Model
 
 		#region Constructor
 
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateFlowChart() method.
+		/// </summary>
 		public FlowChart( Guid guid ) : base( guid )
 		{
 			
 		}
 
 		#endregion // Constructor
+
+		#region Create Events
+
+		public event EventHandler Create;
+
+		public void InvokeCreateEvent()
+		{
+			EventArgs args = new EventArgs();
+
+			OnCreate();
+
+			Create?.Invoke( this, new EventArgs() );
+		}
+
+		protected virtual void OnCreate()
+		{
+
+		}
+
+		#endregion // Create Events
 	}
 }

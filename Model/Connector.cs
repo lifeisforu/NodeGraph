@@ -60,6 +60,9 @@ namespace NodeGraph.Model
 
 		#region Constructor
 
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateConnector() method.
+		/// </summary>
 		public Connector( Guid guid, FlowChart flowChart ) : base( guid )
 		{
 			Owner = flowChart;
@@ -75,5 +78,25 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Methods
+
+		#region Create Events
+
+		public event EventHandler Create;
+
+		public void InvokeCreateEvent()
+		{
+			EventArgs args = new EventArgs();
+
+			OnCreate();
+
+			Create?.Invoke( this, new EventArgs() );
+		}
+
+		protected virtual void OnCreate()
+		{
+
+		}
+
+		#endregion // Create Events
 	}
 }

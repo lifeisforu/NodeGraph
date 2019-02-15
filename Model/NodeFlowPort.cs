@@ -11,7 +11,11 @@ namespace NodeGraph.Model
 
 		#region Constructor
 
-		public NodeFlowPort( Guid guid, Node node, NodeFlowPortAttribute attr ) : base( guid, node, attr )
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateNodeFlowPort() method.
+		/// </summary>
+		public NodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput ) :
+			base( guid, node, name, displayName, isInput, allowMultipleInput )
 		{
 			
 		}

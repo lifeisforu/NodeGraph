@@ -179,13 +179,13 @@ namespace NodeGraph.Model
 		#region Constructor
 
 		/// <summary>
-		/// Never call this constructor directly. Use Node.Create() method.
+		/// Never call this constructor directly. Use GraphManager.CreateNode() method.
 		/// </summary>
-		public Node( Guid guid, FlowChart flowChart, NodeAttribute attr ) : base( guid )
+		public Node( Guid guid, FlowChart flowChart, bool allowCircularConnection ) : base( guid )
 		{
 			Owner = flowChart;
 
-			AllowCircularConnection = attr.AllowCircularConnection;
+			AllowCircularConnection = allowCircularConnection;
 		}
 
 		#endregion // Constructor
@@ -198,5 +198,25 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Destructor
+
+		#region Create Events
+
+		public event EventHandler Create;
+
+		public void InvokeCreateEvent()
+		{
+			EventArgs args = new EventArgs();
+
+			OnCreate();
+
+			Create?.Invoke( this, new EventArgs() );
+		}
+
+		protected virtual void OnCreate()
+		{
+
+		}
+
+		#endregion // Create Events
 	}
 }

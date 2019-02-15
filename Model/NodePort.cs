@@ -54,13 +54,16 @@ namespace NodeGraph.Model
 
 		#region Constructor
 
-		public NodePort( Guid guid, Node node, NodePortAttribute attr ) : base( guid )
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateNodeFlowPort() or GraphManager.CreateNodePropertyPort() method.
+		/// </summary>
+		protected NodePort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput ) : base( guid )
 		{
 			Owner = node;
-			Name = attr.Name;
-			DisplayName = attr.DisplayName;
-			IsInput = attr.IsInput;
-			AllowMultipleInput = attr.AllowMultipleInput;
+			Name = name;
+			DisplayName = displayName;
+			IsInput = isInput;
+			AllowMultipleInput = allowMultipleInput;
 		}
 
 		#endregion // Constructor
@@ -72,5 +75,25 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Destructor
+
+		#region Create Events
+
+		public event EventHandler Create;
+
+		public void InvokeCreateEvent()
+		{
+			EventArgs args = new EventArgs();
+
+			OnCreate();
+
+			Create?.Invoke( this, new EventArgs() );
+		}
+
+		protected virtual void OnCreate()
+		{
+
+		}
+
+		#endregion // Create Events
 	}
 }

@@ -27,12 +27,19 @@ namespace NodeGraph.Model
 
 		#region Constructors
 
-		public NodePropertyPort( Guid guid, Node node, NodePropertyPortAttribute attr ) : base( guid, node, attr )
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateNodePropertyPort() method.
+		/// </summary>
+		public NodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type typeOfValue, object value ) : 
+			base( guid, node, name, displayName, isInput, allowMultipleInput )
 		{
-			if( null != attr.DefaultValue )
-				Value = attr.DefaultValue;
+			if( null != value )
+				Value = value;
 
-			TypeOfValue = attr.Type;
+			if( !typeOfValue.IsClass && ( null == value ) )
+				throw new ArgumentNullException( "If typeOfValue is not a class, you cannot specify value as null" );
+
+			TypeOfValue = typeOfValue;
 		}
 
 		#endregion // Constructors

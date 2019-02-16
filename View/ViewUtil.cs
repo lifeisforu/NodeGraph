@@ -22,6 +22,17 @@ namespace NodeGraph.View
 			return FindFirstParent<T>( parent );
 		}
 
+		public static T FindFirstParent<T>( DependencyObject child, string parentName ) where T : DependencyObject
+		{
+			DependencyObject parent = VisualTreeHelper.GetParent( child );
+
+			T parentAsT = parent as T;
+			if( ( null != parentAsT ) && ( ( parentAsT as FrameworkElement ).Name == parentName ) )
+				return parentAsT;
+
+			return FindFirstParent<T>( parent );
+		}
+
 		public static void FindChildren<T>( DependencyObject parent, List< T > outChildren  ) where T : DependencyObject
 		{
 			for( int i = 0; i < VisualTreeHelper.GetChildrenCount( parent ); i++ )

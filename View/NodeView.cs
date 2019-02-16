@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace NodeGraph.View
 {
@@ -29,6 +30,18 @@ namespace NodeGraph.View
 
 		#endregion // Border Properties
 
+		#region Properties
+
+		public bool HasConnection
+		{
+			get { return ( bool )GetValue( HasConnectionProperty ); }
+			set { SetValue( HasConnectionProperty, value ); }
+		}
+		public static readonly DependencyProperty HasConnectionProperty =
+			DependencyProperty.Register( "HasConnection", typeof( bool ), typeof( NodeView ), new PropertyMetadata( false ) );
+
+		#endregion // Properties
+
 		#region Constructors
 
 		static NodeView()
@@ -40,6 +53,9 @@ namespace NodeGraph.View
 		{
 			LayoutUpdated += NodeView_LayoutUpdated;
 			DataContextChanged += NodeView_DataContextChanged;
+
+			ContextMenu = new ContextMenu();
+			ContextMenuOpening += NodeView_ContextMenuOpening;
 		}
 
 		private void NodeView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
@@ -68,27 +84,58 @@ namespace NodeGraph.View
 
 		#region Mouse Events
 
+		protected override void OnMouseLeftButtonUp( MouseButtonEventArgs e )
+		{
+			base.OnMouseLeftButtonUp( e );
+
+			FlowChart flowChart = _ViewModel.Model.Owner;
+
+			NodeGraphManager.This.EndConnection();
+			NodeGraphManager.This.EndDragSelection( false );
+
+			if( !NodeGraphManager.This.AreNodesReallyDragged &&
+				NodeGraphManager.This.MouseLeftDownNode == _ViewModel.Model )
+			{
+				NodeGraphManager.This.TrySelection( flowChart, _ViewModel.Model,
+					Keyboard.IsKeyDown( Key.LeftCtrl ),
+					Keyboard.IsKeyDown( Key.LeftShift ),
+					Keyboard.IsKeyDown( Key.LeftAlt ) );
+			}
+
+			NodeGraphManager.This.EndDragNode();
+
+			NodeGraphManager.This.MouseLeftDownNode = null;
+
+			e.Handled = true;
+		}
+
 		protected override void OnMouseLeftButtonDown( MouseButtonEventArgs e )
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			if( !NodeGraphManager.This.IsConnecting && 
-				!NodeGraphManager.This.IsNodeDragging &&
-				!NodeGraphManager.This.IsSelecting )
-			{
-				NodeGraphManager.This.TrySelection( _ViewModel.Model,
-					Keyboard.IsKeyDown( Key.LeftCtrl ), 
-					Keyboard.IsKeyDown( Key.LeftShift ),
-					Keyboard.IsKeyDown( Key.LeftAlt ) );
-				NodeGraphManager.This.StartDragNode( _ViewModel.Model );
-			}
-		}
+			NodeGraphManager.This.EndConnection();
+			NodeGraphManager.This.EndDragNode();
+			NodeGraphManager.This.EndDragSelection( false );
 
-		protected override void OnMouseRightButtonUp( MouseButtonEventArgs e )
-		{
-			base.OnMouseRightButtonUp( e );
+			NodeGraphManager.This.MouseLeftDownNode = _ViewModel.Model;
+
+			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChartView flowChartView = flowChart.ViewModel.View;
+			NodeGraphManager.This.StartDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
 
 			e.Handled = true;
+		}
+
+		protected override void OnMouseMove( MouseEventArgs e )
+		{
+			base.OnMouseMove( e );
+
+			if( NodeGraphManager.This.IsNodeDragging &&
+				( NodeGraphManager.This.MouseLeftDownNode == _ViewModel.Model ) &&
+				!IsSelected )
+			{
+				NodeGraphManager.This.TrySelection( _ViewModel.Model.Owner, _ViewModel.Model, false, false, false );
+			}
 		}
 
 		#endregion // Mouse Events
@@ -101,14 +148,47 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Selection
-
-		#region Connections
+		
+		#region Connection
 
 		public virtual void OnPortConnectionChanged()
 		{
-
+			HasConnection = ( 0 < _ViewModel.InputFlowPortViewModels.Count ) ||
+				( 0 < _ViewModel.OutputFlowPortViewModels.Count ) ||
+				( 0 < _ViewModel.InputPropertyPortViewModels.Count ) ||
+				( 0 < _ViewModel.OutputPropertyPortViewModels.Count );
 		}
 
-		#endregion // Connections
+		#endregion // Connection
+
+		#region ContextMenu
+
+		private void NodeView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
+		{
+			if( ( null == _ViewModel ) || !NodeViewModel.ContextMenuEnabled )
+			{
+				e.Handled = true;
+				return;
+			}
+
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.PlacementTarget = this;
+			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(
+				contextMenu, Mouse.GetPosition( this ) );
+			_ViewModel.InvokeBuildContextMenuEvent( args );
+
+			if( 0 == contextMenu.Items.Count )
+			{
+				ContextMenu = null;
+				e.Handled = true;
+			}
+			else
+			{
+				ContextMenu = contextMenu;
+			}
+		}
+
+		#endregion // ContextMenu
 	}
 }

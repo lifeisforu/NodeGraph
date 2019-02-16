@@ -8,6 +8,7 @@ using System.Windows.Media;
 
 namespace NodeGraph.Model
 {
+	[Node("")]
 	public class Node : ModelBase
 	{
 		#region Fields

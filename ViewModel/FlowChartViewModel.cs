@@ -12,13 +12,11 @@ namespace NodeGraph.ViewModel
 {
 	public class FlowChartViewModel : ViewModelBase
 	{
-		#region Statics
-
-		public static ObservableCollection<Type> NodeTypes = new ObservableCollection<Type>();
+		#region Fields
 
 		public FlowChartView View;
 
-		#endregion // Statics
+		#endregion // Fields
 
 		#region Properties
 
@@ -143,39 +141,21 @@ namespace NodeGraph.ViewModel
 		}
 
 		#endregion // Constructor
-
+		
 		#region ContextMenu
 
-		private Point _ContextMenuMouseLocation;
-		public virtual void BuildContextMenuItems( ItemCollection items, Point mouseLocation )
+		public delegate void BuildContextMenuEventHandler( object sender, BuildContextMenuEventArgs e );
+
+		public static event BuildContextMenuEventHandler BuildContextMenu;
+
+		public static bool ContextMenuEnabled
 		{
-			items.Clear();
-
-			_ContextMenuMouseLocation = mouseLocation;
-
-			foreach( var nodeType in NodeTypes )
-			{
-				MenuItem menuItem = new MenuItem();
-
-				var NodeAttrs = nodeType.GetCustomAttributes( typeof( NodeAttribute ), false ) as NodeAttribute[];
-				if( 1 != NodeAttrs.Length )
-					throw new ArgumentException( string.Format( "{0} must have NodeAttribute", nodeType.Name ) );
-
-				menuItem.Header = "Create " + NodeAttrs[ 0 ].Header;
-				menuItem.CommandParameter = nodeType;
-				menuItem.Click += ContextMenuItem_Click;
-				items.Add( menuItem );
-			}
+			get { return ( null != BuildContextMenu ) && ( 0 < BuildContextMenu.GetInvocationList().Length ); }
 		}
 
-		protected virtual void ContextMenuItem_Click( object sender, RoutedEventArgs e )
+		public void InvokeBuildContextMenuEvent( BuildContextMenuEventArgs e )
 		{
-			MenuItem menuItem = sender as MenuItem;
-			Type nodeType = menuItem.CommandParameter as Type;
-
-			Node node = NodeGraphManager.This.CreateNode( Guid.NewGuid(), Model, nodeType );
-			node.X = _ContextMenuMouseLocation.X;
-			node.Y = _ContextMenuMouseLocation.Y;
+			BuildContextMenu?.Invoke( this, e );
 		}
 
 		#endregion // ContextMenu

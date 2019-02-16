@@ -18,7 +18,7 @@ using System.Windows.Shapes;
 
 namespace NodeGraph.View
 {
-	[TemplatePart( Name = "PART_Port", Type = typeof( FrameworkElement ) )]
+	[ TemplatePart( Name = "PART_Port", Type = typeof( FrameworkElement ) )]
 	public class NodePortView : ContentControl
 	{
 		#region Fields
@@ -29,7 +29,7 @@ namespace NodeGraph.View
 
 		#region Properties
 
-		public FrameworkElement PartPort{ get; private set; }
+		public FrameworkElement PartPort { get; private set; }
 
 		public bool IsInput
 		{
@@ -73,7 +73,14 @@ namespace NodeGraph.View
 		{
 			IsInput = isInput;
 			DataContextChanged += NodePortView_DataContextChanged;
+
+			ContextMenu = new ContextMenu();
+			ContextMenuOpening += NodePortView_ContextMenuOpening;
 		}
+
+		#endregion // Constructor
+
+		#region DataContext
 
 		private void NodePortView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
@@ -81,11 +88,9 @@ namespace NodeGraph.View
 			if( null == _ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodePortView." );
 			_ViewModel.View = this;
+
+			OnConnectionChanged();
 		}
-
-		#endregion // Constructor
-
-		#region DataContext
 
 		#endregion // DataContext
 
@@ -145,12 +150,20 @@ namespace NodeGraph.View
 		{
 			base.OnMouseRightButtonUp( e );
 
-			if( !NodeGraphManager.This.IsConnecting )
+			if( null == _ViewModel )
 			{
-				NodeGraphManager.This.Disconnect( _ViewModel.Model );
+				return;
 			}
 
-			e.Handled = true;
+			if( MouseButtonState.Pressed != e.LeftButton )
+			{
+				if( !NodeGraphManager.This.IsConnecting && IsMouseOnPartPort() )
+				{
+					NodeGraphManager.This.Disconnect( _ViewModel.Model );
+				}
+
+				e.Handled = true;
+			}
 		}
 
 		#endregion // Mouse Events
@@ -165,6 +178,11 @@ namespace NodeGraph.View
 			return null;
 		}
 
+		public bool IsMouseOnPartPort()
+		{
+			return ( null != VisualTreeHelper.HitTest( PartPort, Mouse.GetPosition( this ) ) );
+		}
+
 		#endregion // HitTest
 
 		#region Connections
@@ -175,5 +193,41 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Connections
+
+		#region Context Menu
+
+		private void NodePortView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
+		{
+			if( ( null == _ViewModel ) || !NodePortViewModel.ContextMenuEnabled )
+			{
+				e.Handled = true;
+				return;
+			}
+
+			if( IsMouseOnPartPort() )
+			{
+				e.Handled = true;
+				return;
+			}
+
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.PlacementTarget = this;
+			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(
+				contextMenu, Mouse.GetPosition( this ) );
+			_ViewModel.InvokeBuildContextMenuEvent( args );
+
+			if( 0 == contextMenu.Items.Count )
+			{
+				ContextMenu = null;
+				e.Handled = true;
+			}
+			else
+			{
+				ContextMenu = contextMenu;
+			}
+		}
+
+		#endregion // Context Menu
 	}
 }

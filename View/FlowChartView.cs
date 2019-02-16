@@ -10,8 +10,8 @@ using System.Windows.Media;
 
 namespace NodeGraph.View
 {
-	[TemplatePart( Name = "PART_ContextMenu", Type = typeof( ContextMenu ) )]
-	[TemplatePart( Name = "PART_DragAndSelectionCanvas", Type = typeof( Canvas ) )]
+	[TemplatePart( Name = "PART_NodeCanvas", Type = typeof( FrameworkElement ) )]
+	[TemplatePart( Name = "PART_DragAndSelectionCanvas", Type = typeof( FrameworkElement ) )]
 	public class FlowChartView : ContentControl
 	{
 		#region Fields
@@ -22,14 +22,14 @@ namespace NodeGraph.View
 
 		#region Properties
 
-		protected ConnectorViewsContainer _PartConnectorViewsContainer;
-		public ConnectorViewsContainer PartConnectorViewsContainer
+		protected FrameworkElement _PartNodeViewsContainer;
+		public FrameworkElement PartNodeCanvas
 		{
-			get { return _PartConnectorViewsContainer; }
+			get { return _PartNodeViewsContainer; }
 		}
 
-		protected Canvas _PartDragAndSelectionCanvas;
-		public Canvas PartDragAndSelectionCanvas
+		protected FrameworkElement _PartDragAndSelectionCanvas;
+		public FrameworkElement PartDragAndSelectionCanvas
 		{
 			get { return _PartDragAndSelectionCanvas; }
 		}
@@ -47,6 +47,9 @@ namespace NodeGraph.View
 		{
 			Focusable = true;
 			DataContextChanged += FlowChartView_DataContextChanged;
+
+			ContextMenu = new ContextMenu();
+			ContextMenuOpening += FlowChartView_ContextMenuOpening;
 		}
 
 		private void FlowChartView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
@@ -65,17 +68,18 @@ namespace NodeGraph.View
 		{
 			base.OnApplyTemplate();
 
-			ContextMenu = GetTemplateChild( "PART_ContextMenu" ) as ContextMenu;
-			ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
+			_PartNodeViewsContainer = GetTemplateChild( "PART_NodeViewsContainer" ) as FrameworkElement;
+			if( null == _PartNodeViewsContainer )
+				throw new Exception( "PART_NodeViewsContainer can not be null in FlowChartView" );
 
-			_PartDragAndSelectionCanvas = GetTemplateChild( "PART_DragAndSelectionCanvas" ) as Canvas;
+			_PartDragAndSelectionCanvas = GetTemplateChild( "PART_DragAndSelectionCanvas" ) as FrameworkElement;
+			if( null == _PartDragAndSelectionCanvas )
+				throw new Exception( "PART_DragAndSelectionCanvas can not be null in FlowChartView" );
 		}
 
 		#endregion // Template
 
 		#region Mouse Events
-
-		private Point _PrevPosition;
 
 		protected override void OnMouseLeftButtonDown( MouseButtonEventArgs e )
 		{
@@ -87,8 +91,6 @@ namespace NodeGraph.View
 			}
 
 			Keyboard.Focus( this );
-
-			_PrevPosition = e.GetPosition( this );
 
 			if( !NodeGraphManager.This.IsNodeDragging &&
 				!NodeGraphManager.This.IsConnecting &&
@@ -103,7 +105,7 @@ namespace NodeGraph.View
 					NodeGraphManager.This.DeslectAllNodes( _ViewModel.Model );
 				}
 
-				NodeGraphManager.This.StartDragSelection( _ViewModel.Model, _PrevPosition );
+				NodeGraphManager.This.StartDragSelection( _ViewModel.Model, e.GetPosition( this ) );
 			}
 		}
 
@@ -122,9 +124,7 @@ namespace NodeGraph.View
 			}
 			else if( NodeGraphManager.This.IsNodeDragging )
 			{
-				Point position = e.GetPosition( this );
-				NodeGraphManager.This.DragNode( new Point( position.X - _PrevPosition.X, position.Y - _PrevPosition.Y ) );
-				_PrevPosition = position;
+				NodeGraphManager.This.DragNode( e.GetPosition( this ) );
 			}
 			else if( NodeGraphManager.This.IsSelecting )
 			{
@@ -163,7 +163,33 @@ namespace NodeGraph.View
 				return;
 			}
 
-			NodeGraphManager.This.EndConnection();
+			if( NodeGraphManager.This.IsConnecting )
+			{
+				Connector connector = NodeGraphManager.This.ConnectingConnector;
+				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
+				{
+					NodePort firstPort = NodeGraphManager.This.FirstConnectionPort;
+
+					NodeGraphManager.This.EndConnection();
+
+					Point mouseLocation = Mouse.GetPosition( this );
+
+					HitTestResult hitResult = VisualTreeHelper.HitTest( this, mouseLocation );
+					if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
+					{
+						FrameworkElement element = hitResult.VisualHit as FrameworkElement;
+						if( null == ViewUtil.FindFirstParent<NodeView>( element ) )
+						{
+							Node node = NodeGraphManager.This.CreateRouterNodeForPort(
+								Guid.NewGuid(), _ViewModel.Model, firstPort, mouseLocation.X, mouseLocation.Y, 0 );
+						}
+					}
+				}
+				else
+				{
+					NodeGraphManager.This.EndConnection();
+				}
+			}
 			NodeGraphManager.This.EndDragNode();
 			NodeGraphManager.This.EndDragSelection( false );
 		}
@@ -189,11 +215,6 @@ namespace NodeGraph.View
 			if( null == _ViewModel )
 			{
 				return;
-			}
-
-			if( MouseButtonState.Pressed != e.LeftButton )
-			{
-				_ViewModel.BuildContextMenuItems( ContextMenu.Items, Mouse.GetPosition( this ) );
 			}
 		}
 
@@ -224,5 +245,35 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Mouse Events
+
+		#region Context Menu
+
+		private void FlowChartView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
+		{
+			if( ( null == _ViewModel ) || !FlowChartViewModel.ContextMenuEnabled )
+			{
+				e.Handled = true;
+				return;
+			}
+
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.PlacementTarget = this;
+			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(
+				contextMenu, Mouse.GetPosition( this ) );
+			_ViewModel.InvokeBuildContextMenuEvent( args );
+
+			if( 0 == contextMenu.Items.Count )
+			{
+				ContextMenu = null;
+				e.Handled = true;
+			}
+			else
+			{
+				ContextMenu = contextMenu;
+			}
+		}
+
+		#endregion // Context Menu
 	}
 }

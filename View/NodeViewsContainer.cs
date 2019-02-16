@@ -1,5 +1,8 @@
-﻿using System.Windows;
+﻿using NodeGraph.Model;
+using NodeGraph.ViewModel;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace NodeGraph.View
 {

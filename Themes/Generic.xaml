@@ -172,7 +172,11 @@
 						<Border Background="{TemplateBinding Background}"
 								Margin="{TemplateBinding Margin}"
 								Padding="{TemplateBinding Padding}"
-								Opacity="0.9"/>
+								Opacity="0.9">
+							<Border.Effect>
+								<BlurEffect KernelType="Box" Radius="8.0"/>
+							</Border.Effect>
+						</Border>
 						<!-- Selection -->
 						<Border x:Name="BorderSelection"
 								Background="Transparent"

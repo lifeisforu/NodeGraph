@@ -1,8 +1,6 @@
 ﻿using NodeGraph.Model;
 using NodeGraph.ViewModel;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -105,8 +103,48 @@ namespace NodeGraph.View
 					NodeGraphManager.This.DeslectAllNodes( _ViewModel.Model );
 				}
 
-				NodeGraphManager.This.StartDragSelection( _ViewModel.Model, e.GetPosition( this ) );
+				NodeGraphManager.This.BeginDragSelection( _ViewModel.Model, e.GetPosition( this ) );
 			}
+		}
+
+		protected override void OnMouseLeftButtonUp( MouseButtonEventArgs e )
+		{
+			base.OnMouseLeftButtonUp( e );
+
+			if( null == _ViewModel )
+			{
+				return;
+			}
+
+			if( NodeGraphManager.This.IsConnecting )
+			{
+				Connector connector = NodeGraphManager.This.ConnectingConnector;
+				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
+				{
+					NodePort firstPort = NodeGraphManager.This.FirstConnectionPort;
+
+					NodeGraphManager.This.EndConnection();
+
+					Point mouseLocation = Mouse.GetPosition( this );
+
+					HitTestResult hitResult = VisualTreeHelper.HitTest( this, mouseLocation );
+					if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
+					{
+						FrameworkElement element = hitResult.VisualHit as FrameworkElement;
+						if( null == ViewUtil.FindFirstParent<NodeView>( element ) )
+						{
+							Node node = NodeGraphManager.This.CreateRouterNodeForPort(
+								Guid.NewGuid(), _ViewModel.Model, firstPort, mouseLocation.X, mouseLocation.Y, 0 );
+						}
+					}
+				}
+				else
+				{
+					NodeGraphManager.This.EndConnection();
+				}
+			}
+			NodeGraphManager.This.EndDragNode();
+			NodeGraphManager.This.EndDragSelection( false );
 		}
 
 		protected override void OnMouseMove( MouseEventArgs e )
@@ -154,46 +192,6 @@ namespace NodeGraph.View
 			NodeGraphManager.This.EndDragSelection( true );
 		}
 
-		protected override void OnMouseLeftButtonUp( MouseButtonEventArgs e )
-		{
-			base.OnMouseLeftButtonUp( e );
-
-			if( null == _ViewModel )
-			{
-				return;
-			}
-
-			if( NodeGraphManager.This.IsConnecting )
-			{
-				Connector connector = NodeGraphManager.This.ConnectingConnector;
-				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
-				{
-					NodePort firstPort = NodeGraphManager.This.FirstConnectionPort;
-
-					NodeGraphManager.This.EndConnection();
-
-					Point mouseLocation = Mouse.GetPosition( this );
-
-					HitTestResult hitResult = VisualTreeHelper.HitTest( this, mouseLocation );
-					if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
-					{
-						FrameworkElement element = hitResult.VisualHit as FrameworkElement;
-						if( null == ViewUtil.FindFirstParent<NodeView>( element ) )
-						{
-							Node node = NodeGraphManager.This.CreateRouterNodeForPort(
-								Guid.NewGuid(), _ViewModel.Model, firstPort, mouseLocation.X, mouseLocation.Y, 0 );
-						}
-					}
-				}
-				else
-				{
-					NodeGraphManager.This.EndConnection();
-				}
-			}
-			NodeGraphManager.This.EndDragNode();
-			NodeGraphManager.This.EndDragSelection( false );
-		}
-
 		protected override void OnLostFocus( RoutedEventArgs e )
 		{
 			base.OnLostFocus( e );
@@ -206,6 +204,8 @@ namespace NodeGraph.View
 			NodeGraphManager.This.EndConnection();
 			NodeGraphManager.This.EndDragNode();
 			NodeGraphManager.This.EndDragSelection( true );
+
+			ReleaseMouseCapture();
 		}
 
 		protected override void OnMouseRightButtonUp( MouseButtonEventArgs e )

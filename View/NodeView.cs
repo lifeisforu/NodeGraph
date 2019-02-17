@@ -119,7 +119,7 @@ namespace NodeGraph.View
 			NodeGraphManager.This.MouseLeftDownNode = _ViewModel.Model;
 
 
-			NodeGraphManager.This.StartDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
+			NodeGraphManager.This.BeginDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
 
 			e.Handled = true;
 		}

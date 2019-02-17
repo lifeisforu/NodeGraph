@@ -1,8 +1,10 @@
 ﻿using NodeGraph.Model;
+using NodeGraph.View;
 using NodeGraph.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 
@@ -534,6 +536,8 @@ namespace NodeGraph
 			Node node = port.Owner;
 			FlowChart flowChart = node.Owner;
 
+			TrapMouse( flowChart.ViewModel.View );
+
 			ConnectingConnector = CreateConnector( Guid.NewGuid(), flowChart, typeof( Connector ) );
 
 			if( port.IsInput )
@@ -698,6 +702,8 @@ namespace NodeGraph
 
 		public void EndConnection( NodePort endPort = null )
 		{
+			UntrapMouse();
+
 			if( !IsConnecting )
 				return;
 
@@ -822,8 +828,10 @@ namespace NodeGraph
 		private Guid _NodeDraggingFlowChartGuid;
 		private Point _NodeDraggingPrevPosition;
 
-		public void StartDragNode( FlowChart flowChart, Point startPosition )
+		public void BeginDragNode( FlowChart flowChart, Point startPosition )
 		{
+			TrapMouse( flowChart.ViewModel.View );
+
 			_NodeDraggingPrevPosition = startPosition;
 			if( IsNodeDragging )
 				throw new InvalidOperationException( "Node is already being dragging." );
@@ -834,6 +842,8 @@ namespace NodeGraph
 
 		public void EndDragNode()
 		{
+			UntrapMouse();
+
 			IsNodeDragging = false;
 			AreNodesReallyDragged = false;
 		}
@@ -862,6 +872,32 @@ namespace NodeGraph
 		}
 
 		#endregion // Node Dragging
+
+		#region Mouse Trapping
+
+		[DllImport( "user32.dll" )]
+		static extern void ClipCursor( ref System.Drawing.Rectangle rect );
+
+		[DllImport( "user32.dll" )]
+		static extern void ClipCursor( IntPtr rect );
+
+		public void TrapMouse( FrameworkElement element )
+		{
+			Point startLocation = element.PointToScreen( new Point( 0, 0 ) );
+
+			System.Drawing.Rectangle rect = new System.Drawing.Rectangle(
+				( int )startLocation.X, ( int )startLocation.Y, 
+				( int )( startLocation.X + element.ActualWidth ), 
+				( int )( startLocation.Y + element.ActualHeight ) );
+			ClipCursor( ref rect );
+		}
+
+		public void UntrapMouse()
+		{
+			ClipCursor( IntPtr.Zero );
+		}
+
+		#endregion // Mouse Trapping
 
 		#region Node Selection
 
@@ -955,8 +991,11 @@ namespace NodeGraph
 		private Point _SelectingStartPoint;
 		private Guid[] _OriginalSelections;
 
-		public void StartDragSelection( FlowChart flowChart, Point start )
+		public void BeginDragSelection( FlowChart flowChart, Point start )
 		{
+			FlowChartView flowChartView = flowChart.ViewModel.View;
+			TrapMouse( flowChartView );
+
 			_SelectingStartPoint = start;
 
 			_FlowChartSelecting = flowChart;
@@ -1067,6 +1106,8 @@ namespace NodeGraph
 
 		public void EndDragSelection( bool bCancel )
 		{
+			UntrapMouse();
+
 			if( bCancel )
 			{
 				if( ( null != _FlowChartSelecting ) && ( null != _OriginalSelections ) )

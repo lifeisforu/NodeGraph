@@ -100,6 +100,10 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
+			Node node = _ViewModel.Model.Owner;
+			FlowChart flowChart = node.Owner;
+			Keyboard.Focus( flowChart.ViewModel.View );
+
 			if( IsMouseOver && !NodeGraphManager.This.IsConnecting )
 			{
 				IsFilledPort = true;

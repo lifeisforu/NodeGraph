@@ -74,8 +74,8 @@
 		</Setter>
 	</Style>
 
-	<!-- NodeFlowPortView Style -->
-	<Style TargetType="{x:Type v:NodeFlowPortView}">
+	<!-- DefaultNodeFlowPortView Style -->
+	<Style x:Key="DefaultNodeFlowPortViewStyle" TargetType="{x:Type v:NodeFlowPortView}">
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type v:NodeFlowPortView}">
@@ -115,8 +115,8 @@
 		</Setter>
 	</Style>
 
-	<!-- NodePropertyView Style -->
-	<Style TargetType="{x:Type v:NodePropertyPortView}">
+	<!-- DefaultNodePropertyPortView Style -->
+	<Style x:Key="DefaultNodePropertyPortViewStyle" TargetType="{x:Type v:NodePropertyPortView}">
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type v:NodePropertyPortView}">
@@ -156,8 +156,104 @@
 		</Setter>
 	</Style>
 
-	<!-- NodeView Style -->
-	<Style TargetType="{x:Type v:NodeView}">
+	<!-- RouterNodeView Style -->
+	<Style x:Key="RouterNodeViewStyle" TargetType="{x:Type v:NodeView}">
+		<Setter Property="Background" Value="{StaticResource NodeBackGroundColor}"/>
+		<Setter Property="BorderBrush" Value="{StaticResource NodeBackGroundColor}"/>
+		<Setter Property="Canvas.Left" Value="{Binding Model.X}"/>
+		<Setter Property="Canvas.Top" Value="{Binding Model.Y}"/>
+		<Setter Property="Canvas.ZIndex" Value="{Binding Model.ZIndex}"/>
+		<Setter Property="MinWidth" Value="70"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type v:NodeView}">
+					<Grid>
+						<!-- Background -->
+						<Border Background="{TemplateBinding Background}"
+								Margin="{TemplateBinding Margin}"
+								Padding="{TemplateBinding Padding}"
+								CornerRadius="8"
+								Opacity="0.9">
+							<Border.Effect>
+								<BlurEffect KernelType="Box" Radius="8.0"/>
+							</Border.Effect>
+						</Border>
+						<!-- Selection -->
+						<Border x:Name="BorderSelection"
+								Background="Transparent"
+								BorderBrush="{TemplateBinding BorderBrush}"
+								BorderThickness="2"
+								Margin="{TemplateBinding Margin}"
+								Padding="{TemplateBinding Padding}"
+								CornerRadius="8">
+							<!-- Content -->
+							<Grid>
+								<!-- Node Properties -->
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition/>
+										<ColumnDefinition/>
+									</Grid.ColumnDefinitions>
+									<!-- Node Input FlowPorts -->
+									<v:NodeFlowPortViewsContainer Visibility="{Binding InputFlowPortsVisibility}" 
+																  IsInput="True"
+																  Grid.Column="0"
+																  HorizontalAlignment="Left"
+																  ItemsSource="{Binding InputFlowPortViewModels}">
+										<ItemsControl.ItemsPanel>
+											<ItemsPanelTemplate>
+												<StackPanel Orientation="Vertical" Margin="2"/>
+											</ItemsPanelTemplate>
+										</ItemsControl.ItemsPanel>
+									</v:NodeFlowPortViewsContainer>
+									<!-- Node Output FlowPorts -->
+									<v:NodeFlowPortViewsContainer Visibility="{Binding OutputFlowPortsVisibility}"
+																  IsInput="False"
+																  Grid.Column="1" 
+																  HorizontalAlignment="Right"
+																  ItemsSource="{Binding OutputFlowPortViewModels}">
+										<ItemsControl.ItemsPanel>
+											<ItemsPanelTemplate>
+												<StackPanel Orientation="Vertical" Margin="2"/>
+											</ItemsPanelTemplate>
+										</ItemsControl.ItemsPanel>
+									</v:NodeFlowPortViewsContainer>
+								</Grid>
+								<!-- Node Properites -->
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition/>
+										<ColumnDefinition/>
+									</Grid.ColumnDefinitions>
+									<!-- Node Input PropertyPorts -->
+									<v:NodePropertyPortViewsContainer Visibility="{Binding InputPropertyPortsVisibility}"
+																	  Grid.Column="0"
+																	  IsInput="True"
+																	  HorizontalAlignment="Left"
+																	  ItemsSource="{Binding InputPropertyPortViewModels}"/>
+									<!-- Node Output ProperyPorts -->
+									<v:NodePropertyPortViewsContainer Visibility="{Binding OutputPropertyPortsVisibility}" 
+																	  Grid.Column="1" 
+																	  IsInput="False"
+																	  HorizontalAlignment="Right"
+																	  ItemsSource="{Binding OutputPropertyPortViewModels}"/>
+								</Grid>
+							</Grid>
+						</Border>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<!-- Node Selection Trigger -->
+						<Trigger Property="IsSelected" Value="True">
+							<Setter TargetName="BorderSelection" Property="BorderBrush" Value="Orange"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- DefaultNodeView Style -->
+	<Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
 		<Setter Property="Background" Value="{StaticResource NodeBackGroundColor}"/>
 		<Setter Property="BorderBrush" Value="{StaticResource NodeBackGroundColor}"/>
 		<Setter Property="Canvas.Left" Value="{Binding Model.X}"/>

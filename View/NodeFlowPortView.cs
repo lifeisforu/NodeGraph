@@ -18,29 +18,13 @@ using System.Windows.Shapes;
 
 namespace NodeGraph.View
 {
-	[TemplatePart( Name = "PART_PortTextBlock", Type = typeof( FrameworkElement ) )]
 	public class NodeFlowPortView : NodePortView
 	{
-		#region Properteis
-
-		public FrameworkElement PartPortTextBlock { get; private set; }
-
-		#endregion // Properites
-
 		#region Template
-
-		static NodeFlowPortView()
-		{
-			DefaultStyleKeyProperty.OverrideMetadata( typeof( NodeFlowPortView ), new FrameworkPropertyMetadata( typeof( NodeFlowPortView ) ) );
-		}
 
 		public override void OnApplyTemplate()
 		{
 			base.OnApplyTemplate();
-
-			PartPortTextBlock = Template.FindName( "PART_PortTextBlock", this ) as FrameworkElement;
-			if( null == PartPortTextBlock )
-				throw new Exception( "PartPortTextBlock can not be null in NodePropertyPortView" );
 		}
 
 		#endregion // Template

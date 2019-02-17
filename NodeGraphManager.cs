@@ -106,7 +106,8 @@ namespace NodeGraph
 
 		#region Node
 
-		public Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double X, double Y, int ZIndex )
+		public Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double X, double Y, int ZIndex,
+			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -130,7 +131,9 @@ namespace NodeGraph
 			node.ZIndex = ZIndex;
 			Nodes.Add( guid, node );
 			// create node viewmodel.
-			node.ViewModel = Activator.CreateInstance( nodeAttr.ViewModelType, new object[] { node } ) as NodeViewModel;
+			node.ViewModel = Activator.CreateInstance( 
+				( null != nodeViewModelTypeOverride ) ? nodeViewModelTypeOverride : nodeAttr.ViewModelType, 
+				new object[] { node } ) as NodeViewModel;
 			flowChart.ViewModel.NodeViewModels.Add( node.ViewModel );
 			flowChart.Nodes.Add( node );
 
@@ -144,7 +147,8 @@ namespace NodeGraph
 			foreach( var attr in flowPortAttrs )
 			{
 				NodeFlowPort port = CreateNodeFlowPort( 
-					Guid.NewGuid(), node, attr.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.ViewModelType );
+					Guid.NewGuid(), node, attr.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.AllowMultipleOutput,
+					( null != flowPortViewModelTypeOverride ) ? flowPortViewModelTypeOverride : attr.ViewModelType );
 			}
 
 			//----- create nodePropertyPorts( property ) from NodePropertyAttribute.
@@ -158,7 +162,8 @@ namespace NodeGraph
 					foreach( var attr in nodePropertyAttrs )
 					{
 						NodePropertyPort port = CreateNodePropertyPort( Guid.NewGuid(), node,
-							propertyInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.Type, attr.DefaultValue, attr.ViewModelType );
+							propertyInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.Type, attr.DefaultValue, 
+							( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType );
 					}
 				}
 			}
@@ -174,7 +179,8 @@ namespace NodeGraph
 					foreach( var attr in nodePropertyAttrs )
 					{
 						NodePropertyPort port = CreateNodePropertyPort( Guid.NewGuid(), node,
-							fieldInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.Type, attr.DefaultValue, attr.ViewModelType );
+							fieldInfo.Name, attr.DisplayName, attr.IsInput, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.Type, attr.DefaultValue,
+							( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType );
 					}
 				}
 			}
@@ -250,7 +256,8 @@ namespace NodeGraph
 
 		#region RouterNode
 
-		public Node CreateRouterNode( Guid guid, FlowChart flowChart, NodePort referencePort, double X, double Y, int ZIndex )
+		public Node CreateRouterNode( Guid guid, FlowChart flowChart, NodePort referencePort, double X, double Y, int ZIndex,
+			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -268,18 +275,20 @@ namespace NodeGraph
 			if( !isFlowPort && !isPropertyPort )
 				throw new ArgumentException( "CreateRouteNode() is only supported for NodeFlowPort or NodePropertyPort" );
 
-			Node node = CreateNode( guid, flowChart, typeof( Node ), X, Y, ZIndex );
-
+			Node node = CreateNode( guid, flowChart, typeof( Node ), X, Y, ZIndex,
+				nodeViewModelTypeOverride, flowPortViewModelTypeOverride, propertyPortViewModelTypeOverride );
 			if( isFlowPort )
 			{
-				CreateNodeFlowPort( Guid.NewGuid(), node, "Input", "", true, false );
-				CreateNodeFlowPort( Guid.NewGuid(), node, "Output", "", false, false );
+				CreateNodeFlowPort( Guid.NewGuid(), node, "Input", "", true, false, false, flowPortViewModelTypeOverride );
+				CreateNodeFlowPort( Guid.NewGuid(), node, "Output", "", false, false, false, flowPortViewModelTypeOverride );
 			}
 			else if( isPropertyPort )
 			{
 				NodePropertyPort propertyPort = referencePort as NodePropertyPort;
-				CreateNodePropertyPort( Guid.NewGuid(), node, "Input", "", true, false, propertyPort.TypeOfValue, propertyPort.Value );
-				CreateNodePropertyPort( Guid.NewGuid(), node, "Output", "", false, false, propertyPort.TypeOfValue, propertyPort.Value );
+				CreateNodePropertyPort( Guid.NewGuid(), node, "Input", "", true, false, false,
+					propertyPort.TypeOfValue, propertyPort.Value, propertyPortViewModelTypeOverride );
+				CreateNodePropertyPort( Guid.NewGuid(), node, "Output", "", false, false, false,
+					propertyPort.TypeOfValue, propertyPort.Value, propertyPortViewModelTypeOverride );
 			}
 
 			return node;
@@ -357,7 +366,7 @@ namespace NodeGraph
 
 		#region FlowPort
 
-		public NodeFlowPort CreateNodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type portViewModelType = null )
+		public NodeFlowPort CreateNodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -368,11 +377,11 @@ namespace NodeGraph
 
 			// create flowPort model.
 			NodeFlowPort port = Activator.CreateInstance( typeof( NodeFlowPort ),
-				new object[] { guid, node, name, displayName, isInput, allowMultipleInput } ) as NodeFlowPort;
+				new object[] { guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput } ) as NodeFlowPort;
 			NodeFlowPorts.Add( port.Guid, port );
 			
 			// create flowPort viewmodel.
-			var portVM = Activator.CreateInstance( ( null != portViewModelType ) ? portViewModelType : typeof( NodeFlowPortViewModel ),
+			var portVM = Activator.CreateInstance( ( null != portViewModelTypeOverride ) ? portViewModelTypeOverride : typeof( NodeFlowPortViewModel ),
 				new object[] { port } ) as NodeFlowPortViewModel;
 
 			// add port to node.
@@ -434,7 +443,7 @@ namespace NodeGraph
 
 		#region PropertyPort
 
-		public NodePropertyPort CreateNodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type valueType, object defaultValue, Type portViewModelType = null )
+		public NodePropertyPort CreateNodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type valueType, object defaultValue, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -445,11 +454,11 @@ namespace NodeGraph
 
 			// create propertyPort model.
 			NodePropertyPort port = Activator.CreateInstance( typeof( NodePropertyPort ), 
-				new object[]{ guid, node, name, displayName, isInput, allowMultipleInput, valueType, defaultValue } ) as NodePropertyPort;
+				new object[]{ guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput, valueType, defaultValue } ) as NodePropertyPort;
 			NodePropertyPorts.Add( port.Guid, port );
 
 			// create propertyPort viewmodel.
-			var portVM = Activator.CreateInstance( ( null != portViewModelType ) ? portViewModelType : typeof( NodePropertyPortViewModel ),
+			var portVM = Activator.CreateInstance( ( null != portViewModelTypeOverride ) ? portViewModelTypeOverride : typeof( NodePropertyPortViewModel ),
 				new object[] { port } ) as NodePropertyPortViewModel;
 			port.ViewModel = portVM;
 
@@ -703,6 +712,23 @@ namespace NodeGraph
 			}
 			else
 			{
+				if( !ConnectingConnector.StartPort.AllowMultipleOutput )
+				{
+					List<Guid> connectorGuids = new List<Guid>();
+					foreach( var connector in ConnectingConnector.StartPort.Connectors )
+					{
+						if( ConnectingConnector.Guid != connector.Guid )
+						{
+							connectorGuids.Add( connector.Guid );
+						}
+					}
+
+					foreach( var guid in connectorGuids )
+					{
+						DestroyConnector( guid );
+					}
+				}
+				
 				if( !ConnectingConnector.EndPort.AllowMultipleInput )
 				{
 					List<Guid> connectorGuids = new List<Guid>();
@@ -728,7 +754,7 @@ namespace NodeGraph
 
 		public Node CreateRouterNodeForPort( Guid guid, FlowChart flowChart, NodePort firstPort, double X, double Y, int ZIndex )
 		{
-			Node node = CreateRouterNode( guid, flowChart, firstPort, X, Y, ZIndex );
+			Node node = CreateRouterNode( guid, flowChart, firstPort, X, Y, ZIndex, typeof( RouterNodeViewModel ) );
 
 			BeginConnection( firstPort );
 
@@ -763,8 +789,6 @@ namespace NodeGraph
 			}
 
 			EndConnection( endPort );
-
-			
 
 			return node;
 		}

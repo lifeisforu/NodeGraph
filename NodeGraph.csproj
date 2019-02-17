@@ -88,9 +88,13 @@
     <Compile Include="ViewModel\ConnectorViewModel.cs" />
     <Compile Include="ViewModel\FlowChartViewModel.cs" />
     <Compile Include="ViewModel\NodeFlowPortViewModel.cs" />
+    <Compile Include="ViewModel\NodeFlowPortViewModelAttribute.cs" />
     <Compile Include="ViewModel\NodePortViewModel.cs" />
     <Compile Include="ViewModel\NodePropertyPortViewModel.cs" />
+    <Compile Include="ViewModel\NodePropertyPortViewModelAttribute.cs" />
     <Compile Include="ViewModel\NodeViewModel.cs" />
+    <Compile Include="ViewModel\NodeViewModelAttribute.cs" />
+    <Compile Include="ViewModel\RouterNodeViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="View\ConnectorView.cs" />
     <Compile Include="View\ConnectorViewsContainer.cs" />

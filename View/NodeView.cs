@@ -44,11 +44,6 @@ namespace NodeGraph.View
 
 		#region Constructors
 
-		static NodeView()
-		{
-			DefaultStyleKeyProperty.OverrideMetadata( typeof( NodeView ), new FrameworkPropertyMetadata( typeof( NodeView ) ) );
-		}
-
 		public NodeView()
 		{
 			LayoutUpdated += NodeView_LayoutUpdated;
@@ -113,14 +108,17 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
+			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChartView flowChartView = flowChart.ViewModel.View;
+			Keyboard.Focus( flowChartView );
+
 			NodeGraphManager.This.EndConnection();
 			NodeGraphManager.This.EndDragNode();
 			NodeGraphManager.This.EndDragSelection( false );
 
 			NodeGraphManager.This.MouseLeftDownNode = _ViewModel.Model;
 
-			FlowChart flowChart = _ViewModel.Model.Owner;
-			FlowChartView flowChartView = flowChart.ViewModel.View;
+
 			NodeGraphManager.This.StartDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
 
 			e.Handled = true;

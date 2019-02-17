@@ -13,6 +13,7 @@ namespace NodeGraph.Model
 		public string DisplayName = string.Empty;
 		public bool IsInput = false;
 		public bool AllowMultipleInput = false;
+		public bool AllowMultipleOutput = false;
 
 		public NodePortAttribute( string displayName, bool isInput )
 		{

@@ -1,5 +1,4 @@
 ﻿using NodeGraph.Model;
-using NodeGraph.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace NodeGraph.ViewModel
 {
-	[NodeFlowPortViewModel()]
-	public class NodeFlowPortViewModel : NodePortViewModel
+	[NodeViewModel( "RouterNodeViewStyle" )]
+	public class RouterNodeViewModel : NodeViewModel
 	{
 		#region Constructor
 
-		public NodeFlowPortViewModel( NodeFlowPort nodeFlowPort ) : base( nodeFlowPort )
+		public RouterNodeViewModel( Node node ) : base( node )
 		{
+
 		}
 
 		#endregion // Constructor
-
 	}
 }

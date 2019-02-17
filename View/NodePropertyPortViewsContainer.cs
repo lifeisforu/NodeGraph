@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeGraph.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,13 +30,39 @@ namespace NodeGraph.View
 
 		#endregion // Properties
 
-		#region Methods
+		#region Overrides ItemsControl
+
+		protected override void PrepareContainerForItemOverride( DependencyObject element, object item )
+		{
+			base.PrepareContainerForItemOverride( element, item );
+
+			var attrs = item.GetType().GetCustomAttributes( typeof( NodePropertyPortViewModelAttribute ), false ) as NodePropertyPortViewModelAttribute[];
+			if( 1 != attrs.Length )
+				throw new Exception( "A NodePropertyPortViewModelAttribute must exist for NodePropertyPortViewModel class" );
+
+			FrameworkElement fe = element as FrameworkElement;
+
+			ResourceDictionary resourceDictionary = new ResourceDictionary
+			{
+				Source = new Uri( "/NodeGraph;component/Themes/generic.xaml", UriKind.RelativeOrAbsolute )
+			};
+
+			Style style = resourceDictionary[ attrs[ 0 ].ViewStyleName ] as Style;
+			if( null == style )
+			{
+				style = Application.Current.TryFindResource( attrs[ 0 ].ViewStyleName ) as Style;
+			}
+			fe.Style = style;
+
+			if( null == fe.Style )
+				throw new Exception( String.Format( "{0} does not exist", attrs[ 0 ].ViewStyleName ) );
+		}
 
 		protected override DependencyObject GetContainerForItemOverride()
 		{
 			return new NodePropertyPortView( IsInput );
 		}
 
-		#endregion // Methods
+		#endregion // Overrides ItemsControl
 	}
 }

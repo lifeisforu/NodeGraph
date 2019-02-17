@@ -15,6 +15,8 @@ namespace NodeGraph.Model
 			Type = type;
 			IsInput = isInput;
 			AllowMultipleInput = false;
+			AllowMultipleOutput = true;
+
 			if( !typeof( NodePropertyPortViewModel ).IsAssignableFrom( ViewModelType ) )
 				throw new ArgumentException( "ViewModelType of NodePropertyAttribute must be subclass of NodePropertyPortViewModel" );
 		}

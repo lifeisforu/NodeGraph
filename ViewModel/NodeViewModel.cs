@@ -12,6 +12,7 @@ using System.Windows.Media;
 
 namespace NodeGraph.ViewModel
 {
+	[NodeViewModel()]
 	public class NodeViewModel : ViewModelBase
 	{
 		#region Fields

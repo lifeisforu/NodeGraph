@@ -18,6 +18,8 @@ namespace NodeGraph.Model
 
 		public readonly bool AllowMultipleInput;
 
+		public readonly bool AllowMultipleOutput;
+
 		#endregion // Fields
 
 		#region Properties
@@ -57,13 +59,14 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodeFlowPort() or GraphManager.CreateNodePropertyPort() method.
 		/// </summary>
-		protected NodePort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput ) : base( guid )
+		protected NodePort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput ) : base( guid )
 		{
 			Owner = node;
 			Name = name;
 			DisplayName = displayName;
 			IsInput = isInput;
 			AllowMultipleInput = allowMultipleInput;
+			AllowMultipleOutput = allowMultipleOutput;
 		}
 
 		#endregion // Constructor

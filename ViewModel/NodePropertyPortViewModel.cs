@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace NodeGraph.ViewModel
 {
+	[NodePropertyPortViewModel()]
 	public class NodePropertyPortViewModel : NodePortViewModel
 	{
 		#region Constructor

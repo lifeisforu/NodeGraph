@@ -30,8 +30,8 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodePropertyPort() method.
 		/// </summary>
-		public NodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, Type typeOfValue, object value ) : 
-			base( guid, node, name, displayName, isInput, allowMultipleInput )
+		public NodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMltipleOutput, Type typeOfValue, object value ) : 
+			base( guid, node, name, displayName, isInput, allowMultipleInput, allowMltipleOutput )
 		{
 			if( null != value )
 				Value = value;

@@ -90,9 +90,9 @@ namespace NodeGraph.View
 
 			Keyboard.Focus( this );
 
-			if( !NodeGraphManager.This.IsNodeDragging &&
-				!NodeGraphManager.This.IsConnecting &&
-				!NodeGraphManager.This.IsSelecting )
+			if( !NodeGraphManager.IsNodeDragging &&
+				!NodeGraphManager.IsConnecting &&
+				!NodeGraphManager.IsSelecting )
 			{
 				bool bCtrl = Keyboard.IsKeyDown( Key.LeftCtrl );
 				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
@@ -100,10 +100,10 @@ namespace NodeGraph.View
 
 				if( !bCtrl && !bShift && !bAlt )
 				{
-					NodeGraphManager.This.DeslectAllNodes( _ViewModel.Model );
+					NodeGraphManager.DeslectAllNodes( _ViewModel.Model );
 				}
 
-				NodeGraphManager.This.BeginDragSelection( _ViewModel.Model, e.GetPosition( this ) );
+				NodeGraphManager.BeginDragSelection( _ViewModel.Model, e.GetPosition( this ) );
 			}
 		}
 
@@ -116,14 +116,14 @@ namespace NodeGraph.View
 				return;
 			}
 
-			if( NodeGraphManager.This.IsConnecting )
+			if( NodeGraphManager.IsConnecting )
 			{
-				Connector connector = NodeGraphManager.This.ConnectingConnector;
+				Connector connector = NodeGraphManager.ConnectingConnector;
 				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
 				{
-					NodePort firstPort = NodeGraphManager.This.FirstConnectionPort;
+					NodePort firstPort = NodeGraphManager.FirstConnectionPort;
 
-					NodeGraphManager.This.EndConnection();
+					NodeGraphManager.EndConnection();
 
 					Point mouseLocation = Mouse.GetPosition( this );
 
@@ -133,18 +133,18 @@ namespace NodeGraph.View
 						FrameworkElement element = hitResult.VisualHit as FrameworkElement;
 						if( null == ViewUtil.FindFirstParent<NodeView>( element ) )
 						{
-							Node node = NodeGraphManager.This.CreateRouterNodeForPort(
+							Node node = NodeGraphManager.CreateRouterNodeForPort(
 								Guid.NewGuid(), _ViewModel.Model, firstPort, mouseLocation.X, mouseLocation.Y, 0 );
 						}
 					}
 				}
 				else
 				{
-					NodeGraphManager.This.EndConnection();
+					NodeGraphManager.EndConnection();
 				}
 			}
-			NodeGraphManager.This.EndDragNode();
-			NodeGraphManager.This.EndDragSelection( false );
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( false );
 		}
 
 		protected override void OnMouseMove( MouseEventArgs e )
@@ -156,15 +156,15 @@ namespace NodeGraph.View
 				return;
 			}
 
-			if( NodeGraphManager.This.IsConnecting )
+			if( NodeGraphManager.IsConnecting )
 			{
-				NodeGraphManager.This.UpdateConnection();
+				NodeGraphManager.UpdateConnection();
 			}
-			else if( NodeGraphManager.This.IsNodeDragging )
+			else if( NodeGraphManager.IsNodeDragging )
 			{
-				NodeGraphManager.This.DragNode( e.GetPosition( this ) );
+				NodeGraphManager.DragNode( e.GetPosition( this ) );
 			}
-			else if( NodeGraphManager.This.IsSelecting )
+			else if( NodeGraphManager.IsSelecting )
 			{
 				Point position = e.GetPosition( this );
 
@@ -174,7 +174,7 @@ namespace NodeGraph.View
 				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
 				bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
 
-				NodeGraphManager.This.UpdateDragSelection( position, bCtrl, bShift, bAlt );
+				NodeGraphManager.UpdateDragSelection( position, bCtrl, bShift, bAlt );
 			}
 		}
 
@@ -187,9 +187,9 @@ namespace NodeGraph.View
 				return;
 			}
 
-			NodeGraphManager.This.EndConnection();
-			NodeGraphManager.This.EndDragNode();
-			NodeGraphManager.This.EndDragSelection( true );
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( true );
 		}
 
 		protected override void OnLostFocus( RoutedEventArgs e )
@@ -201,9 +201,9 @@ namespace NodeGraph.View
 				return;
 			}
 
-			NodeGraphManager.This.EndConnection();
-			NodeGraphManager.This.EndDragNode();
-			NodeGraphManager.This.EndDragSelection( true );
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( true );
 
 			ReleaseMouseCapture();
 		}
@@ -229,17 +229,17 @@ namespace NodeGraph.View
 
 			if( Key.Delete == e.Key )
 			{
-				NodeGraphManager.This.DestroySelectedNodes( _ViewModel.Model );
+				NodeGraphManager.DestroySelectedNodes( _ViewModel.Model );
 			}
 			else if( Key.Escape == e.Key )
 			{
-				NodeGraphManager.This.DeslectAllNodes( _ViewModel.Model );
+				NodeGraphManager.DeslectAllNodes( _ViewModel.Model );
 			}
 			else if( Key.A == e.Key )
 			{
 				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
 				{
-					NodeGraphManager.This.SelectAllNodes( _ViewModel.Model );
+					NodeGraphManager.SelectAllNodes( _ViewModel.Model );
 				}
 			}
 		}

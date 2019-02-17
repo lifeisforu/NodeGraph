@@ -104,10 +104,10 @@ namespace NodeGraph.View
 			FlowChart flowChart = node.Owner;
 			Keyboard.Focus( flowChart.ViewModel.View );
 
-			if( IsMouseOver && !NodeGraphManager.This.IsConnecting )
+			if( IsMouseOver && !NodeGraphManager.IsConnecting )
 			{
 				IsFilledPort = true;
-				NodeGraphManager.This.BeginConnection( _ViewModel.Model );
+				NodeGraphManager.BeginConnection( _ViewModel.Model );
 			}
 
 			e.Handled = true;
@@ -119,12 +119,12 @@ namespace NodeGraph.View
 
 			if( MouseButtonState.Pressed == e.LeftButton )
 			{
-				if( NodeGraphManager.This.IsConnecting )
+				if( NodeGraphManager.IsConnecting )
 				{
-					bool connectable = NodeGraphManager.This.CheckIfConnectable( _ViewModel.Model );
+					bool connectable = NodeGraphManager.CheckIfConnectable( _ViewModel.Model );
 					if( connectable )
 					{
-						NodeGraphManager.This.SetOtherConnectionPort( _ViewModel.Model );
+						NodeGraphManager.SetOtherConnectionPort( _ViewModel.Model );
 					}
 				}
 			}
@@ -134,9 +134,9 @@ namespace NodeGraph.View
 		{
 			base.OnLostFocus( e );
 
-			if( NodeGraphManager.This.IsConnecting )
+			if( NodeGraphManager.IsConnecting )
 			{
-				NodeGraphManager.This.SetOtherConnectionPort( null );
+				NodeGraphManager.SetOtherConnectionPort( null );
 			}
 		}
 
@@ -144,9 +144,9 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeave( e );
 
-			if( NodeGraphManager.This.IsConnecting )
+			if( NodeGraphManager.IsConnecting )
 			{
-				NodeGraphManager.This.SetOtherConnectionPort( null );
+				NodeGraphManager.SetOtherConnectionPort( null );
 			}
 		}
 
@@ -161,9 +161,9 @@ namespace NodeGraph.View
 
 			if( MouseButtonState.Pressed != e.LeftButton )
 			{
-				if( !NodeGraphManager.This.IsConnecting && IsMouseOnPartPort() )
+				if( !NodeGraphManager.IsConnecting && IsMouseOnPartPort() )
 				{
-					NodeGraphManager.This.Disconnect( _ViewModel.Model );
+					NodeGraphManager.Disconnect( _ViewModel.Model );
 				}
 
 				e.Handled = true;

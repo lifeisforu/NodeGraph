@@ -12,28 +12,20 @@ namespace NodeGraph
 {
 	public class NodeGraphManager
 	{
-		#region Instance
-
-		public static NodeGraphManager This = new NodeGraphManager();
-
-		private NodeGraphManager() { }
-
-		#endregion // Instance
-
 		#region Fields
 
-		public readonly Dictionary<Guid, FlowChart> FlowCharts = new Dictionary<Guid, FlowChart>();
-		public readonly Dictionary<Guid, Node> Nodes = new Dictionary<Guid, Node>();
-		public readonly Dictionary<Guid, Connector> Connectors = new Dictionary<Guid, Connector>();
-		public readonly Dictionary<Guid, NodeFlowPort> NodeFlowPorts = new Dictionary<Guid, NodeFlowPort>();
-		public readonly Dictionary<Guid, NodePropertyPort> NodePropertyPorts = new Dictionary<Guid, NodePropertyPort>();
-		public readonly Dictionary<Guid, List<Guid>> SelectedNodes = new Dictionary<Guid, List<Guid>>();
+		public static readonly Dictionary<Guid, FlowChart> FlowCharts = new Dictionary<Guid, FlowChart>();
+		public static readonly Dictionary<Guid, Node> Nodes = new Dictionary<Guid, Node>();
+		public static readonly Dictionary<Guid, Connector> Connectors = new Dictionary<Guid, Connector>();
+		public static readonly Dictionary<Guid, NodeFlowPort> NodeFlowPorts = new Dictionary<Guid, NodeFlowPort>();
+		public static readonly Dictionary<Guid, NodePropertyPort> NodePropertyPorts = new Dictionary<Guid, NodePropertyPort>();
+		public static readonly Dictionary<Guid, List<Guid>> SelectedNodes = new Dictionary<Guid, List<Guid>>();
 
 		#endregion // Fields
 
 		#region FlowChart
 
-		public FlowChart CreateFlowChart( Guid guid, Type flowChartModelType )
+		public static FlowChart CreateFlowChart( Guid guid, Type flowChartModelType )
 		{
 			//------ create FlowChart.
 
@@ -60,7 +52,7 @@ namespace NodeGraph
 			return flowChart;
 		}
 
-		public void DestroyFlowChart( Guid guid )
+		public static void DestroyFlowChart( Guid guid )
 		{
 			List<Guid> guids = new List<Guid>();
 
@@ -97,7 +89,7 @@ namespace NodeGraph
 			FlowCharts.Remove( guid );
 		}
 
-		public FlowChart FindFlowChart( Guid guid )
+		public static FlowChart FindFlowChart( Guid guid )
 		{
 			FlowChart flowChart;
 			FlowCharts.TryGetValue( guid, out flowChart );
@@ -108,7 +100,7 @@ namespace NodeGraph
 
 		#region Node
 
-		public Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double X, double Y, int ZIndex,
+		public static Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double X, double Y, int ZIndex,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -196,7 +188,7 @@ namespace NodeGraph
 			return node;
 		}
 
-		public void DestroyNode( Guid guid )
+		public static void DestroyNode( Guid guid )
 		{
 			Node node;
 			if( Nodes.TryGetValue( guid, out node ) )
@@ -247,7 +239,7 @@ namespace NodeGraph
 			}
 		}
 
-		public Node FindNode( Guid guid )
+		public static Node FindNode( Guid guid )
 		{
 			Node node;
 			Nodes.TryGetValue( guid, out node );
@@ -258,7 +250,7 @@ namespace NodeGraph
 
 		#region RouterNode
 
-		public Node CreateRouterNode( Guid guid, FlowChart flowChart, NodePort referencePort, double X, double Y, int ZIndex,
+		public static Node CreateRouterNode( Guid guid, FlowChart flowChart, NodePort referencePort, double X, double Y, int ZIndex,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -300,7 +292,7 @@ namespace NodeGraph
 
 		#region Connector
 
-		public Connector CreateConnector( Guid guid, FlowChart flowChart, Type connectorType = null )
+		public static Connector CreateConnector( Guid guid, FlowChart flowChart, Type connectorType = null )
 		{
 			//----- exceptions.
 
@@ -333,7 +325,7 @@ namespace NodeGraph
 			return connector;
 		}
 
-		public void DestroyConnector( Guid guid )
+		public static void DestroyConnector( Guid guid )
 		{
 			Connector connector;
 			if( Connectors.TryGetValue( guid, out connector ) )
@@ -357,7 +349,7 @@ namespace NodeGraph
 			}
 		}
 
-		public Connector FindConnector( Guid guid )
+		public static Connector FindConnector( Guid guid )
 		{
 			Connector connector;
 			Connectors.TryGetValue( guid, out connector );
@@ -368,7 +360,7 @@ namespace NodeGraph
 
 		#region FlowPort
 
-		public NodeFlowPort CreateNodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type portViewModelTypeOverride = null )
+		public static NodeFlowPort CreateNodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -404,14 +396,14 @@ namespace NodeGraph
 			return port;
 		}
 
-		public NodeFlowPort FindNodeFlowPort( Guid guid )
+		public static NodeFlowPort FindNodeFlowPort( Guid guid )
 		{
 			NodeFlowPort port;
 			NodeFlowPorts.TryGetValue( guid, out port );
 			return port;
 		}
 
-		public void DestroyNodeFlowPort( Guid guid )
+		public static void DestroyNodeFlowPort( Guid guid )
 		{
 			NodeFlowPort port = FindNodeFlowPort( guid );
 			Node node = port.Owner;
@@ -445,7 +437,7 @@ namespace NodeGraph
 
 		#region PropertyPort
 
-		public NodePropertyPort CreateNodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type valueType, object defaultValue, Type portViewModelTypeOverride = null )
+		public static NodePropertyPort CreateNodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type valueType, object defaultValue, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.
 
@@ -481,14 +473,14 @@ namespace NodeGraph
 			return port;
 		}
 
-		public NodePropertyPort FindNodePropertyPort( Guid guid )
+		public static NodePropertyPort FindNodePropertyPort( Guid guid )
 		{
 			NodePropertyPort port;
 			NodePropertyPorts.TryGetValue( guid, out port );
 			return port;
 		}
 
-		public void DestroyNodePropertyPort( Guid guid )
+		public static void DestroyNodePropertyPort( Guid guid )
 		{
 			NodePropertyPort port = FindNodePropertyPort( guid );
 			Node node = port.Owner;
@@ -522,11 +514,11 @@ namespace NodeGraph
 
 		#region Connection
 
-		public bool IsConnecting{ get; private set; }
-		public NodePort FirstConnectionPort { get; private set; }
-		public Connector ConnectingConnector { get; private set; }
+		public static bool IsConnecting{ get; private set; }
+		public static NodePort FirstConnectionPort { get; private set; }
+		public static Connector ConnectingConnector { get; private set; }
 
-		public void BeginConnection( NodePort port )
+		public static void BeginConnection( NodePort port )
 		{
 			if( IsConnecting )
 				throw new InvalidOperationException( "You can not connect node during other connection occurs." );
@@ -553,7 +545,7 @@ namespace NodeGraph
 			FirstConnectionPort = port;
 		}
 
-		public void SetOtherConnectionPort( NodePort port )
+		public static void SetOtherConnectionPort( NodePort port )
 		{
 			if( null == port )
 			{
@@ -589,9 +581,9 @@ namespace NodeGraph
 			}
 		}
 
-		private List<Node> _AlreadyCheckedNodes;
+		private static List<Node> _AlreadyCheckedNodes;
 
-		public bool CheckIfConnectable( NodePort otherPort )
+		public static bool CheckIfConnectable( NodePort otherPort )
 		{
 			Type firstType = FirstConnectionPort.GetType();
 			Type otherType = otherPort.GetType();
@@ -664,7 +656,7 @@ namespace NodeGraph
 			return true;
 		}
 
-		private bool IsReachable( Node nodeFrom, Node nodeTo )
+		private static bool IsReachable( Node nodeFrom, Node nodeTo )
 		{
 			if( _AlreadyCheckedNodes.Contains( nodeFrom ) )
 				return false;
@@ -700,7 +692,7 @@ namespace NodeGraph
 			return false;
 		}
 
-		public void EndConnection( NodePort endPort = null )
+		public static void EndConnection( NodePort endPort = null )
 		{
 			UntrapMouse();
 
@@ -758,7 +750,7 @@ namespace NodeGraph
 			FirstConnectionPort = null;
 		}
 
-		public Node CreateRouterNodeForPort( Guid guid, FlowChart flowChart, NodePort firstPort, double X, double Y, int ZIndex )
+		public static Node CreateRouterNodeForPort( Guid guid, FlowChart flowChart, NodePort firstPort, double X, double Y, int ZIndex )
 		{
 			Node node = CreateRouterNode( guid, flowChart, firstPort, X, Y, ZIndex, typeof( RouterNodeViewModel ) );
 
@@ -799,13 +791,13 @@ namespace NodeGraph
 			return node;
 		}
 
-		public void UpdateConnection()
+		public static void UpdateConnection()
 		{
 			if( null != ConnectingConnector )
 				ConnectingConnector.ViewModel.View.BuildCurveData();
 		}
 
-		public void Disconnect( NodePort port )
+		public static void Disconnect( NodePort port )
 		{
 			List<Guid> connectorGuids = new List<Guid>();
 			foreach( var connection in port.Connectors )
@@ -823,12 +815,12 @@ namespace NodeGraph
 
 		#region Node Dragging
 
-		public bool IsNodeDragging { get; private set; }
-		public bool AreNodesReallyDragged { get; private set; }
-		private Guid _NodeDraggingFlowChartGuid;
-		private Point _NodeDraggingPrevPosition;
+		public static bool IsNodeDragging { get; private set; }
+		public static bool AreNodesReallyDragged { get; private set; }
+		private static Guid _NodeDraggingFlowChartGuid;
+		private static Point _NodeDraggingPrevPosition;
 
-		public void BeginDragNode( FlowChart flowChart, Point startPosition )
+		public static void BeginDragNode( FlowChart flowChart, Point startPosition )
 		{
 			TrapMouse( flowChart.ViewModel.View );
 
@@ -840,7 +832,7 @@ namespace NodeGraph
 			_NodeDraggingFlowChartGuid = flowChart.Guid;
 		}
 
-		public void EndDragNode()
+		public static void EndDragNode()
 		{
 			UntrapMouse();
 
@@ -848,7 +840,7 @@ namespace NodeGraph
 			AreNodesReallyDragged = false;
 		}
 
-		public void DragNode( Point currentMousePosition )
+		public static void DragNode( Point currentMousePosition )
 		{
 			if( !IsNodeDragging )
 				return;
@@ -881,7 +873,7 @@ namespace NodeGraph
 		[DllImport( "user32.dll" )]
 		static extern void ClipCursor( IntPtr rect );
 
-		public void TrapMouse( FrameworkElement element )
+		public static void TrapMouse( FrameworkElement element )
 		{
 			Point startLocation = element.PointToScreen( new Point( 0, 0 ) );
 
@@ -892,7 +884,7 @@ namespace NodeGraph
 			ClipCursor( ref rect );
 		}
 
-		public void UntrapMouse()
+		public static void UntrapMouse()
 		{
 			ClipCursor( IntPtr.Zero );
 		}
@@ -901,9 +893,9 @@ namespace NodeGraph
 
 		#region Node Selection
 
-		public Node MouseLeftDownNode { get; set; }
+		public static Node MouseLeftDownNode { get; set; }
 
-		public List<Guid> GetSelectionList( FlowChart flowChart )
+		public static List<Guid> GetSelectionList( FlowChart flowChart )
 		{
 			List<Guid> selectionList;
 			if( !SelectedNodes.TryGetValue( flowChart.Guid, out selectionList ) )
@@ -911,7 +903,7 @@ namespace NodeGraph
 			return selectionList;
 		}
 
-		public void TrySelection( FlowChart flowChart, Node node, bool bCtrl, bool bShift, bool bAlt )
+		public static void TrySelection( FlowChart flowChart, Node node, bool bCtrl, bool bShift, bool bAlt )
 		{
 			bool bAdd = false;
 			if( bCtrl )
@@ -938,7 +930,7 @@ namespace NodeGraph
 				RemoveSelection( node );
 		}
 
-		public void AddSelection( Node node )
+		public static void AddSelection( Node node )
 		{
 			List<Guid> selectionList = GetSelectionList( node.Owner );
 			if( !selectionList.Contains( node.Guid ) )
@@ -948,14 +940,14 @@ namespace NodeGraph
 			}
 		}
 
-		public void RemoveSelection( Node node )
+		public static void RemoveSelection( Node node )
 		{
 			List<Guid> selectionList = GetSelectionList( node.Owner );
 			node.ViewModel.IsSelected = false;
 			selectionList.Remove( node.Guid );
 		}
 
-		public void DeslectAllNodes( FlowChart flowChart )
+		public static void DeslectAllNodes( FlowChart flowChart )
 		{
 			List<Guid> selectionList = GetSelectionList( flowChart );
 			foreach( var guid in selectionList )
@@ -966,7 +958,7 @@ namespace NodeGraph
 			selectionList.Clear();
 		}
 
-		public void SelectAllNodes( FlowChart flowChart )
+		public static void SelectAllNodes( FlowChart flowChart )
 		{
 			DeslectAllNodes( flowChart );
 
@@ -983,15 +975,15 @@ namespace NodeGraph
 			}
 		}
 
-		public bool IsSelecting
+		public static bool IsSelecting
 		{
 			get { return ( null != _FlowChartSelecting ); }
 		}
-		private FlowChart _FlowChartSelecting;
-		private Point _SelectingStartPoint;
-		private Guid[] _OriginalSelections;
+		private static FlowChart _FlowChartSelecting;
+		private static Point _SelectingStartPoint;
+		private static Guid[] _OriginalSelections;
 
-		public void BeginDragSelection( FlowChart flowChart, Point start )
+		public static void BeginDragSelection( FlowChart flowChart, Point start )
 		{
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			TrapMouse( flowChartView );
@@ -1011,7 +1003,7 @@ namespace NodeGraph
 			temp.CopyTo( _OriginalSelections );
 		}
 
-		public void UpdateDragSelection( Point end, bool bCtrl, bool bShift, bool bAlt )
+		public static void UpdateDragSelection( Point end, bool bCtrl, bool bShift, bool bAlt )
 		{
 			double startX = _SelectingStartPoint.X;
 			double startY = _SelectingStartPoint.Y;
@@ -1104,7 +1096,7 @@ namespace NodeGraph
 			}
 		}
 
-		public void EndDragSelection( bool bCancel )
+		public static void EndDragSelection( bool bCancel )
 		{
 			UntrapMouse();
 
@@ -1131,7 +1123,7 @@ namespace NodeGraph
 
 		#region Delete
 
-		public void DestroySelectedNodes( FlowChart flowChart )
+		public static void DestroySelectedNodes( FlowChart flowChart )
 		{
 			List<Guid> guids = new List<Guid>();
 

@@ -85,21 +85,21 @@ namespace NodeGraph.View
 
 			FlowChart flowChart = _ViewModel.Model.Owner;
 
-			NodeGraphManager.This.EndConnection();
-			NodeGraphManager.This.EndDragSelection( false );
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragSelection( false );
 
-			if( !NodeGraphManager.This.AreNodesReallyDragged &&
-				NodeGraphManager.This.MouseLeftDownNode == _ViewModel.Model )
+			if( !NodeGraphManager.AreNodesReallyDragged &&
+				NodeGraphManager.MouseLeftDownNode == _ViewModel.Model )
 			{
-				NodeGraphManager.This.TrySelection( flowChart, _ViewModel.Model,
+				NodeGraphManager.TrySelection( flowChart, _ViewModel.Model,
 					Keyboard.IsKeyDown( Key.LeftCtrl ),
 					Keyboard.IsKeyDown( Key.LeftShift ),
 					Keyboard.IsKeyDown( Key.LeftAlt ) );
 			}
 
-			NodeGraphManager.This.EndDragNode();
+			NodeGraphManager.EndDragNode();
 
-			NodeGraphManager.This.MouseLeftDownNode = null;
+			NodeGraphManager.MouseLeftDownNode = null;
 
 			e.Handled = true;
 		}
@@ -112,14 +112,14 @@ namespace NodeGraph.View
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			Keyboard.Focus( flowChartView );
 
-			NodeGraphManager.This.EndConnection();
-			NodeGraphManager.This.EndDragNode();
-			NodeGraphManager.This.EndDragSelection( false );
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( false );
 
-			NodeGraphManager.This.MouseLeftDownNode = _ViewModel.Model;
+			NodeGraphManager.MouseLeftDownNode = _ViewModel.Model;
 
 
-			NodeGraphManager.This.BeginDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
+			NodeGraphManager.BeginDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
 
 			e.Handled = true;
 		}
@@ -128,11 +128,11 @@ namespace NodeGraph.View
 		{
 			base.OnMouseMove( e );
 
-			if( NodeGraphManager.This.IsNodeDragging &&
-				( NodeGraphManager.This.MouseLeftDownNode == _ViewModel.Model ) &&
+			if( NodeGraphManager.IsNodeDragging &&
+				( NodeGraphManager.MouseLeftDownNode == _ViewModel.Model ) &&
 				!IsSelected )
 			{
-				NodeGraphManager.This.TrySelection( _ViewModel.Model.Owner, _ViewModel.Model, false, false, false );
+				NodeGraphManager.TrySelection( _ViewModel.Model.Owner, _ViewModel.Model, false, false, false );
 			}
 		}
 

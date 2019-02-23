@@ -100,7 +100,7 @@ namespace NodeGraph
 
 		#region Node
 
-		public static Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double X, double Y, int ZIndex,
+		public static Node CreateNode( Guid guid, FlowChart flowChart, Type nodeType, double x, double y, int ZIndex,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -120,8 +120,8 @@ namespace NodeGraph
 
 			// create node model.
 			Node node = Activator.CreateInstance( nodeType, new object[]{ guid, flowChart, nodeAttr.AllowCircularConnection } ) as Node;
-			node.X = X;
-			node.Y = Y;
+			node.X = x;
+			node.Y = y;
 			node.ZIndex = ZIndex;
 			Nodes.Add( guid, node );
 			// create node viewmodel.
@@ -527,8 +527,9 @@ namespace NodeGraph
 
 			Node node = port.Owner;
 			FlowChart flowChart = node.Owner;
+			FlowChartView flowChartView = flowChart.ViewModel.View;
 
-			TrapMouse( flowChart.ViewModel.View );
+			BeginDragging( flowChartView );
 
 			ConnectingConnector = CreateConnector( Guid.NewGuid(), flowChart, typeof( Connector ) );
 
@@ -694,7 +695,7 @@ namespace NodeGraph
 
 		public static void EndConnection( NodePort endPort = null )
 		{
-			UntrapMouse();
+			EndDragging();
 
 			if( !IsConnecting )
 				return;
@@ -822,7 +823,7 @@ namespace NodeGraph
 
 		public static void BeginDragNode( FlowChart flowChart, Point startPosition )
 		{
-			TrapMouse( flowChart.ViewModel.View );
+			BeginDragging( flowChart.ViewModel.View );
 
 			_NodeDraggingPrevPosition = startPosition;
 			if( IsNodeDragging )
@@ -834,7 +835,7 @@ namespace NodeGraph
 
 		public static void EndDragNode()
 		{
-			UntrapMouse();
+			EndDragging();
 
 			IsNodeDragging = false;
 			AreNodesReallyDragged = false;
@@ -868,24 +869,36 @@ namespace NodeGraph
 		#region Mouse Trapping
 
 		[DllImport( "user32.dll" )]
-		static extern void ClipCursor( ref System.Drawing.Rectangle rect );
+		public static extern void ClipCursor( ref System.Drawing.Rectangle rect );
 
 		[DllImport( "user32.dll" )]
-		static extern void ClipCursor( IntPtr rect );
+		public  static extern void ClipCursor( IntPtr rect );
 
-		public static void TrapMouse( FrameworkElement element )
+		private static FlowChartView _TrappingFlowChartView;
+		public static bool IsDragging = false;
+
+		public static void BeginDragging( FlowChartView flowChartView )
 		{
-			Point startLocation = element.PointToScreen( new Point( 0, 0 ) );
+			_TrappingFlowChartView = flowChartView;
+			IsDragging = true;
+
+			Point startLocation = flowChartView.PointToScreen( new Point( 0, 0 ) );
 
 			System.Drawing.Rectangle rect = new System.Drawing.Rectangle(
 				( int )startLocation.X, ( int )startLocation.Y, 
-				( int )( startLocation.X + element.ActualWidth ), 
-				( int )( startLocation.Y + element.ActualHeight ) );
+				( int )( startLocation.X + flowChartView.ActualWidth ), 
+				( int )( startLocation.Y + flowChartView.ActualHeight ) );
 			ClipCursor( ref rect );
 		}
 
-		public static void UntrapMouse()
+		public static void EndDragging()
 		{
+			if( null != _TrappingFlowChartView )
+			{
+				IsDragging = false;
+				_TrappingFlowChartView = null;
+			}
+
 			ClipCursor( IntPtr.Zero );
 		}
 
@@ -980,21 +993,17 @@ namespace NodeGraph
 			get { return ( null != _FlowChartSelecting ); }
 		}
 		private static FlowChart _FlowChartSelecting;
-		private static Point _SelectingStartPoint;
+		public static Point SelectingStartPoint { get; private set; }
 		private static Guid[] _OriginalSelections;
 
 		public static void BeginDragSelection( FlowChart flowChart, Point start )
 		{
 			FlowChartView flowChartView = flowChart.ViewModel.View;
-			TrapMouse( flowChartView );
+			BeginDragging( flowChartView );
 
-			_SelectingStartPoint = start;
+			SelectingStartPoint = start;
 
 			_FlowChartSelecting = flowChart;
-			_FlowChartSelecting.ViewModel.SelectionStartX = start.X;
-			_FlowChartSelecting.ViewModel.SelectionWidth = 0;
-			_FlowChartSelecting.ViewModel.SelectionStartY = start.Y;
-			_FlowChartSelecting.ViewModel.SelectionHeight = 0;
 			_FlowChartSelecting.ViewModel.SelectionVisibility = Visibility.Visible;
 
 			List<Guid> temp = new List<Guid>();
@@ -1003,18 +1012,15 @@ namespace NodeGraph
 			temp.CopyTo( _OriginalSelections );
 		}
 
-		public static void UpdateDragSelection( Point end, bool bCtrl, bool bShift, bool bAlt )
+		public static void UpdateDragSelection( FlowChart flowChart, Point end, bool bCtrl, bool bShift, bool bAlt )
 		{
-			double startX = _SelectingStartPoint.X;
-			double startY = _SelectingStartPoint.Y;
+			FlowChartView flowChartView = flowChart.ViewModel.View;
 
-			Point realStart = new Point( Math.Min( startX, end.X ), Math.Min( startY, end.Y ) );
-			Point realEnd = new Point( Math.Max( startX, end.X ), Math.Max( startY, end.Y ) );
+			double startX = SelectingStartPoint.X;
+			double startY = SelectingStartPoint.Y;
 
-			_FlowChartSelecting.ViewModel.SelectionStartX = realStart.X;
-			_FlowChartSelecting.ViewModel.SelectionStartY = realStart.Y;
-			_FlowChartSelecting.ViewModel.SelectionWidth = realEnd.X - realStart.X;
-			_FlowChartSelecting.ViewModel.SelectionHeight = realEnd.Y - realStart.Y;
+			Point selectionStart = new Point( Math.Min( startX, end.X ), Math.Min( startY, end.Y ) );
+			Point selectionEnd = new Point( Math.Max( startX, end.X ), Math.Max( startY, end.Y ) );
 
 			bool bAdd = false;
 			if( bCtrl )
@@ -1039,11 +1045,10 @@ namespace NodeGraph
 				Node node = pair.Value;
 				if( node.Owner == _FlowChartSelecting )
 				{
-					double nodeStartX = node.X;
-					double nodeEndX = node.X + node.ViewModel.View.ActualWidth;
-					double nodeStartY = node.Y;
-					double nodeEndY = node.Y + node.ViewModel.View.ActualHeight;
-
+					Point nodeStart = new Point( node.X, node.Y );
+					Point nodeEnd = new Point( node.X + node.ViewModel.View.ActualWidth,
+						node.Y + node.ViewModel.View.ActualHeight );
+					
 					bool isInOriginalSelection = false;
 					foreach( Guid nodeGuid in _OriginalSelections )
 					{
@@ -1055,10 +1060,10 @@ namespace NodeGraph
 					}
 
 					// outside.
-					if( ( nodeEndX < realStart.X ) ||
-						( nodeEndY < realStart.Y ) ||
-						( nodeStartX > realEnd.X ) ||
-						( nodeStartY > realEnd.Y ) )
+					if( ( nodeEnd.X < selectionStart.X ) ||
+						( nodeEnd.Y < selectionStart.Y ) ||
+						( nodeStart.X > selectionEnd.X ) ||
+						( nodeStart.Y > selectionEnd.Y ) )
 					{
 						if( isInOriginalSelection )
 						{
@@ -1098,7 +1103,7 @@ namespace NodeGraph
 
 		public static void EndDragSelection( bool bCancel )
 		{
-			UntrapMouse();
+			EndDragging();
 
 			if( bCancel )
 			{
@@ -1142,5 +1147,45 @@ namespace NodeGraph
 		}
 
 		#endregion // Delete
+
+		#region ContentSize
+
+		public static void UpdateContentSize( FlowChart flowChart )
+		{
+			FlowChartView flowChartView = flowChart.ViewModel.View;
+
+			double MinX = double.MaxValue;
+			double MaxX = double.MinValue;
+			double MinY = double.MaxValue;
+			double MaxY = double.MinValue;
+
+			bool hasNodes = false;
+			foreach( var pair in Nodes )
+			{
+				Node node = pair.Value;
+				NodeView nodeView = node.ViewModel.View;
+				if( node.Owner == flowChart )
+				{
+					MinX = Math.Min( node.X, MinX );
+					MaxX = Math.Max( node.X + nodeView.ActualWidth, MaxX );
+					MinY = Math.Min( node.Y, MinY );
+					MaxY = Math.Max( node.Y + nodeView.ActualHeight, MaxY );
+					hasNodes = true;
+				}
+			}
+
+			if( hasNodes )
+			{
+				double width = MaxX - MinX;
+				double height = MaxY - MinY;
+				flowChartView.NodeCanvas_ContentSizeChanged( width, height );
+			}
+			else
+			{
+				flowChartView.NodeCanvas_ContentSizeChanged( 0.0, 0.0 );
+			}
+		}
+
+		#endregion // ContentSize
 	}
 }

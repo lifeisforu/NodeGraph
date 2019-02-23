@@ -46,11 +46,24 @@ namespace NodeGraph.View
 
 		public NodeView()
 		{
-			LayoutUpdated += NodeView_LayoutUpdated;
 			DataContextChanged += NodeView_DataContextChanged;
+			Loaded += NodeView_Loaded;
+			Unloaded += NodeView_Unloaded;
 
 			ContextMenu = new ContextMenu();
 			ContextMenuOpening += NodeView_ContextMenuOpening;
+		}
+
+		private void NodeView_Loaded( object sender, RoutedEventArgs e )
+		{
+			FlowChart flowChart = _ViewModel.Model.Owner;
+			NodeGraphManager.UpdateContentSize( flowChart );
+		}
+
+		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
+		{
+			FlowChart flowChart = _ViewModel.Model.Owner;
+			NodeGraphManager.UpdateContentSize( flowChart );
 		}
 
 		private void NodeView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
@@ -59,11 +72,6 @@ namespace NodeGraph.View
 			if( null == _ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodeView." );
 			_ViewModel.View = this;
-		}
-
-		private void NodeView_LayoutUpdated( object sender, EventArgs e )
-		{
-			
 		}
 
 		#endregion // Constructors
@@ -118,8 +126,21 @@ namespace NodeGraph.View
 
 			NodeGraphManager.MouseLeftDownNode = _ViewModel.Model;
 
-
 			NodeGraphManager.BeginDragNode( flowChart, Mouse.GetPosition( flowChartView ) );
+
+			e.Handled = true;
+		}
+
+		protected override void OnMouseRightButtonDown( MouseButtonEventArgs e )
+		{
+			base.OnMouseRightButtonDown( e );
+
+			e.Handled = true;
+		}
+
+		protected override void OnMouseRightButtonUp( MouseButtonEventArgs e )
+		{
+			base.OnMouseRightButtonUp( e );
 
 			e.Handled = true;
 		}

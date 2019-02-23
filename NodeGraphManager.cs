@@ -20,6 +20,7 @@ namespace NodeGraph
 		public static readonly Dictionary<Guid, NodeFlowPort> NodeFlowPorts = new Dictionary<Guid, NodeFlowPort>();
 		public static readonly Dictionary<Guid, NodePropertyPort> NodePropertyPorts = new Dictionary<Guid, NodePropertyPort>();
 		public static readonly Dictionary<Guid, List<Guid>> SelectedNodes = new Dictionary<Guid, List<Guid>>();
+		public static bool OutputDebugInfo = false;
 
 		#endregion // Fields
 
@@ -45,7 +46,7 @@ namespace NodeGraph
 
 			SelectedNodes.Add( flowChart.Guid, new List<Guid>() );
 
-			flowChart.InvokeCreateEvent();
+			flowChart.OnCreate();
 
 			//----- return.
 
@@ -54,27 +55,17 @@ namespace NodeGraph
 
 		public static void DestroyFlowChart( Guid guid )
 		{
+			FlowChart flowChart;
+			if( !FlowCharts.TryGetValue( guid, out flowChart ) )
+			{
+				return;
+			}
+
+			flowChart.OnPreDestroy();
+
 			List<Guid> guids = new List<Guid>();
-
-			foreach( var pair in Nodes )
+			foreach( var connector in flowChart.Connectors )
 			{
-				Node node = pair.Value;
-				if( guid == node.Owner.Guid )
-				{
-					guids.Add( node.Guid );
-				}
-			}
-
-			foreach( var nodeGuid in guids )
-			{
-				DestroyNode( nodeGuid );
-			}
-
-			guids = new List<Guid>();
-
-			foreach( var pair in Connectors )
-			{
-				Connector connector = pair.Value;
 				if( guid == connector.Owner.Guid )
 				{
 					guids.Add( connector.Guid );
@@ -86,6 +77,21 @@ namespace NodeGraph
 				DestroyConnector( connectorGuid );
 			}
 
+			guids.Clear();
+			foreach( var node in flowChart.Nodes )
+			{
+				if( guid == node.Owner.Guid )
+				{
+					guids.Add( node.Guid );
+				}
+			}
+
+			foreach( var nodeGuid in guids )
+			{
+				DestroyNode( nodeGuid );
+			}
+
+			flowChart.OnPostDestroy();
 			FlowCharts.Remove( guid );
 		}
 
@@ -181,7 +187,7 @@ namespace NodeGraph
 
 			//----- invoke Create event.
 
-			node.InvokeCreateEvent();
+			node.OnCreate();
 
 			//----- return.
 
@@ -193,6 +199,8 @@ namespace NodeGraph
 			Node node;
 			if( Nodes.TryGetValue( guid, out node ) )
 			{
+				node.OnPreDestroy();
+
 				List<Guid> guids = new List<Guid>();
 
 				foreach( var port in node.InputFlowPorts )
@@ -235,6 +243,7 @@ namespace NodeGraph
 				SelectedNodes.TryGetValue( node.Owner.Guid, out selectionList );
 				selectionList.RemoveAll( ( currentGuid ) => currentGuid == guid );
 
+				node.OnPostDestroy();
 				Nodes.Remove( guid );
 			}
 		}
@@ -318,7 +327,7 @@ namespace NodeGraph
 			flowChart.ViewModel.ConnectorViewModels.Add( connector.ViewModel );
 			flowChart.Connectors.Add( connector );
 
-			connector.InvokeCreateEvent();
+			connector.OnCreate();
 
 			//----- return.
 
@@ -330,21 +339,23 @@ namespace NodeGraph
 			Connector connector;
 			if( Connectors.TryGetValue( guid, out connector ) )
 			{
+				connector.OnPreDestroy();
+
 				if( null != connector.StartPort )
 				{
-					connector.StartPort.Connectors.Remove( connector );
-					connector.StartPort = null;
+					DisconnectFrom( connector.StartPort, connector );
 				}
 
 				if( null != connector.EndPort )
 				{
-					connector.EndPort.Connectors.Remove( connector );
-					connector.EndPort = null;
+					DisconnectFrom( connector.EndPort, connector );
 				}
 
 				FlowChart flowChart = connector.Owner;
 				flowChart.ViewModel.ConnectorViewModels.Remove( connector.ViewModel );
 				flowChart.Connectors.Remove( connector );
+
+				connector.OnPostDestroy();
 				Connectors.Remove( guid );
 			}
 		}
@@ -391,7 +402,7 @@ namespace NodeGraph
 				node.ViewModel.OutputFlowPortViewModels.Add( portVM );
 			}
 
-			port.InvokeCreateEvent();
+			port.OnCreate();
 
 			return port;
 		}
@@ -406,7 +417,13 @@ namespace NodeGraph
 		public static void DestroyNodeFlowPort( Guid guid )
 		{
 			NodeFlowPort port = FindNodeFlowPort( guid );
+			if( null == port )
+			{
+				return;
+			}
+
 			Node node = port.Owner;
+			port.OnPreDestroy();
 
 			List<Guid> guids = new List<Guid>();
 			foreach( var connector in port.Connectors )
@@ -430,6 +447,7 @@ namespace NodeGraph
 				node.OutputFlowPorts.Remove( port );
 			}
 
+			port.OnPostDestroy();
 			NodeFlowPorts.Remove( guid );
 		}
 
@@ -468,7 +486,7 @@ namespace NodeGraph
 				node.ViewModel.OutputPropertyPortViewModels.Add( portVM );
 			}
 
-			port.InvokeCreateEvent();
+			port.OnCreate();
 
 			return port;
 		}
@@ -483,6 +501,13 @@ namespace NodeGraph
 		public static void DestroyNodePropertyPort( Guid guid )
 		{
 			NodePropertyPort port = FindNodePropertyPort( guid );
+			if( null == port )
+			{
+				return;
+			}
+
+			port.OnPreDestroy();
+
 			Node node = port.Owner;
 
 			List<Guid> guids = new List<Guid>();
@@ -507,6 +532,7 @@ namespace NodeGraph
 				node.OutputPropertyPorts.Remove( port );
 			}
 
+			port.OnPostDestroy();
 			NodePropertyPorts.Remove( guid );
 		}
 
@@ -516,7 +542,53 @@ namespace NodeGraph
 
 		public static bool IsConnecting{ get; private set; }
 		public static NodePort FirstConnectionPort { get; private set; }
-		public static Connector ConnectingConnector { get; private set; }
+		public static Connector CurrentConnector { get; private set; }
+
+		public static void ConnectTo( NodePort port, Connector connector )
+		{
+			if( port.IsInput )
+			{
+				connector.EndPort = port;
+			}
+			else
+			{
+				connector.StartPort = port;
+			}
+			port.Connectors.Add( connector );
+
+			port.OnConnect( connector );
+			connector.OnConnect( port );
+		}
+
+		public static void DisconnectFrom( NodePort port, Connector connector )
+		{
+			connector.OnDisconnect( port );
+			port.OnDisconnect( connector );
+
+			if( port.IsInput )
+			{
+				connector.EndPort = null;
+			}
+			else
+			{
+				connector.StartPort = null;
+			}
+			port.Connectors.Remove( connector );
+		}
+
+		public static void DisconnectAll( NodePort port )
+		{
+			List<Guid> connectorGuids = new List<Guid>();
+			foreach( var connection in port.Connectors )
+			{
+				connectorGuids.Add( connection.Guid );
+			}
+
+			foreach( var guid in connectorGuids )
+			{
+				DestroyConnector( guid );
+			}
+		}
 
 		public static void BeginConnection( NodePort port )
 		{
@@ -531,17 +603,8 @@ namespace NodeGraph
 
 			BeginDragging( flowChartView );
 
-			ConnectingConnector = CreateConnector( Guid.NewGuid(), flowChart, typeof( Connector ) );
-
-			if( port.IsInput )
-			{
-				ConnectingConnector.EndPort = port;
-			}
-			else
-			{
-				ConnectingConnector.StartPort = port;
-			}
-			port.Connectors.Add( ConnectingConnector );
+			CurrentConnector = CreateConnector( Guid.NewGuid(), flowChart, typeof( Connector ) );
+			ConnectTo( port, CurrentConnector );
 
 			FirstConnectionPort = port;
 		}
@@ -550,35 +613,24 @@ namespace NodeGraph
 		{
 			if( null == port )
 			{
-				if( ( null != ConnectingConnector.StartPort ) && ( ConnectingConnector.StartPort == FirstConnectionPort ) )
+				if( ( null != CurrentConnector.StartPort ) && ( CurrentConnector.StartPort == FirstConnectionPort ) )
 				{
-					if( null != ConnectingConnector.EndPort )
+					if( null != CurrentConnector.EndPort )
 					{
-						ConnectingConnector.EndPort.Connectors.Remove( ConnectingConnector );
-						ConnectingConnector.EndPort = null;
+						DisconnectFrom( CurrentConnector.EndPort, CurrentConnector );
 					}
 				}
-				else if( ( null != ConnectingConnector.EndPort ) && ( ConnectingConnector.EndPort == FirstConnectionPort ) )
+				else if( ( null != CurrentConnector.EndPort ) && ( CurrentConnector.EndPort == FirstConnectionPort ) )
 				{
-					if( null != ConnectingConnector.StartPort )
+					if( null != CurrentConnector.StartPort )
 					{
-						ConnectingConnector.StartPort.Connectors.Remove( ConnectingConnector );
-						ConnectingConnector.StartPort = null;
+						DisconnectFrom( CurrentConnector.StartPort, CurrentConnector );
 					}
 				}
 			}
 			else
 			{
-				if( port.IsInput )
-				{
-					ConnectingConnector.EndPort = port;
-				}
-				else
-				{
-					ConnectingConnector.StartPort = port;
-				}
-
-				port.Connectors.Add( ConnectingConnector );
+				ConnectTo( port, CurrentConnector );
 			}
 		}
 
@@ -705,18 +757,18 @@ namespace NodeGraph
 				SetOtherConnectionPort( endPort );
 			}
 
-			if( ( null == ConnectingConnector.StartPort ) || ( null == ConnectingConnector.EndPort ) )
+			if( ( null == CurrentConnector.StartPort ) || ( null == CurrentConnector.EndPort ) )
 			{
-				DestroyConnector( ConnectingConnector.Guid );
+				DestroyConnector( CurrentConnector.Guid );
 			}
 			else
 			{
-				if( !ConnectingConnector.StartPort.AllowMultipleOutput )
+				if( !CurrentConnector.StartPort.AllowMultipleOutput )
 				{
 					List<Guid> connectorGuids = new List<Guid>();
-					foreach( var connector in ConnectingConnector.StartPort.Connectors )
+					foreach( var connector in CurrentConnector.StartPort.Connectors )
 					{
-						if( ConnectingConnector.Guid != connector.Guid )
+						if( CurrentConnector.Guid != connector.Guid )
 						{
 							connectorGuids.Add( connector.Guid );
 						}
@@ -728,12 +780,12 @@ namespace NodeGraph
 					}
 				}
 				
-				if( !ConnectingConnector.EndPort.AllowMultipleInput )
+				if( !CurrentConnector.EndPort.AllowMultipleInput )
 				{
 					List<Guid> connectorGuids = new List<Guid>();
-					foreach( var connector in ConnectingConnector.EndPort.Connectors )
+					foreach( var connector in CurrentConnector.EndPort.Connectors )
 					{
-						if( ConnectingConnector.Guid != connector.Guid )
+						if( CurrentConnector.Guid != connector.Guid )
 						{
 							connectorGuids.Add( connector.Guid );
 						}
@@ -747,7 +799,7 @@ namespace NodeGraph
 			}
 
 			IsConnecting = false;
-			ConnectingConnector = null;
+			CurrentConnector = null;
 			FirstConnectionPort = null;
 		}
 
@@ -792,24 +844,10 @@ namespace NodeGraph
 			return node;
 		}
 
-		public static void UpdateConnection()
+		public static void UpdateConnection( Point mousePos )
 		{
-			if( null != ConnectingConnector )
-				ConnectingConnector.ViewModel.View.BuildCurveData();
-		}
-
-		public static void Disconnect( NodePort port )
-		{
-			List<Guid> connectorGuids = new List<Guid>();
-			foreach( var connection in port.Connectors )
-			{
-				connectorGuids.Add( connection.Guid );
-			}
-
-			foreach( var guid in connectorGuids )
-			{
-				DestroyConnector( guid );
-			}
+			if( null != CurrentConnector )
+				CurrentConnector.ViewModel.View.BuildCurveData( mousePos );
 		}
 
 		#endregion // Connection
@@ -819,13 +857,11 @@ namespace NodeGraph
 		public static bool IsNodeDragging { get; private set; }
 		public static bool AreNodesReallyDragged { get; private set; }
 		private static Guid _NodeDraggingFlowChartGuid;
-		private static Point _NodeDraggingPrevPosition;
 
-		public static void BeginDragNode( FlowChart flowChart, Point startPosition )
+		public static void BeginDragNode( FlowChart flowChart )
 		{
 			BeginDragging( flowChart.ViewModel.View );
 
-			_NodeDraggingPrevPosition = startPosition;
 			if( IsNodeDragging )
 				throw new InvalidOperationException( "Node is already being dragging." );
 
@@ -841,12 +877,9 @@ namespace NodeGraph
 			AreNodesReallyDragged = false;
 		}
 
-		public static void DragNode( Point currentMousePosition )
+		public static void DragNode( Point delta )
 		{
 			if( !IsNodeDragging )
-				return;
-
-			if( _NodeDraggingPrevPosition == currentMousePosition )
 				return;
 
 			AreNodesReallyDragged = true;
@@ -857,10 +890,9 @@ namespace NodeGraph
 				foreach( var guid in selectedNodes )
 				{
 					Node node = FindNode( guid );
-					node.X += ( currentMousePosition.X - _NodeDraggingPrevPosition.X );
-					node.Y += ( currentMousePosition.Y - _NodeDraggingPrevPosition.Y );
+					node.X += delta.X;
+					node.Y += delta.Y;
 				}
-				_NodeDraggingPrevPosition = currentMousePosition;
 			}
 		}
 

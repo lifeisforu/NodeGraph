@@ -79,24 +79,56 @@ namespace NodeGraph.Model
 
 		#endregion // Methods
 
-		#region Create Events
+		#region Callbacks
 
-		public event EventHandler Create;
-
-		public void InvokeCreateEvent()
+		public virtual void OnCreate()
 		{
-			EventArgs args = new EventArgs();
-
-			OnCreate();
-
-			Create?.Invoke( this, new EventArgs() );
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnCreate()" );
 		}
 
-		protected virtual void OnCreate()
+		public virtual void OnPreExecute( NodeFlowPort prevPort )
 		{
-
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnPreExecute()" );
 		}
 
-		#endregion // Create Events
+		public virtual void OnExecute( NodeFlowPort prevPort )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnExecute()" );
+		}
+
+		public virtual void OnPostExecute( NodeFlowPort prevPort )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnPostExecute()" );
+		}
+
+		public virtual void OnPreDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnPreDestroy()" );
+		}
+
+		public virtual void OnPostDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnPostDestroy()" );
+		}
+
+		public virtual void OnConnect( NodePort port )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnConnect()" );
+		}
+
+		public virtual void OnDisconnect( NodePort port )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnDisconnect()" );
+		}
+
+		#endregion // Callbacks
 	}
 }

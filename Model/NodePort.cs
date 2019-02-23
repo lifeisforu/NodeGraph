@@ -78,29 +78,7 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Destructor
-
-		#region Create Events
-
-		public event EventHandler Create;
-
-		public void InvokeCreateEvent()
-		{
-			EventArgs args = new EventArgs();
-
-			OnCreate();
-
-			Create?.Invoke( this, new EventArgs() );
-		}
-
-		protected virtual void OnCreate()
-		{
-
-		}
-
-		#endregion // Create Events
-
-		#region Connection
-
+				
 		#region Methods
 
 		public virtual bool IsConnectable( NodePort otherPort )
@@ -110,6 +88,38 @@ namespace NodeGraph.Model
 
 		#endregion // Methods
 
-		#endregion // Connection
+		#region Callbacks
+
+		public virtual void OnCreate()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnCreate()" );
+		}
+
+		public virtual void OnPreDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnPreDestroy()" );
+		}
+
+		public virtual void OnPostDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnPostDestroy()" );
+		}
+
+		public virtual void OnConnect( Connector connector )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnConnect()" );
+		}
+
+		public virtual void OnDisconnect( Connector connector )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnDisconnect()" );
+		}
+
+		#endregion // Callbacks
 	}
 }

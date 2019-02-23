@@ -72,14 +72,16 @@ namespace NodeGraph.View
 
 		private void ConnectorView_LayoutUpdated( object sender, EventArgs e )
 		{
-			BuildCurveData();
+			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChartView flowChartView = flowChart.ViewModel.View;
+			BuildCurveData( Mouse.GetPosition( flowChartView ) );
 		}
 
 		#endregion // Constructor
 
 		#region Curve
 
-		public void BuildCurveData()
+		public void BuildCurveData( Point mousePos )
 		{
 			Connector connector = _ViewModel.Model;
 			FlowChart flowChart = connector.Owner;
@@ -88,10 +90,8 @@ namespace NodeGraph.View
 			NodePort startPort = connector.StartPort;
 			NodePort endPort = connector.EndPort;
 
-			Point mouseLocation = Mouse.GetPosition( flowChartView );
-
-			Point start = ( null != startPort ) ? ViewUtil.GetRelativeCenterLocation( startPort.ViewModel.View.PartPort, flowChartView ) : mouseLocation;
-			Point end = ( null != endPort ) ? ViewUtil.GetRelativeCenterLocation( endPort.ViewModel.View.PartPort, flowChartView ) : mouseLocation;
+			Point start = ( null != startPort ) ? ViewUtil.GetRelativeCenterLocation( startPort.ViewModel.View.PartPort, flowChartView ) : mousePos;
+			Point end = ( null != endPort ) ? ViewUtil.GetRelativeCenterLocation( endPort.ViewModel.View.PartPort, flowChartView ) : mousePos;
 			Point center = new Point( ( start.X + end.X ) * 0.5, ( start.Y + end.Y ) * 0.5 );
 
 			if( start.X > end.X )

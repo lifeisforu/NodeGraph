@@ -69,24 +69,44 @@ namespace NodeGraph.Model
 
 		#endregion // Constructor
 
-		#region Create Events
+		#region Callbacks
 
-		public event EventHandler Create;
-
-		public void InvokeCreateEvent()
+		public virtual void OnCreate()
 		{
-			EventArgs args = new EventArgs();
-
-			OnCreate();
-
-			Create?.Invoke( this, new EventArgs() );
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnCreate()" );
 		}
 
-		protected virtual void OnCreate()
+		public virtual void OnPreExecute()
 		{
-
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPreExecute()" );
 		}
 
-		#endregion // Create Events
+		public virtual void OnExecute()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnExecute()" );
+		}
+
+		public virtual void OnPostExecute()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPostExecute()" );
+		}
+
+		public virtual void OnPreDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPreDestroy()" );
+		}
+
+		public virtual void OnPostDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPostDestroy()" );
+		}
+
+		#endregion // Callbacks
 	}
 }

@@ -200,24 +200,44 @@ namespace NodeGraph.Model
 
 		#endregion // Destructor
 
-		#region Create Events
+		#region Callbacks
 
-		public event EventHandler Create;
-
-		public void InvokeCreateEvent()
+		public virtual void OnCreate()
 		{
-			EventArgs args = new EventArgs();
-
-			OnCreate();
-
-			Create?.Invoke( this, new EventArgs() );
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnPreExecute()" );
+		}
+		
+		public virtual void OnPreExecute( Connector prevConnector )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnPreExecute()" );
 		}
 
-		protected virtual void OnCreate()
+		public virtual void OnExecute( Connector prevConnector )
 		{
-
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnExecute()" );
 		}
 
-		#endregion // Create Events
+		public virtual void OnPostExecute( Connector prevConnector )
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnPostExecute()" );
+		}
+
+		public virtual void OnPreDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnPreDestroy()" );
+		}
+
+		public virtual void OnPostDestroy()
+		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnPostDestroy()" );
+		}
+
+		#endregion // Callbacks
 	}
 }

@@ -208,7 +208,7 @@ namespace NodeGraph.View
 
 			if( NodeGraphManager.IsConnecting )
 			{
-				Connector connector = NodeGraphManager.ConnectingConnector;
+				Connector connector = NodeGraphManager.CurrentConnector;
 				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
 				{
 					NodePort firstPort = NodeGraphManager.FirstConnectionPort;
@@ -268,6 +268,40 @@ namespace NodeGraph.View
 			}
 		}
 
+		private void UpdateDragging( Point mousePos, Point delta )
+		{
+			if( NodeGraphManager.IsConnecting )
+			{
+				NodeGraphManager.UpdateConnection( mousePos );
+			}
+			else if( NodeGraphManager.IsNodeDragging )
+			{
+				double invScale = 1.0f / _ZoomAndPan.Scale;
+				NodeGraphManager.DragNode( new Point( delta.X * invScale, delta.Y * invScale ) );
+			}
+			else if( NodeGraphManager.IsSelecting )
+			{
+				// gather nodes in area.
+
+				bool bCtrl = Keyboard.IsKeyDown( Key.LeftCtrl );
+				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
+				bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
+
+				NodeGraphManager.UpdateDragSelection( _ViewModel.Model,
+					_ZoomAndPan.MatrixInv.Transform( mousePos ), bCtrl, bShift, bAlt );
+
+				Point startPos = _ZoomAndPan.Matrix.Transform( NodeGraphManager.SelectingStartPoint );
+
+				Point selectionStart = new Point( Math.Min( startPos.X, mousePos.X ), Math.Min( startPos.Y, mousePos.Y ) );
+				Point selectionEnd = new Point( Math.Max( startPos.X, mousePos.X ), Math.Max( startPos.Y, mousePos.Y ) );
+
+				_ViewModel.SelectionStartX = selectionStart.X;
+				_ViewModel.SelectionStartY = selectionStart.Y;
+				_ViewModel.SelectionWidth = selectionEnd.X - selectionStart.X;
+				_ViewModel.SelectionHeight = selectionEnd.Y - selectionStart.Y;
+			}
+		}
+		
 		private void Timer_Tick( object sender, EventArgs e )
 		{
 			if( NodeGraphManager.IsDragging )
@@ -286,8 +320,13 @@ namespace NodeGraph.View
 					if( MouseArea.Bottom == ( area & MouseArea.Bottom ) )
 						delta.Y = 10.0;
 
-					_ZoomAndPan.StartX += delta.X / _ZoomAndPan.Scale;
-					_ZoomAndPan.StartY += delta.Y / _ZoomAndPan.Scale;
+					Point mousePos = Mouse.GetPosition( this );
+					UpdateDragging( 
+						new Point( mousePos.X + delta.X, mousePos.Y + delta.Y ), // virtual mouse-position.
+						delta ); // virtual delta.
+
+					_ZoomAndPan.StartX += delta.X;
+					_ZoomAndPan.StartY += delta.Y;
 				}
 			}
 		}
@@ -301,45 +340,15 @@ namespace NodeGraph.View
 				return;
 			}
 
-			Point currentMousePosition = e.GetPosition( this );
+			Point mousePos = e.GetPosition( this );
 
 			MouseArea area = CheckMouseArea();
-			Point delta = new Point( currentMousePosition.X - _PrevMousePosition.X,
-				currentMousePosition.Y - _PrevMousePosition.Y );
+			Point delta = new Point( mousePos.X - _PrevMousePosition.X,
+				mousePos.Y - _PrevMousePosition.Y );
 
 			if( NodeGraphManager.IsDragging )
 			{
-				if( NodeGraphManager.IsConnecting )
-				{
-					NodeGraphManager.UpdateConnection();
-				}
-				else if( NodeGraphManager.IsNodeDragging )
-				{
-					NodeGraphManager.DragNode( e.GetPosition( this ) );
-				}
-				else if( NodeGraphManager.IsSelecting )
-				{
-					Point endPos = e.GetPosition( this );
-
-					// gather nodes in area.
-
-					bool bCtrl = Keyboard.IsKeyDown( Key.LeftCtrl );
-					bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
-					bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
-
-					NodeGraphManager.UpdateDragSelection( _ViewModel.Model,
-						_ZoomAndPan.MatrixInv.Transform( endPos ), bCtrl, bShift, bAlt );
-
-					Point startPos = _ZoomAndPan.Matrix.Transform( NodeGraphManager.SelectingStartPoint );
-
-					Point selectionStart = new Point( Math.Min( startPos.X, endPos.X ), Math.Min( startPos.Y, endPos.Y ) );
-					Point selectionEnd = new Point( Math.Max( startPos.X, endPos.X ), Math.Max( startPos.Y, endPos.Y ) );
-
-					_ViewModel.SelectionStartX = selectionStart.X;
-					_ViewModel.SelectionStartY = selectionStart.Y;
-					_ViewModel.SelectionWidth = selectionEnd.X - selectionStart.X;
-					_ViewModel.SelectionHeight = selectionEnd.Y - selectionStart.Y;
-				}
+				UpdateDragging( mousePos, delta );
 			}
 			else
 			{
@@ -352,7 +361,7 @@ namespace NodeGraph.View
 				}
 			}
 
-			_PrevMousePosition = currentMousePosition;
+			_PrevMousePosition = mousePos;
 		}
 
 		protected override void OnMouseLeave( MouseEventArgs e )

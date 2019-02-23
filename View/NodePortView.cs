@@ -163,7 +163,7 @@ namespace NodeGraph.View
 			{
 				if( !NodeGraphManager.IsConnecting && IsMouseOnPartPort() )
 				{
-					NodeGraphManager.Disconnect( _ViewModel.Model );
+					NodeGraphManager.DisconnectAll( _ViewModel.Model );
 				}
 
 				e.Handled = true;

@@ -66,10 +66,7 @@ namespace NodeGraph
 			List<Guid> guids = new List<Guid>();
 			foreach( var connector in flowChart.Connectors )
 			{
-				if( guid == connector.Owner.Guid )
-				{
-					guids.Add( connector.Guid );
-				}
+				guids.Add( connector.Guid );
 			}
 
 			foreach( var connectorGuid in guids )
@@ -80,10 +77,7 @@ namespace NodeGraph
 			guids.Clear();
 			foreach( var node in flowChart.Nodes )
 			{
-				if( guid == node.Owner.Guid )
-				{
-					guids.Add( node.Guid );
-				}
+				guids.Add( node.Guid );
 			}
 
 			foreach( var nodeGuid in guids )
@@ -318,7 +312,7 @@ namespace NodeGraph
 				throw new ArgumentException( string.Format( "{0} must have ONE ConnectorAttribute", connectorType.Name ) );
 			var connectorAttr = connectorAttrs[ 0 ];
 
-			Connector connector = Activator.CreateInstance( connectorType, new object[] { guid, flowChart } ) as Connector;
+			Connector connector = Activator.CreateInstance( connectorType, new object[] { guid, flowChart.Guid } ) as Connector;
 			Connectors.Add( connector.Guid, connector );
 
 			//----- create viewmodel
@@ -341,17 +335,17 @@ namespace NodeGraph
 			{
 				connector.OnPreDestroy();
 
-				if( null != connector.StartPort )
+				if( Guid.Empty != connector.StartPortGuid )
 				{
-					DisconnectFrom( connector.StartPort, connector );
+					DisconnectFrom( connector.StartPortGuid, connector );
 				}
 
-				if( null != connector.EndPort )
+				if( Guid.Empty != connector.EndPortGuid )
 				{
-					DisconnectFrom( connector.EndPort, connector );
+					DisconnectFrom( connector.EndPortGuid, connector );
 				}
 
-				FlowChart flowChart = connector.Owner;
+				FlowChart flowChart = FindFlowChart( connector.OwnerGuid );
 				flowChart.ViewModel.ConnectorViewModels.Remove( connector.ViewModel );
 				flowChart.Connectors.Remove( connector );
 
@@ -404,6 +398,14 @@ namespace NodeGraph
 
 			port.OnCreate();
 
+			return port;
+		}
+
+		public static NodePort FindNodePort( Guid guid )
+		{
+			NodePort port = FindNodeFlowPort( guid );
+			if( null == port )
+				port = FindNodePropertyPort( guid );
 			return port;
 		}
 
@@ -548,11 +550,11 @@ namespace NodeGraph
 		{
 			if( port.IsInput )
 			{
-				connector.EndPort = port;
+				connector.EndPortGuid = port.Guid;
 			}
 			else
 			{
-				connector.StartPort = port;
+				connector.StartPortGuid = port.Guid;
 			}
 			port.Connectors.Add( connector );
 
@@ -560,18 +562,21 @@ namespace NodeGraph
 			connector.OnConnect( port );
 		}
 
-		public static void DisconnectFrom( NodePort port, Connector connector )
+		public static void DisconnectFrom( Guid portGuid, Connector connector )
 		{
+			NodePort port = FindNodePort( portGuid );
+			if( null == port )
+
 			connector.OnDisconnect( port );
 			port.OnDisconnect( connector );
 
 			if( port.IsInput )
 			{
-				connector.EndPort = null;
+				connector.EndPortGuid = Guid.Empty;
 			}
 			else
 			{
-				connector.StartPort = null;
+				connector.StartPortGuid = Guid.Empty;
 			}
 			port.Connectors.Remove( connector );
 		}
@@ -613,18 +618,18 @@ namespace NodeGraph
 		{
 			if( null == port )
 			{
-				if( ( null != CurrentConnector.StartPort ) && ( CurrentConnector.StartPort == FirstConnectionPort ) )
+				if( ( Guid.Empty != CurrentConnector.StartPortGuid ) && ( CurrentConnector.StartPortGuid == FirstConnectionPort.Guid ) )
 				{
-					if( null != CurrentConnector.EndPort )
+					if( Guid.Empty != CurrentConnector.EndPortGuid )
 					{
-						DisconnectFrom( CurrentConnector.EndPort, CurrentConnector );
+						DisconnectFrom( CurrentConnector.EndPortGuid, CurrentConnector );
 					}
 				}
-				else if( ( null != CurrentConnector.EndPort ) && ( CurrentConnector.EndPort == FirstConnectionPort ) )
+				else if( ( Guid.Empty != CurrentConnector.EndPortGuid ) && ( CurrentConnector.EndPortGuid == FirstConnectionPort.Guid ) )
 				{
-					if( null != CurrentConnector.StartPort )
+					if( Guid.Empty != CurrentConnector.StartPortGuid )
 					{
-						DisconnectFrom( CurrentConnector.StartPort, CurrentConnector );
+						DisconnectFrom( CurrentConnector.StartPortGuid, CurrentConnector );
 					}
 				}
 			}
@@ -674,7 +679,7 @@ namespace NodeGraph
 			// already connectecd.
 			foreach( var connector in FirstConnectionPort.Connectors )
 			{
-				if( connector.StartPort == otherPort )
+				if( connector.StartPortGuid == otherPort.Guid )
 				{
 					return false;
 				}
@@ -720,7 +725,8 @@ namespace NodeGraph
 			{
 				foreach( var connector in port.Connectors )
 				{
-					Node nextNode = connector.EndPort.Owner;
+					NodePort endPort = FindNodeFlowPort( connector.EndPortGuid );
+					Node nextNode = endPort.Owner;
 					if( nextNode == nodeTo )
 						return true;
 
@@ -733,7 +739,8 @@ namespace NodeGraph
 			{
 				foreach( var connector in port.Connectors )
 				{
-					Node nextNode = connector.EndPort.Owner;
+					NodePort endPort = FindNodePropertyPort( connector.EndPortGuid );
+					Node nextNode = endPort.Owner;
 					if( nextNode == nodeTo )
 						return true;
 
@@ -757,16 +764,19 @@ namespace NodeGraph
 				SetOtherConnectionPort( endPort );
 			}
 
-			if( ( null == CurrentConnector.StartPort ) || ( null == CurrentConnector.EndPort ) )
+			if( ( Guid.Empty == CurrentConnector.StartPortGuid ) || ( Guid.Empty == CurrentConnector.EndPortGuid ) )
 			{
 				DestroyConnector( CurrentConnector.Guid );
 			}
 			else
 			{
-				if( !CurrentConnector.StartPort.AllowMultipleOutput )
+				NodePort startPort = FindNodePort( CurrentConnector.StartPortGuid );
+				if( null == endPort )
+					endPort = FindNodePort( CurrentConnector.EndPortGuid );
+				if( !startPort.AllowMultipleOutput )
 				{
 					List<Guid> connectorGuids = new List<Guid>();
-					foreach( var connector in CurrentConnector.StartPort.Connectors )
+					foreach( var connector in startPort.Connectors )
 					{
 						if( CurrentConnector.Guid != connector.Guid )
 						{
@@ -780,10 +790,10 @@ namespace NodeGraph
 					}
 				}
 				
-				if( !CurrentConnector.EndPort.AllowMultipleInput )
+				if( !endPort.AllowMultipleInput )
 				{
 					List<Guid> connectorGuids = new List<Guid>();
-					foreach( var connector in CurrentConnector.EndPort.Connectors )
+					foreach( var connector in endPort.Connectors )
 					{
 						if( CurrentConnector.Guid != connector.Guid )
 						{

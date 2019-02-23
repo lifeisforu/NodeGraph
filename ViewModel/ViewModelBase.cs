@@ -5,18 +5,6 @@ using System.Windows.Controls;
 
 namespace NodeGraph.ViewModel
 {
-	public class BuildContextMenuEventArgs : EventArgs
-	{
-		public ContextMenu ContextMenu;
-		public Point MouseLocation;
-
-		public BuildContextMenuEventArgs( ContextMenu contextMenu, Point location )
-		{
-			ContextMenu = contextMenu;
-			MouseLocation = location;
-		}
-	}
-
 	public class ViewModelBase : INotifyPropertyChanged
 	{
 		#region Overrides InotifyPropertyChanged

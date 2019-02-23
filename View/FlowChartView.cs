@@ -75,9 +75,6 @@ namespace NodeGraph.View
 			Focusable = true;
 			DataContextChanged += FlowChartView_DataContextChanged;
 
-			ContextMenu = new ContextMenu();
-			ContextMenuOpening += FlowChartView_ContextMenuOpening;
-
 			SizeChanged += FlowChartView_SizeChanged;
 
 			Timer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
@@ -209,11 +206,26 @@ namespace NodeGraph.View
 			if( NodeGraphManager.IsConnecting )
 			{
 				Connector connector = NodeGraphManager.CurrentConnector;
-				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
+				if( ( Guid.Empty == connector.StartPortGuid ) || ( Guid.Empty == connector.EndPortGuid ) )
 				{
 					NodePort firstPort = NodeGraphManager.FirstConnectionPort;
 
 					NodeGraphManager.EndConnection();
+
+					if( firstPort.IsInput )
+					{
+						if( firstPort.AllowMultipleInput && ( 0 < firstPort.Connectors.Count ) )
+						{
+							NodeGraphManager.DestroyConnector( firstPort.Connectors[ 0 ].Guid );
+						}
+					}
+					else
+					{
+						if( firstPort.AllowMultipleOutput && ( 0 < firstPort.Connectors.Count ) )
+						{
+							NodeGraphManager.DestroyConnector( firstPort.Connectors[ 0 ].Guid );
+						}
+					}
 
 					Point nodePos = _ZoomAndPan.MatrixInv.Transform( Mouse.GetPosition( this ) );
 					Node node = NodeGraphManager.CreateRouterNodeForPort(
@@ -455,42 +467,6 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Keyboard Events
-
-		#region Context Menu
-
-		private void FlowChartView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
-		{
-			if( ( null == _ViewModel ) || !FlowChartViewModel.ContextMenuEnabled || _IsDraggingCanvas )
-			{
-				e.Handled = true;
-				return;
-			}
-
-			if( _WasDraggingCanvas )
-			{
-				e.Handled = true;
-				_WasDraggingCanvas = false;
-				return;
-			}
-
-			ContextMenu contextMenu = new ContextMenu();
-			contextMenu.PlacementTarget = this;
-			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(	contextMenu, Mouse.GetPosition( this ) );
-			_ViewModel.InvokeBuildContextMenuEvent( args );
-
-			if( 0 == contextMenu.Items.Count )
-			{
-				ContextMenu = null;
-				e.Handled = true;
-			}
-			else
-			{
-				ContextMenu = contextMenu;
-			}
-		}
-
-		#endregion // Context Menu
 
 		#region Area
 

@@ -73,9 +73,6 @@ namespace NodeGraph.View
 		{
 			IsInput = isInput;
 			DataContextChanged += NodePortView_DataContextChanged;
-
-			ContextMenu = new ContextMenu();
-			ContextMenuOpening += NodePortView_ContextMenuOpening;
 		}
 
 		#endregion // Constructor
@@ -161,7 +158,7 @@ namespace NodeGraph.View
 
 			if( MouseButtonState.Pressed != e.LeftButton )
 			{
-				if( !NodeGraphManager.IsConnecting && IsMouseOnPartPort() )
+				if( !NodeGraphManager.IsConnecting )
 				{
 					NodeGraphManager.DisconnectAll( _ViewModel.Model );
 				}
@@ -182,11 +179,6 @@ namespace NodeGraph.View
 			return null;
 		}
 
-		public bool IsMouseOnPartPort()
-		{
-			return ( null != VisualTreeHelper.HitTest( PartPort, Mouse.GetPosition( this ) ) );
-		}
-
 		#endregion // HitTest
 
 		#region Connections
@@ -197,41 +189,5 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Connections
-
-		#region Context Menu
-
-		private void NodePortView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
-		{
-			if( ( null == _ViewModel ) || !NodePortViewModel.ContextMenuEnabled )
-			{
-				e.Handled = true;
-				return;
-			}
-
-			if( IsMouseOnPartPort() )
-			{
-				e.Handled = true;
-				return;
-			}
-
-			ContextMenu contextMenu = new ContextMenu();
-			contextMenu.PlacementTarget = this;
-			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(
-				contextMenu, Mouse.GetPosition( this ) );
-			_ViewModel.InvokeBuildContextMenuEvent( args );
-
-			if( 0 == contextMenu.Items.Count )
-			{
-				ContextMenu = null;
-				e.Handled = true;
-			}
-			else
-			{
-				ContextMenu = contextMenu;
-			}
-		}
-
-		#endregion // Context Menu
 	}
 }

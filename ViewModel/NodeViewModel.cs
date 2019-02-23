@@ -162,23 +162,5 @@ namespace NodeGraph.ViewModel
 		}
 
 		#endregion // Connection Events
-
-		#region ContextMenu
-
-		public delegate void BuildContextMenuEventHandler( object sender, BuildContextMenuEventArgs e );
-
-		public static event BuildContextMenuEventHandler BuildContextMenu;
-
-		public static bool ContextMenuEnabled
-		{
-			get { return ( null != BuildContextMenu ) && ( 0 < BuildContextMenu.GetInvocationList().Length ); }
-		}
-
-		public void InvokeBuildContextMenuEvent( BuildContextMenuEventArgs e )
-		{
-			BuildContextMenu?.Invoke( this, e );
-		}
-
-		#endregion // ContextMenu
 	}
 }

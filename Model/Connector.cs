@@ -1,18 +1,16 @@
 ﻿using NodeGraph.ViewModel;
 using System;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace NodeGraph.Model
 {
 	[Connector()]
-	public class Connector : ModelBase
+	public class Connector : ModelBase, IXmlSerializable
 	{
-		#region Fields
-
-		public readonly FlowChart Owner;
-
-		#endregion // Fields
-
 		#region Properties
+
+		public Guid OwnerGuid { get; private set; }
 
 		protected ConnectorViewModel _ViewModel;
 		public ConnectorViewModel ViewModel
@@ -28,30 +26,30 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected NodePort _StartPort;
-		public NodePort StartPort
+		protected Guid _StartPortGuid;
+		public Guid StartPortGuid
 		{
-			get { return _StartPort; }
+			get { return _StartPortGuid; }
 			set
 			{
-				if( value != _StartPort )
+				if( value != _StartPortGuid )
 				{
-					_StartPort = value;
-					RaisePropertyChanged( "StartPort" );
+					_StartPortGuid = value;
+					RaisePropertyChanged( "StartPortGuid" );
 				}
 			}
 		}
 
-		protected NodePort _EndPort;
-		public NodePort EndPort
+		protected Guid _EndPortGuid;
+		public Guid EndPortGuid
 		{
-			get { return _EndPort; }
+			get { return _EndPortGuid; }
 			set
 			{
-				if( value != _EndPort )
+				if( value != _EndPortGuid )
 				{
-					_EndPort = value;
-					RaisePropertyChanged( "EndPort" );
+					_EndPortGuid = value;
+					RaisePropertyChanged( "EndPortGuid" );
 				}
 			}
 		}
@@ -63,9 +61,17 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateConnector() method.
 		/// </summary>
-		public Connector( Guid guid, FlowChart flowChart ) : base( guid )
+		public Connector()
 		{
-			Owner = flowChart;
+
+		}
+
+		/// <summary>
+		/// Never call this constructor directly. Use GraphManager.CreateConnector() method.
+		/// </summary>
+		public Connector( Guid guid, Guid flowChartGuid ) : base( guid )
+		{
+			OwnerGuid = flowChartGuid;
 		}
 
 		#endregion // Constructor
@@ -74,7 +80,7 @@ namespace NodeGraph.Model
 
 		public bool IsConnectedPort( NodePort port )
 		{
-			return ( StartPort == port ) || ( EndPort == port );
+			return ( StartPortGuid == port.Guid ) || ( EndPortGuid == port.Guid );
 		}
 
 		#endregion // Methods
@@ -130,5 +136,38 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Callbacks
+
+		#region ModelBase
+
+		public override void WriteXml( XmlWriter writer )
+		{
+			base.WriteXml( writer );
+
+			writer.WriteAttributeString( "OwnerGuid", OwnerGuid.ToString() );
+			writer.WriteAttributeString( "StartPortGuid", StartPortGuid.ToString() );
+			writer.WriteAttributeString( "EndPortGuid", StartPortGuid.ToString() );
+		}
+
+		public override void ReadXml( XmlReader reader )
+		{
+			base.ReadXml( reader );
+
+			string guidString = reader.GetAttribute( "OwnerGuid" );
+			if( string.IsNullOrEmpty( guidString ) )
+				throw new Exception( "OwnerGuid attribute must exist." );
+			OwnerGuid = Guid.Parse( guidString );
+
+			guidString = reader.GetAttribute( "StartPortGuid" );
+			if( string.IsNullOrEmpty( guidString ) )
+				throw new Exception( "StartPortGuid attribute must exist." );
+			StartPortGuid = Guid.Parse( guidString );
+
+			guidString = reader.GetAttribute( "EndPortGuid" );
+			if( string.IsNullOrEmpty( guidString ) )
+				throw new Exception( "EndPortGuid attribute must exist." );
+			EndPortGuid = Guid.Parse( guidString );
+		}
+
+		#endregion // ModelBase
 	}
 }

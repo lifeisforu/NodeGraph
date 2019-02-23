@@ -49,9 +49,6 @@ namespace NodeGraph.View
 			DataContextChanged += NodeView_DataContextChanged;
 			Loaded += NodeView_Loaded;
 			Unloaded += NodeView_Unloaded;
-
-			ContextMenu = new ContextMenu();
-			ContextMenuOpening += NodeView_ContextMenuOpening;
 		}
 
 		private void NodeView_Loaded( object sender, RoutedEventArgs e )
@@ -179,35 +176,5 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Connection
-
-		#region ContextMenu
-
-		private void NodeView_ContextMenuOpening( object sender, ContextMenuEventArgs e )
-		{
-			if( ( null == _ViewModel ) || !NodeViewModel.ContextMenuEnabled )
-			{
-				e.Handled = true;
-				return;
-			}
-
-			ContextMenu contextMenu = new ContextMenu();
-			contextMenu.PlacementTarget = this;
-			contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-			BuildContextMenuEventArgs args = new BuildContextMenuEventArgs(
-				contextMenu, Mouse.GetPosition( this ) );
-			_ViewModel.InvokeBuildContextMenuEvent( args );
-
-			if( 0 == contextMenu.Items.Count )
-			{
-				ContextMenu = null;
-				e.Handled = true;
-			}
-			else
-			{
-				ContextMenu = contextMenu;
-			}
-		}
-
-		#endregion // ContextMenu
 	}
 }

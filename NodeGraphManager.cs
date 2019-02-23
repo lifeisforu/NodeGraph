@@ -654,7 +654,7 @@ namespace NodeGraph
 				_AlreadyCheckedNodes = null;
 			}
 
-			return true;
+			return FirstConnectionPort.IsConnectable( otherPort );
 		}
 
 		private static bool IsReachable( Node nodeFrom, Node nodeTo )

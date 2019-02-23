@@ -98,5 +98,18 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Create Events
+
+		#region Connection
+
+		#region Methods
+
+		public virtual bool IsConnectable( NodePort otherPort )
+		{
+			return true;
+		}
+
+		#endregion // Methods
+
+		#endregion // Connection
 	}
 }

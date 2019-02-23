@@ -1,5 +1,5 @@
 # NodeGraph
-한국분은 [Introduction For Korean] 를 참고하세요.
+한국분은 [Introduction For Korean](https://github.com/lifeisforu/NodeGraph/wiki/Introduction-For-Koeran) 를 참고하세요.
 
 WPF control librarty for node graph.
 

@@ -27,6 +27,14 @@ namespace NodeGraph
 
 		#region FlowChart
 
+		/// <summary>
+		/// Create FlowChart with FlowChartViewModel.
+		/// </summary>
+		/// <param name="isDeserializing">Is in deserializing routine? 
+		/// If it is true, OnCreate() callback will not be called, otherwise OnPostLoad will be called.</param>
+		/// <param name="guid">Guid of this FlowChart.</param>
+		/// <param name="flowChartModelType">Type of FlowChart to be created.</param>
+		/// <returns>Created FlowChart instance</returns>
 		public static FlowChart CreateFlowChart( bool isDeserializing, Guid guid, Type flowChartModelType )
 		{
 			//------ create FlowChart.
@@ -108,6 +116,23 @@ namespace NodeGraph
 
 		#region Node
 
+		/// <summary>
+		/// Create Node with NodeViewModel.
+		/// </summary>
+		/// <param name="isDeserializing">Is in deserializing routine? 
+		/// If it is true, OnCreate() callback will not be called, otherwise OnPostLoad will be called.
+		/// If it is true, Node's attribute will not be evaluated. That means flows and properties will not be created automatically by attributes.
+		/// All flows and properties will be created during deserialization process.</param>
+		/// <param name="guid">Guid for this Node.</param>
+		/// <param name="flowChart">Owner FlowChart.</param>
+		/// <param name="nodeType">Type of this node.</param>
+		/// <param name="x">Location along X axis( Canvas.Left ).</param>
+		/// <param name="y">Location along Y axis( Canvas.Top )</param>
+		/// <param name="ZIndex">Z index( Canvas.ZIndex ).</param>
+		/// <param name="nodeViewModelTypeOverride">NodeViewModel to override.</param>
+		/// <param name="flowPortViewModelTypeOverride">FlowPortViewModel to override.</param>
+		/// <param name="propertyPortViewModelTypeOverride">PropertyPortViewmodel to override.</param>
+		/// <returns>Created node instance.</returns>
 		public static Node CreateNode( bool isDeserializing, Guid guid, FlowChart flowChart, Type nodeType, double x, double y, int ZIndex,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
@@ -381,6 +406,20 @@ namespace NodeGraph
 
 		#region FlowPort
 
+		/// <summary>
+		/// Create NodeFlowPort with NodeFlwoPortViewModel.
+		/// </summary>
+		/// <param name="isDeserializing">Is in deserializing routine? 
+		/// If it is true, OnCreate() callback will not be called, otherwise OnPostLoad will be called.</param>
+		/// <param name="guid">Guid for this port.</param>
+		/// <param name="node">Owner of this port.</param>
+		/// <param name="name">Name of port.</param>
+		/// <param name="displayName">Display name of port.</param>
+		/// <param name="isInput">Is input port?</param>
+		/// <param name="allowMultipleInput">Multiple inputs are allowed for this port?</param>
+		/// <param name="allowMultipleOutput">Multiple outputs are allowed for this port?</param>
+		/// <param name="portViewModelTypeOverride">ViewModelType to override.</param>
+		/// <returns>Created NodeFlwoPort instance.</returns>
 		public static NodeFlowPort CreateNodeFlowPort( bool isDeserializing, Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -480,6 +519,22 @@ namespace NodeGraph
 
 		#region PropertyPort
 
+		/// <summary>
+		/// Create PropertyPort with PropertyPortViewModel.
+		/// </summary>
+		/// <param name="isDeserializing">Is in deserializing routine? 
+		/// If it is true, OnCreate() callback will not be called, otherwise OnPostLoad will be called.</param>
+		/// <param name="guid">Guid for this port.</param>
+		/// <param name="node">Owner of this port.</param>
+		/// <param name="name">Name of port.</param>
+		/// <param name="displayName">Display name of port.</param>
+		/// <param name="isInput">Is input port?</param>
+		/// <param name="allowMultipleInput">Multiple inputs are allowed for this port?</param>
+		/// <param name="allowMultipleOutput">Multiple outputs are allowed for this port?</param>
+		/// <param name="valueType">Type of property value.</param>
+		/// <param name="defaultValue">Default property value.</param>
+		// <param name="portViewModelTypeOverride">ViewModelType to override.</param>
+		/// <returns>Created NodePropertyPort instance.</returns>
 		public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, Type valueType, object defaultValue, Type portViewModelTypeOverride = null )
 		{
 			//----- exceptions.

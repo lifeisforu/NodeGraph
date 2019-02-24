@@ -20,7 +20,7 @@ NodeGraph supports MVVM( Model-View-ViewModel ) pattern.
 
 All Model classes have their own attribute. I'll explain it later, all attributes could override ViewModel.
 
-If you don't need special ViewModel or View, you can create node with basic features and behaviors just by adding attributes.
+If you don't need special ViewModel or View, you can create node with basic apperances and behaviors just by adding attributes.
 
 ## Creating FlowChartView
 
@@ -189,7 +189,7 @@ private void MainWindow_ContextMenuOpening( object sender, ContextMenuEventArgs 
 }
 </code></pre>
 
-In above code snippets, types in _NodeTypes are pre-defined nodes I have been created. The mechanism is simple. While iterating _NodeTypes, get NodeAttribute attribute from each type. NodeAttribute contains features info of the node, among them, select "Header" field and set it as Header of MenuItem. And pass node's type to CommandParameter. It is to create a node with the type, when we click the menu item. _ContextMenuLocation is used for position of the node that will be created.
+In above code snippets, types in _NodeTypes are pre-defined nodes I have been created. The mechanism is simple. While iterating _NodeTypes, get NodeAttribute attribute from each type. NodeAttribute contains appearances info of the node, among them, select "Header" field and set it as Header of MenuItem. And pass node's type to CommandParameter. It is to create a node with the type, when we click the menu item. _ContextMenuLocation is used for position of the node that will be created.
 
 Now, you can see ContextMenu when you click mouse right button.
 
@@ -323,7 +323,7 @@ public class NodeFlowPortAttribute : NodePortAttribute
 	}
 }</code></pre>
 
-NodeFlowPortAttribute is derived from NodePortAttribute. It defines common features and behavior of a port.
+NodeFlowPortAttribute is derived from NodePortAttribute. It defines common apperances and behavior of a port.
 
 <pre>
 "NodeGraph/Model/NodePortAttribute.cs"
@@ -546,6 +546,6 @@ public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Gui
 
 Elements of NodeGraph are categorized by Model-View-ViewModel. ALL Model instances are created by NodeGraphManager, it also create ViewModel instances. And ViewModels determine their Views.
 
-Model class specify type of ViewModel, and features info is determined statically by attributes or dynamically by calling methods of NodeGraphManager.
+Model class specify type of ViewModel, and appearances info is determined statically by attributes or dynamically by calling methods of NodeGraphManager.
 
 In next articles, I will explain about Styling with Custom ViewModel and methods about Serialization/Deserialization.

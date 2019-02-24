@@ -20,7 +20,7 @@ NodeGraph supports MVVM( Model-View-ViewModel ) pattern.
 
 All Model classes have their own attribute. I'll explain it later, all attributes could override ViewModel.
 
-If you don't need special ViewModel or View, you can create node with basic apperances and behaviors just by adding attributes.
+If you don't need special ViewModel or View, you can create node with basic appearances and behaviors just by adding attributes.
 
 ## Creating FlowChartView
 
@@ -323,7 +323,7 @@ public class NodeFlowPortAttribute : NodePortAttribute
 	}
 }</code></pre>
 
-NodeFlowPortAttribute is derived from NodePortAttribute. It defines common apperances and behavior of a port.
+NodeFlowPortAttribute is derived from NodePortAttribute. It defines common appearances and behavior of a port.
 
 <pre>
 "NodeGraph/Model/NodePortAttribute.cs"

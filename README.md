@@ -189,7 +189,7 @@ private void MainWindow_ContextMenuOpening( object sender, ContextMenuEventArgs 
 }
 </code></pre>
 
-In above code snippets, types in <pre>_NodeTypes</pre> are pre-defined nodes I have been created. The mechanism is simple. While iterating <pre>_NodeTypes</pre>, get NodeAttribute attribute from each type. NodeAttribute contains features info of the node, among them, select "Header" field and set it as Header of MenuItem. And pass node's type to CommandParameter. It is to create a node with the type, when we click the menu item. <pre>_ContextMenuLocation</pre> is used for position of the node that will be created.
+In above code snippets, types in _NodeTypes are pre-defined nodes I have been created. The mechanism is simple. While iterating _NodeTypes, get NodeAttribute attribute from each type. NodeAttribute contains features info of the node, among them, select "Header" field and set it as Header of MenuItem. And pass node's type to CommandParameter. It is to create a node with the type, when we click the menu item. _ContextMenuLocation is used for position of the node that will be created.
 
 Now, you can see ContextMenu when you click mouse right button.
 

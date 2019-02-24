@@ -53,13 +53,13 @@ namespace NodeGraph.View
 
 		private void NodeView_Loaded( object sender, RoutedEventArgs e )
 		{
-			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChart flowChart = _ViewModel.Model.FlowChart;
 			NodeGraphManager.UpdateContentSize( flowChart );
 		}
 
 		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
 		{
-			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChart flowChart = _ViewModel.Model.FlowChart;
 			NodeGraphManager.UpdateContentSize( flowChart );
 		}
 
@@ -88,7 +88,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonUp( e );
 
-			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChart flowChart = _ViewModel.Model.FlowChart;
 
 			NodeGraphManager.EndConnection();
 			NodeGraphManager.EndDragSelection( false );
@@ -113,7 +113,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			FlowChart flowChart = _ViewModel.Model.Owner;
+			FlowChart flowChart = _ViewModel.Model.FlowChart;
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			Keyboard.Focus( flowChartView );
 
@@ -150,7 +150,7 @@ namespace NodeGraph.View
 				( NodeGraphManager.MouseLeftDownNode == _ViewModel.Model ) &&
 				!IsSelected )
 			{
-				NodeGraphManager.TrySelection( _ViewModel.Model.Owner, _ViewModel.Model, false, false, false );
+				NodeGraphManager.TrySelection( _ViewModel.Model.FlowChart, _ViewModel.Model, false, false, false );
 			}
 		}
 

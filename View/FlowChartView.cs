@@ -123,7 +123,8 @@ namespace NodeGraph.View
 		{
 			_ViewModel = DataContext as FlowChartViewModel;
 			if( null == _ViewModel )
-				throw new Exception( "ViewModel must be bound as DataContext in FlowChartView." );
+				return;
+
 			_ViewModel.View = this;
 
 			if( null == _ConnectorCanvas )

@@ -1,12 +1,11 @@
 ﻿using NodeGraph.ViewModel;
 using System;
 using System.Xml;
-using System.Xml.Serialization;
 
 namespace NodeGraph.Model
 {
 	[Connector()]
-	public class Connector : ModelBase, IXmlSerializable
+	public class Connector : ModelBase
 	{
 		#region Properties
 
@@ -61,7 +60,7 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateConnector() method.
 		/// </summary>
-		public Connector()
+		protected internal Connector()
 		{
 
 		}
@@ -135,15 +134,26 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "Connector.OnDisconnect()" );
 		}
 
+		public virtual void OnPostLoad()
+		{
+			NodeGraphManager.ConnectTo( StartPort, this );
+			NodeGraphManager.ConnectTo( EndPort, this );
+		}
+
 		#endregion // Callbacks
 
-		#region ModelBase
+		#region Overrides IXmlSerializable
 
 		public override void WriteXml( XmlWriter writer )
 		{
 			base.WriteXml( writer );
 
-			writer.WriteAttributeString( "FlowChart", FlowChart.Guid.ToString() );
+			//{ Begin Creation info : You need not deserialize this block in ReadXml().
+			// These are automatically serialized in Node.ReadXml().
+			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().AssemblyQualifiedName );
+			writer.WriteAttributeString( "Owner", FlowChart.Guid.ToString() );
+			//} End Creation Info.
+
 			writer.WriteAttributeString( "StartPort", StartPort.Guid.ToString() );
 			writer.WriteAttributeString( "EndPort", EndPort.Guid.ToString() );
 		}
@@ -152,16 +162,15 @@ namespace NodeGraph.Model
 		{
 			base.ReadXml( reader );
 
-			string guidString = reader.GetAttribute( "FlowChart" );
-			FlowChart = NodeGraphManager.FindFlowChart( Guid.Parse( guidString ) );
+			StartPort = NodeGraphManager.FindNodePort( Guid.Parse( reader.GetAttribute( "StartPort" ) ) );
+			if( null == StartPort )
+				throw new InvalidOperationException( "StartPort can not be null in Connector.ReadXml()." );
 
-			guidString = reader.GetAttribute( "StartPortGuid" );
-			StartPort = NodeGraphManager.FindNodePort( Guid.Parse( guidString ) );
-
-			guidString = reader.GetAttribute( "EndPortGuid" );
-			EndPort = NodeGraphManager.FindNodePort( Guid.Parse( guidString ) );
+			EndPort = NodeGraphManager.FindNodePort( Guid.Parse( reader.GetAttribute( "EndPort" ) ) );
+			if( null == StartPort )
+				throw new InvalidOperationException( "EndPort can not be null in Connector.ReadXml()." );
 		}
 
-		#endregion // ModelBase
+		#endregion // Overrides IXmlSerializable
 	}
 }

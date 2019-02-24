@@ -1,6 +1,7 @@
 ﻿using NodeGraph.ViewModel;
 using System;
 using System.Collections.ObjectModel;
+using System.Xml;
 
 namespace NodeGraph.Model
 {
@@ -9,8 +10,6 @@ namespace NodeGraph.Model
 		#region Fields
 
 		public NodePortViewModel ViewModel;
-
-		public readonly Node Owner;
 
 		public readonly string Name;
 
@@ -23,6 +22,8 @@ namespace NodeGraph.Model
 		#endregion // Fields
 
 		#region Properties
+
+		public Node Node { get; private set; }
 
 		private string _DisplayName;
 		public string DisplayName
@@ -61,7 +62,7 @@ namespace NodeGraph.Model
 		/// </summary>
 		protected NodePort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput ) : base( guid )
 		{
-			Owner = node;
+			Node = node;
 			Name = name;
 			DisplayName = displayName;
 			IsInput = isInput;
@@ -120,6 +121,36 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "NodePort.OnDisconnect()" );
 		}
 
+		public virtual void OnPostLoad()
+		{
+
+		}
+
 		#endregion // Callbacks
+
+		#region Overrides IXmlSerializable
+
+		public override void WriteXml( XmlWriter writer )
+		{
+			base.WriteXml( writer );
+
+			//{ Begin Creation info : You need not deserialize this block in ReadXml().
+			// These are automatically serialized in Node.ReadXml().
+			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().AssemblyQualifiedName );
+			writer.WriteAttributeString( "Owner", Node.Guid.ToString() );
+			writer.WriteAttributeString( "Name", Name );
+			writer.WriteAttributeString( "DisplayName", DisplayName );
+			writer.WriteAttributeString( "IsInput", IsInput.ToString() );
+			writer.WriteAttributeString( "AllowMultipleInput", AllowMultipleInput.ToString() );
+			writer.WriteAttributeString( "AllowMultipleOutput", AllowMultipleOutput.ToString() );
+			//} End Creation Info.
+		}
+
+		public override void ReadXml( XmlReader reader )
+		{
+			base.ReadXml( reader );
+		}
+
+		#endregion // Overrides IXmlSerializable
 	}
 }

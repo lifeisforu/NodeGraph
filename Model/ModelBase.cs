@@ -26,22 +26,21 @@ namespace NodeGraph.Model
 
 		#region IXmlSerializable
 
-		public XmlSchema GetSchema()
-		{
-			return null;
-		}
-
 		public virtual void WriteXml( XmlWriter writer )
 		{
 			writer.WriteAttributeString( "Guid", Guid.ToString() );
+			writer.WriteAttributeString( "Type", GetType().AssemblyQualifiedName );
 		}
 
 		public virtual void ReadXml( XmlReader reader )
 		{
-			string guidString = reader.GetAttribute( "Guid" );
-			if( string.IsNullOrEmpty( guidString ) )
-				throw new Exception( "Guid attribute must exist." );
-			Guid = Guid.Parse( guidString );
+			// Reading "Guid" and "Type" tasks will be processed before a real instance created.
+			// So, calls for this methods will be needless.
+		}
+
+		public virtual XmlSchema GetSchema()
+		{
+			return null;
 		}
 
 		#endregion IXmlSerializable

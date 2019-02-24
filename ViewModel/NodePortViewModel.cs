@@ -50,7 +50,7 @@ namespace NodeGraph.ViewModel
 
 		private void _ConnectorViewModels_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
 		{
-			Node node = Model.Owner;
+			Node node = Model.Node;
 
 			if( null != e.OldItems )
 			{

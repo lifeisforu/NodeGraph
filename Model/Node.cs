@@ -5,19 +5,16 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Media;
+using System.Xml;
 
 namespace NodeGraph.Model
 {
 	[Node("")]
 	public class Node : ModelBase
 	{
-		#region Fields
-
-		public readonly FlowChart Owner;
-
-		#endregion // Fields
-
 		#region Properties
+
+		public FlowChart FlowChart { get; private set; }
 
 		protected NodeViewModel _ViewModel;
 		public NodeViewModel ViewModel
@@ -184,7 +181,7 @@ namespace NodeGraph.Model
 		/// </summary>
 		public Node( Guid guid, FlowChart flowChart, bool allowCircularConnection ) : base( guid )
 		{
-			Owner = flowChart;
+			FlowChart = flowChart;
 
 			AllowCircularConnection = allowCircularConnection;
 		}
@@ -238,6 +235,156 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "Node.OnPostDestroy()" );
 		}
 
+		public virtual void OnPostLoad()
+		{
+			foreach( var port in InputFlowPorts )
+			{
+				port.OnPostLoad();
+			}
+
+			foreach( var port in OutputFlowPorts )
+			{
+				port.OnPostLoad();
+			}
+
+			foreach( var port in InputPropertyPorts )
+			{
+				port.OnPostLoad();
+			}
+
+			foreach( var port in OutputPropertyPorts )
+			{
+				port.OnPostLoad();
+			}
+		}
+
 		#endregion // Callbacks
+
+		#region Overrides IXmlSerializable
+
+		public override void WriteXml( XmlWriter writer )
+		{
+			base.WriteXml( writer );
+
+			//{ Begin Creation info : You need not deserialize this block in ReadXml().
+			// These are automatically serialized in FlowChart.ReadXml().
+			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().FullName );
+			writer.WriteAttributeString( "Owner", FlowChart.Guid.ToString() );
+			writer.WriteAttributeString( "X", X.ToString() );
+			writer.WriteAttributeString( "Y", Y.ToString() );
+			writer.WriteAttributeString( "ZIndex", ZIndex.ToString() );
+			//} End creation info.
+
+			writer.WriteStartElement( "InputFlowPorts" );
+			foreach( var port in InputFlowPorts )
+			{
+				writer.WriteStartElement( "FlowPort" );
+				port.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+			writer.WriteEndElement();
+
+			writer.WriteStartElement( "OutputFlowPorts" );
+			foreach( var port in OutputFlowPorts )
+			{
+				writer.WriteStartElement( "FlowPort" );
+				port.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+			writer.WriteEndElement();
+
+			writer.WriteStartElement( "InputPropertyPorts" );
+			foreach( var port in InputPropertyPorts )
+			{
+				writer.WriteStartElement( "PropertyPort" );
+				port.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+			writer.WriteEndElement();
+
+			writer.WriteStartElement( "OutputPropertyPorts" );
+			foreach( var port in OutputPropertyPorts )
+			{
+				writer.WriteStartElement( "PropertyPort" );
+				port.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+			writer.WriteEndElement();
+		}
+
+		public override void ReadXml( XmlReader reader )
+		{
+			base.ReadXml( reader );
+
+			bool isInputFlowPortsEnd = false;
+			bool isOutputFlowPortsEnd = false;
+			bool isInputPropertyPortsEnd = false;
+			bool isOutputPropertyPortsEnd = false;
+			while( reader.Read() )
+			{
+				if( XmlNodeType.Element == reader.NodeType )
+				{
+					if( ( "PropertyPort" == reader.Name ) ||
+						( "FlowPort" == reader.Name ) )
+					{
+						string prevReaderName = reader.Name;
+
+						Guid guid = Guid.Parse( reader.GetAttribute( "Guid" ) );
+						Type type = Type.GetType( reader.GetAttribute( "Type" ) );
+						Type vmType = Type.GetType( reader.GetAttribute( "ViewModelType" ) );
+						string name = reader.GetAttribute( "Name" );
+						string displayName = reader.GetAttribute( "DisplayName" );
+						bool isInput = bool.Parse( reader.GetAttribute( "IsInput" ) );
+						bool allowMultipleInput = bool.Parse( reader.GetAttribute( "AllowMultipleInput" ) );
+						bool allowMultipleOutput = bool.Parse( reader.GetAttribute( "AllowMultipleOutput" ) );
+
+						string ownerGuidString = reader.GetAttribute( "Owner" );
+						Node node = NodeGraphManager.FindNode( Guid.Parse( ownerGuidString ) );
+
+						if( "PropertyPort" == prevReaderName )
+						{
+							NodePropertyPort port = NodeGraphManager.CreateNodePropertyPort(
+								false, guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput, type, null, vmType );
+							port.ReadXml( reader );
+						}
+						else
+						{
+							NodeFlowPort port = NodeGraphManager.CreateNodeFlowPort(
+								false, guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput, vmType );
+							port.ReadXml( reader );
+						}
+					}
+						
+				}
+
+				if( reader.IsEmptyElement || ( XmlNodeType.EndElement == reader.NodeType ) )
+				{
+					if( "InputFlowPorts" == reader.Name )
+					{
+						isInputFlowPortsEnd = true;
+					}
+					else if( "OutputFlowPorts" == reader.Name )
+					{
+						isOutputFlowPortsEnd = true;
+					}
+					else if( "InputPropertyPorts" == reader.Name )
+					{
+						isInputPropertyPortsEnd = true;
+					}
+					else if( "OutputPropertyPorts" == reader.Name )
+					{
+						isOutputPropertyPortsEnd = true;
+					}
+				}
+
+				if( isInputFlowPortsEnd && isOutputFlowPortsEnd && 
+					isInputPropertyPortsEnd && isOutputPropertyPortsEnd )
+				{
+					break;
+				}
+			}
+		}
+
+		#endregion // Overrides IXmlSerializable
 	}
 }

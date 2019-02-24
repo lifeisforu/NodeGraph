@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace NodeGraph.Model
 {
@@ -107,6 +108,101 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPostDestroy()" );
 		}
 
+		public virtual void OnPostLoad()
+		{
+			foreach( var node in Nodes )
+			{
+				node.OnPostLoad();
+			}
+
+			foreach( var connector in Connectors )
+			{
+				connector.OnPostLoad();
+			}
+		}
+
 		#endregion // Callbacks
+
+		#region Overrides IXmlSerializable
+
+		public override void WriteXml( XmlWriter writer )
+		{
+			base.WriteXml( writer );
+
+			writer.WriteStartElement( "Nodes" );
+			foreach( var node in Nodes )
+			{
+				writer.WriteStartElement( "Node" );
+				node.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+			writer.WriteEndElement();
+
+			writer.WriteStartElement( "Connectors" );
+			foreach( var connector in Connectors )
+			{
+				writer.WriteStartElement( "Connector" );
+				connector.WriteXml( writer );
+				writer.WriteEndElement();
+			}
+		}
+
+		public override void ReadXml( XmlReader reader )
+		{
+			base.ReadXml( reader );
+
+			bool isNodesEnd = false;
+			bool isConnectorsEnd = false;
+
+			while( reader.Read() )
+			{
+				if( XmlNodeType.Element == reader.NodeType )
+				{
+					if( ( "Node" == reader.Name ) ||
+						( "Connector" == reader.Name ) )
+					{
+						string prevReaderName = reader.Name;
+
+						Guid guid = Guid.Parse( reader.GetAttribute( "Guid" ) );
+						Type type = Type.GetType( reader.GetAttribute( "Type" ) );
+						FlowChart flowChart = NodeGraphManager.FindFlowChart(
+							Guid.Parse( reader.GetAttribute( "Owner" ) ) );
+
+						if( "Node" == prevReaderName )
+						{
+							Type vmType = Type.GetType( reader.GetAttribute( "ViewModelType" ) );
+							double x = double.Parse( reader.GetAttribute( "X" ) );
+							double y = double.Parse( reader.GetAttribute( "Y" ) );
+							int zIndex = int.Parse( reader.GetAttribute( "ZIndex" ) );
+
+							Node node = NodeGraphManager.CreateNode( true, guid, flowChart, type, x, y, zIndex, vmType );
+							node.ReadXml( reader );
+						}
+						else
+						{
+							Connector connector = NodeGraphManager.CreateConnector( false, guid, flowChart, type );
+							connector.ReadXml( reader );
+						}
+					}
+				}
+
+				if( reader.IsEmptyElement || XmlNodeType.EndElement == reader.NodeType )
+				{
+					if( "Nodes" == reader.Name )
+					{
+						isNodesEnd = true;
+					}
+					else if( "Connectors" == reader.Name )
+					{
+						isConnectorsEnd = true;
+					}
+				}
+
+				if( isNodesEnd && isConnectorsEnd )
+					break;
+			}
+		}
+
+		#endregion // Overrides IXmlSerializable
 	}
 }

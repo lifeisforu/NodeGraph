@@ -97,8 +97,8 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			Node node = _ViewModel.Model.Owner;
-			FlowChart flowChart = node.Owner;
+			Node node = _ViewModel.Model.Node;
+			FlowChart flowChart = node.FlowChart;
 			Keyboard.Focus( flowChart.ViewModel.View );
 
 			if( IsMouseOver && !NodeGraphManager.IsConnecting )

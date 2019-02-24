@@ -1,5 +1,7 @@
 ﻿using NodeGraph.ViewModel;
 using System;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace NodeGraph.Model
 {
@@ -44,6 +46,15 @@ namespace NodeGraph.Model
 
 		#endregion // Constructors
 
+		#region Overrides Callbacks
+
+		public override void OnPostLoad()
+		{
+
+		}
+
+		#endregion // Overrides Callbacks
+
 		#region Destructor
 
 		~NodePropertyPort()
@@ -51,5 +62,43 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Destructor
+
+		#region Overrides IXmlSerializable
+
+		public override void WriteXml( XmlWriter writer )
+		{
+			base.WriteXml( writer );
+
+			writer.WriteAttributeString( "TypeOfValue", TypeOfValue.AssemblyQualifiedName );
+			if( null != Value )
+			{
+				var serializer = new XmlSerializer( TypeOfValue );
+				serializer.Serialize( writer, Value );
+			}
+		}
+
+		public override void ReadXml( XmlReader reader )
+		{
+			base.ReadXml( reader );
+
+			TypeOfValue = Type.GetType( reader.GetAttribute( "TypeOfValue" ) );
+
+			if( !reader.IsEmptyElement )
+			{
+				while( reader.Read() )
+				{
+					if( XmlNodeType.Element == reader.NodeType )
+					{
+						var serializer = new XmlSerializer( TypeOfValue );
+						// This Deserialize() method consumes EndElement and move to next Element.
+						// For example, it consumes "<object>content</object>" and current reader becomes "</Value>"
+						Value = serializer.Deserialize( reader );
+						break;
+					}
+				}
+			}
+		}
+
+		#endregion // Overrides IXmlSerializable
 	}
 }

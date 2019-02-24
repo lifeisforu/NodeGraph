@@ -206,7 +206,7 @@ namespace NodeGraph.View
 			if( NodeGraphManager.IsConnecting )
 			{
 				Connector connector = NodeGraphManager.CurrentConnector;
-				if( ( Guid.Empty == connector.StartPortGuid ) || ( Guid.Empty == connector.EndPortGuid ) )
+				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
 				{
 					NodePort firstPort = NodeGraphManager.FirstConnectionPort;
 

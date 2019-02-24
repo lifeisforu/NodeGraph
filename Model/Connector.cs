@@ -10,7 +10,7 @@ namespace NodeGraph.Model
 	{
 		#region Properties
 
-		public Guid OwnerGuid { get; private set; }
+		public FlowChart FlowChart { get; private set; }
 
 		protected ConnectorViewModel _ViewModel;
 		public ConnectorViewModel ViewModel
@@ -26,30 +26,30 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected Guid _StartPortGuid;
-		public Guid StartPortGuid
+		protected NodePort _StartPort;
+		public NodePort StartPort
 		{
-			get { return _StartPortGuid; }
+			get { return _StartPort; }
 			set
 			{
-				if( value != _StartPortGuid )
+				if( value != _StartPort )
 				{
-					_StartPortGuid = value;
-					RaisePropertyChanged( "StartPortGuid" );
+					_StartPort = value;
+					RaisePropertyChanged( "StartPort" );
 				}
 			}
 		}
 
-		protected Guid _EndPortGuid;
-		public Guid EndPortGuid
+		protected NodePort _EndPort;
+		public NodePort EndPort
 		{
-			get { return _EndPortGuid; }
+			get { return _EndPort; }
 			set
 			{
-				if( value != _EndPortGuid )
+				if( value != _EndPort )
 				{
-					_EndPortGuid = value;
-					RaisePropertyChanged( "EndPortGuid" );
+					_EndPort = value;
+					RaisePropertyChanged( "EndPort" );
 				}
 			}
 		}
@@ -69,9 +69,9 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateConnector() method.
 		/// </summary>
-		public Connector( Guid guid, Guid flowChartGuid ) : base( guid )
+		public Connector( Guid guid, FlowChart flowChart ) : base( guid )
 		{
-			OwnerGuid = flowChartGuid;
+			FlowChart = flowChart;
 		}
 
 		#endregion // Constructor
@@ -80,7 +80,7 @@ namespace NodeGraph.Model
 
 		public bool IsConnectedPort( NodePort port )
 		{
-			return ( StartPortGuid == port.Guid ) || ( EndPortGuid == port.Guid );
+			return ( StartPort == port ) || ( EndPort == port );
 		}
 
 		#endregion // Methods
@@ -143,29 +143,23 @@ namespace NodeGraph.Model
 		{
 			base.WriteXml( writer );
 
-			writer.WriteAttributeString( "OwnerGuid", OwnerGuid.ToString() );
-			writer.WriteAttributeString( "StartPortGuid", StartPortGuid.ToString() );
-			writer.WriteAttributeString( "EndPortGuid", StartPortGuid.ToString() );
+			writer.WriteAttributeString( "FlowChart", FlowChart.Guid.ToString() );
+			writer.WriteAttributeString( "StartPort", StartPort.Guid.ToString() );
+			writer.WriteAttributeString( "EndPort", EndPort.Guid.ToString() );
 		}
 
 		public override void ReadXml( XmlReader reader )
 		{
 			base.ReadXml( reader );
 
-			string guidString = reader.GetAttribute( "OwnerGuid" );
-			if( string.IsNullOrEmpty( guidString ) )
-				throw new Exception( "OwnerGuid attribute must exist." );
-			OwnerGuid = Guid.Parse( guidString );
+			string guidString = reader.GetAttribute( "FlowChart" );
+			FlowChart = NodeGraphManager.FindFlowChart( Guid.Parse( guidString ) );
 
 			guidString = reader.GetAttribute( "StartPortGuid" );
-			if( string.IsNullOrEmpty( guidString ) )
-				throw new Exception( "StartPortGuid attribute must exist." );
-			StartPortGuid = Guid.Parse( guidString );
+			StartPort = NodeGraphManager.FindNodePort( Guid.Parse( guidString ) );
 
 			guidString = reader.GetAttribute( "EndPortGuid" );
-			if( string.IsNullOrEmpty( guidString ) )
-				throw new Exception( "EndPortGuid attribute must exist." );
-			EndPortGuid = Guid.Parse( guidString );
+			EndPort = NodeGraphManager.FindNodePort( Guid.Parse( guidString ) );
 		}
 
 		#endregion // ModelBase

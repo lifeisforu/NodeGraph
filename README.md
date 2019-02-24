@@ -64,7 +64,7 @@ public static readonly DependencyProperty FlowChartViewModelProperty =
 	DependencyProperty.Register( "FlowChartViewModel", typeof( NodeGraph.ViewModel.FlowChartViewModel ), 
 	typeof( MainWindow ), new PropertyMetadata( null ) );
 
-[ ... ]
+[...]
 
 private void MainWindow_Loaded( object sender, RoutedEventArgs e )
 {
@@ -73,7 +73,7 @@ private void MainWindow_Loaded( object sender, RoutedEventArgs e )
 	FlowChartViewModel = flowChart.ViewModel;
 
 	[ ... ]
-}<code></pre>
+}</code></pre>
 
 If you create FlowChart instance, FlowChartViewModel is created automatically with it. So you can bind it.
 

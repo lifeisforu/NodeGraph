@@ -36,7 +36,11 @@ namespace NodeGraph.Model
 			base( guid, node, name, displayName, isInput, allowMultipleInput, allowMltipleOutput )
 		{
 			if( null != value )
+			{
+				if( value.GetType() != typeOfValue )
+					throw new ArgumentException( "Type of value is not same as typeOfvalue." );
 				Value = value;
+			}
 
 			if( !typeOfValue.IsClass && ( null == value ) )
 				throw new ArgumentNullException( "If typeOfValue is not a class, you cannot specify value as null" );
@@ -90,8 +94,6 @@ namespace NodeGraph.Model
 					if( XmlNodeType.Element == reader.NodeType )
 					{
 						var serializer = new XmlSerializer( TypeOfValue );
-						// This Deserialize() method consumes EndElement and move to next Element.
-						// For example, it consumes "<object>content</object>" and current reader becomes "</Value>"
 						Value = serializer.Deserialize( reader );
 						break;
 					}

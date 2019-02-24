@@ -548,4 +548,4 @@ Elements of NodeGraph are categorized by Model-View-ViewModel. ALL Model instanc
 
 Model class specify type of ViewModel, and appearances info is determined statically by attributes or dynamically by calling methods of NodeGraphManager.
 
-In next articles, I will explain about Styling with Custom ViewModel and methods about Serialization/Deserialization.
+In next articles, I will explain about Styling with Custom ViewModel and methods for Serialization/Deserialization.

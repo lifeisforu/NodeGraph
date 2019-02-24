@@ -48,7 +48,7 @@ Then, you can add a namespace in XAML of a Visual element. As you can see above,
     &lt;/Grid&gt;
 &lt;/Window&gt;</code></pre>
 
-## FlowChart 생성 및 바인딩
+## Creating and binding FlowChart
 
 All Model instances in NodeGrpah could be created only by NodeGraphManager.
 

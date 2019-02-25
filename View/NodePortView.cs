@@ -101,7 +101,11 @@ namespace NodeGraph.View
 			FlowChart flowChart = node.FlowChart;
 			Keyboard.Focus( flowChart.ViewModel.View );
 
-			if( IsMouseOver && !NodeGraphManager.IsConnecting )
+			if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+			{
+				NodeGraphManager.DisconnectAll( _ViewModel.Model );
+			}
+			else if( !NodeGraphManager.IsConnecting )
 			{
 				IsFilledPort = true;
 				NodeGraphManager.BeginConnection( _ViewModel.Model );
@@ -144,26 +148,6 @@ namespace NodeGraph.View
 			if( NodeGraphManager.IsConnecting )
 			{
 				NodeGraphManager.SetOtherConnectionPort( null );
-			}
-		}
-
-		protected override void OnMouseRightButtonUp( MouseButtonEventArgs e )
-		{
-			base.OnMouseRightButtonUp( e );
-
-			if( null == _ViewModel )
-			{
-				return;
-			}
-
-			if( MouseButtonState.Pressed != e.LeftButton )
-			{
-				if( !NodeGraphManager.IsConnecting )
-				{
-					NodeGraphManager.DisconnectAll( _ViewModel.Model );
-				}
-
-				e.Handled = true;
 			}
 		}
 

@@ -1065,9 +1065,13 @@ namespace NodeGraph
 			}
 
 			if( bAdd )
+			{
 				AddSelection( node );
+			}
 			else
+			{
 				RemoveSelection( node );
+			}
 		}
 
 		public static void AddSelection( Node node )
@@ -1078,6 +1082,8 @@ namespace NodeGraph
 				node.ViewModel.IsSelected = true;
 				selectionList.Add( node.Guid );
 			}
+
+			MoveNodeToFront( node );
 		}
 
 		public static void RemoveSelection( Node node )
@@ -1252,6 +1258,33 @@ namespace NodeGraph
 		}
 
 		#endregion // Node Selection
+
+		#region Z-Indexing
+		
+		public static void MoveNodeToFront( Node node )
+		{
+			List<Node> nodes = new List<Node>();
+
+			int maxZIndex = int.MinValue;
+			foreach( var pair in Nodes )
+			{
+				Node currentNode = pair.Value;
+				maxZIndex = Math.Max( maxZIndex, currentNode.ZIndex );
+				nodes.Add( currentNode );
+			}
+
+			node.ZIndex = maxZIndex + 1;
+
+			nodes.Sort( ( left, right ) => left.ZIndex.CompareTo( right.ZIndex ) );
+
+			int zIndex = 0;
+			foreach( var currentNode in nodes )
+			{
+				currentNode.ZIndex = zIndex++;
+			}
+		}
+
+		#endregion // Z-Indexing.
 
 		#region Delete
 

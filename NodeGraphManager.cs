@@ -1076,6 +1076,11 @@ namespace NodeGraph
 
 		public static void AddSelection( Node node )
 		{
+			if( node.ViewModel.IsSelected )
+			{
+				return;
+			}
+
 			List<Guid> selectionList = GetSelectionList( node.FlowChart );
 			if( !selectionList.Contains( node.Guid ) )
 			{
@@ -1310,14 +1315,13 @@ namespace NodeGraph
 
 		#region ContentSize
 
-		public static void UpdateContentSize( FlowChart flowChart )
+		public static void CalculateContentSize( FlowChart flowChart, bool bOnlySelected,
+			out double minX, out double maxX, out double minY, out double maxY )
 		{
-			FlowChartView flowChartView = flowChart.ViewModel.View;
-
-			double MinX = double.MaxValue;
-			double MaxX = double.MinValue;
-			double MinY = double.MaxValue;
-			double MaxY = double.MinValue;
+			minX = double.MaxValue;
+			maxX = double.MinValue;
+			minY = double.MaxValue;
+			maxY = double.MinValue;
 
 			bool hasNodes = false;
 			foreach( var pair in Nodes )
@@ -1326,23 +1330,20 @@ namespace NodeGraph
 				NodeView nodeView = node.ViewModel.View;
 				if( node.FlowChart == flowChart )
 				{
-					MinX = Math.Min( node.X, MinX );
-					MaxX = Math.Max( node.X + nodeView.ActualWidth, MaxX );
-					MinY = Math.Min( node.Y, MinY );
-					MaxY = Math.Max( node.Y + nodeView.ActualHeight, MaxY );
+					if( bOnlySelected && !node.ViewModel.IsSelected )
+						continue;
+
+					minX = Math.Min( node.X, minX );
+					maxX = Math.Max( node.X + nodeView.ActualWidth, maxX );
+					minY = Math.Min( node.Y, minY );
+					maxY = Math.Max( node.Y + nodeView.ActualHeight, maxY );
 					hasNodes = true;
 				}
 			}
 
-			if( hasNodes )
+			if( !hasNodes )
 			{
-				double width = MaxX - MinX;
-				double height = MaxY - MinY;
-				flowChartView.NodeCanvas_ContentSizeChanged( width, height );
-			}
-			else
-			{
-				flowChartView.NodeCanvas_ContentSizeChanged( 0.0, 0.0 );
+				minX = maxX = minY = maxY = 0.0;
 			}
 		}
 

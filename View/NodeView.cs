@@ -69,16 +69,11 @@ namespace NodeGraph.View
 
 		private void NodeView_Loaded( object sender, RoutedEventArgs e )
 		{
-			FlowChart flowChart = _ViewModel.Model.FlowChart;
-			NodeGraphManager.UpdateContentSize( flowChart );
-
 			OnCanvasRenderTransformChanged();
 		}
 
 		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
 		{
-			FlowChart flowChart = _ViewModel.Model.FlowChart;
-			NodeGraphManager.UpdateContentSize( flowChart );
 		}
 
 		private void NodeView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )

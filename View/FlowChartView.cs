@@ -113,12 +113,6 @@ namespace NodeGraph.View
 			_ZoomAndPan.ViewHeight = ActualHeight;
 		}
 
-		public void NodeCanvas_ContentSizeChanged( double width, double height )
-		{
-			_ZoomAndPan.ContentWidth = width;
-			_ZoomAndPan.ContentHeight = height;
-		}
-
 		private void FlowChartView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
 			_ViewModel = DataContext as FlowChartViewModel;
@@ -438,6 +432,14 @@ namespace NodeGraph.View
 				{
 					NodeGraphManager.SelectAllNodes( _ViewModel.Model );
 				}
+				else
+				{
+					FitNodesToView( false );
+				}
+			}
+			else if( Key.F == e.Key )
+			{
+				FitNodesToView( true );
 			}
 		}
 
@@ -475,39 +477,49 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Area
+
+		#region Fitting.
+
+		public void FitNodesToView( bool bOnlySelected )
+		{
+			double minX;
+			double maxX;
+			double minY;
+			double maxY;
+			NodeGraphManager.CalculateContentSize( _ViewModel.Model, bOnlySelected, out minX, out maxX, out minY, out maxY );
+			if( ( minX == maxX ) || ( minY == maxY ) )
+			{
+				return;
+			}
+
+			double vsWidth = _ZoomAndPan.ViewWidth;
+			double vsHeight = _ZoomAndPan.ViewHeight;
+			double contentWidth = maxX - minX;
+			double contentHeight = maxY - minY;
+
+			_ZoomAndPan.StartX = ( minX + maxX - vsWidth ) * 0.5;
+			_ZoomAndPan.StartY = ( minY + maxY - vsHeight ) * 0.5;
+			_ZoomAndPan.Scale = 1.0;
+
+			Point vsZoomCenter = new Point( vsWidth * 0.5, vsHeight * 0.5 );
+			Point zoomCenter = _ZoomAndPan.MatrixInv.Transform( vsZoomCenter );
+
+			double newScale = Math.Min( vsWidth / contentWidth, vsHeight / contentHeight );
+			_ZoomAndPan.Scale = Math.Max( 0.1, Math.Min( 1.0, newScale ) );
+
+			Point vsNextZoomCenter = _ZoomAndPan.Matrix.Transform( zoomCenter );
+			Point vsDelta = new Point( vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y );
+
+			_ZoomAndPan.StartX -= vsDelta.X;
+			_ZoomAndPan.StartY -= vsDelta.Y;
+		}
+
+		#endregion // Fitting.
 	}
-
-
 
 	public class ZoomAndPan
 	{
 		#region Properties
-
-		private double _ContentWidth = 0;
-		public double ContentWidth
-		{
-			get { return _ContentWidth; }
-			set
-			{
-				if( value != _ContentWidth )
-				{
-					_ContentWidth = value;
-				}
-			}
-		}
-
-		private double _ContentHeight = 0;
-		public double ContentHeight
-		{
-			get { return _ContentHeight; }
-			set
-			{
-				if( value != _ContentHeight )
-				{
-					_ContentHeight = value;
-				}
-			}
-		}
 
 		private double _ViewWidth;
 		public double ViewWidth
@@ -535,7 +547,7 @@ namespace NodeGraph.View
 			}
 		}
 
-		private double _StartX;
+		private double _StartX = 0.0;
 		public double StartX
 		{
 			get { return _StartX; }
@@ -549,7 +561,7 @@ namespace NodeGraph.View
 			}
 		}
 
-		private double _StartY;
+		private double _StartY = 0.0;
 		public double StartY
 		{
 			get { return _StartY; }

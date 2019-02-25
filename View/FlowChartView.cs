@@ -204,39 +204,7 @@ namespace NodeGraph.View
 				return;
 			}
 
-			if( NodeGraphManager.IsConnecting )
-			{
-				Connector connector = NodeGraphManager.CurrentConnector;
-				if( ( null == connector.StartPort ) || ( null == connector.EndPort ) )
-				{
-					NodePort firstPort = NodeGraphManager.FirstConnectionPort;
-
-					NodeGraphManager.EndConnection();
-
-					if( firstPort.IsInput )
-					{
-						if( firstPort.AllowMultipleInput && ( 0 < firstPort.Connectors.Count ) )
-						{
-							NodeGraphManager.DestroyConnector( firstPort.Connectors[ 0 ].Guid );
-						}
-					}
-					else
-					{
-						if( firstPort.AllowMultipleOutput && ( 0 < firstPort.Connectors.Count ) )
-						{
-							NodeGraphManager.DestroyConnector( firstPort.Connectors[ 0 ].Guid );
-						}
-					}
-
-					Point nodePos = _ZoomAndPan.MatrixInv.Transform( Mouse.GetPosition( this ) );
-					Node node = NodeGraphManager.CreateRouterNodeForPort(
-						Guid.NewGuid(), _ViewModel.Model, firstPort, nodePos.X, nodePos.Y, 0 );
-				}
-				else
-				{
-					NodeGraphManager.EndConnection();
-				}
-			}
+			NodeGraphManager.EndConnection();
 			NodeGraphManager.EndDragNode();
 			NodeGraphManager.EndDragSelection( false );
 		}

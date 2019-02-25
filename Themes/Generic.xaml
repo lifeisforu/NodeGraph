@@ -172,17 +172,17 @@
 						<Border Background="{TemplateBinding Background}"
 								Margin="{TemplateBinding Margin}"
 								Padding="{TemplateBinding Padding}"
-								CornerRadius="8"
+								CornerRadius="{TemplateBinding CornerRadius}"
 								Opacity="0.9">
 							<Border.Effect>
-								<BlurEffect KernelType="Box" Radius="8.0"/>
+								<BlurEffect KernelType="Box" Radius="{TemplateBinding CornerRadius}"/>
 							</Border.Effect>
 						</Border>
 						<!-- Selection -->
 						<Border x:Name="BorderSelection"
 								Background="Transparent"
 								BorderBrush="{TemplateBinding BorderBrush}"
-								BorderThickness="2"
+								BorderThickness="{TemplateBinding SelectionThickness}"
 								Margin="{TemplateBinding Margin}"
 								Padding="{TemplateBinding Padding}"
 								CornerRadius="8">
@@ -268,6 +268,7 @@
 						<Border Background="{TemplateBinding Background}"
 								Margin="{TemplateBinding Margin}"
 								Padding="{TemplateBinding Padding}"
+								CornerRadius="{TemplateBinding CornerRadius}"
 								Opacity="0.9">
 							<Border.Effect>
 								<BlurEffect KernelType="Box" Radius="8.0"/>
@@ -277,7 +278,8 @@
 						<Border x:Name="BorderSelection"
 								Background="Transparent"
 								BorderBrush="{TemplateBinding BorderBrush}"
-								BorderThickness="2"
+								BorderThickness="{TemplateBinding SelectionThickness}"
+								CornerRadius="{TemplateBinding CornerRadius}"
 								Margin="{TemplateBinding Margin}"
 								Padding="{TemplateBinding Padding}">
 							<!-- Content -->

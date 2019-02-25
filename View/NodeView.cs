@@ -40,6 +40,22 @@ namespace NodeGraph.View
 		public static readonly DependencyProperty HasConnectionProperty =
 			DependencyProperty.Register( "HasConnection", typeof( bool ), typeof( NodeView ), new PropertyMetadata( false ) );
 
+		public Thickness SelectionThickness
+		{
+			get { return ( Thickness )GetValue( SelectionThicknessProperty ); }
+			set { SetValue( SelectionThicknessProperty, value ); }
+		}
+		public static readonly DependencyProperty SelectionThicknessProperty =
+			DependencyProperty.Register( "SelectionThickness", typeof( Thickness ), typeof( NodeView ), new PropertyMetadata( new Thickness( 2.0 ) ) );
+
+		public double CornerRadius
+		{
+			get { return ( double )GetValue( CornerRadiusProperty ); }
+			set { SetValue( CornerRadiusProperty, value ); }
+		}
+		public static readonly DependencyProperty CornerRadiusProperty =
+			DependencyProperty.Register( "CornerRadius", typeof( double ), typeof( NodeView ), new PropertyMetadata( 8.0 ) );
+
 		#endregion // Properties
 
 		#region Constructors
@@ -55,6 +71,8 @@ namespace NodeGraph.View
 		{
 			FlowChart flowChart = _ViewModel.Model.FlowChart;
 			NodeGraphManager.UpdateContentSize( flowChart );
+
+			OnCanvasRenderTransformChanged();
 		}
 
 		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
@@ -176,5 +194,18 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Connection
+
+		#region RenderTrasnform
+
+		public void OnCanvasRenderTransformChanged()
+		{
+			Matrix matrix = ( VisualParent as Canvas ).RenderTransform.Value;
+			double scale = matrix.M11;
+
+			SelectionThickness = new Thickness( 2.0 / scale );
+			CornerRadius = 8.0 / scale;
+		}
+
+		#endregion // RenderTransform
 	}
 }

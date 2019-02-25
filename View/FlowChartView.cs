@@ -151,6 +151,12 @@ namespace NodeGraph.View
 		private void _ZoomAndPan_UpdateTransform()
 		{
 			_NodeCanvas.RenderTransform = new MatrixTransform( _ZoomAndPan.Matrix );
+
+			foreach( var pair in NodeGraphManager.Nodes )
+			{
+				NodeView nodeView = pair.Value.ViewModel.View;
+				nodeView.OnCanvasRenderTransformChanged();
+			}
 		}
 
 		protected Point _PrevMousePosition;

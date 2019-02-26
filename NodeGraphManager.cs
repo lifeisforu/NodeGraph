@@ -1409,5 +1409,36 @@ namespace NodeGraph
 		}
 
 		#endregion // Serialization
+
+		#region ContextMenu
+
+		public delegate bool BuildContextMenuDelegate( object sender, BuildContextMenuArgs args );
+		public static event BuildContextMenuDelegate BuildContextMenu;
+
+		public static bool InvokeBuildContextMenu( object sender, BuildContextMenuArgs args )
+		{
+			if( null == BuildContextMenu )
+				return false;
+
+			return BuildContextMenu.Invoke( sender, args );
+		}
+
+		#endregion // ContextMenu
+	}
+
+	public enum ModelType
+	{
+		FlowChart,
+		Node,
+		FlowPort,
+		PropertyPort,
+	}
+
+	public class BuildContextMenuArgs
+	{
+		public Point ViewSpaceMouseLocation { get; set; }
+		public Point ModelSpaceMouseLocation { get; set; }
+		public ModelType ModelType { get; set; }
+		public System.Windows.Controls.ContextMenu ContextMenu { get; internal set; }
 	}
 }

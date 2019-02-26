@@ -148,13 +148,6 @@ namespace NodeGraph.View
 			e.Handled = true;
 		}
 
-		protected override void OnMouseRightButtonUp( MouseButtonEventArgs e )
-		{
-			base.OnMouseRightButtonUp( e );
-
-			e.Handled = true;
-		}
-
 		protected override void OnMouseMove( MouseEventArgs e )
 		{
 			base.OnMouseMove( e );

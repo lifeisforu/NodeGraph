@@ -21,13 +21,9 @@ namespace NodeGraph.View
 	[ TemplatePart( Name = "PART_Port", Type = typeof( FrameworkElement ) )]
 	public class NodePortView : ContentControl
 	{
-		#region Fields
-
-		protected NodePortViewModel _ViewModel;
-
-		#endregion // Fields
-
 		#region Properties
+
+		public NodePortViewModel ViewModel { get; private set; }
 
 		public FrameworkElement PartPort { get; private set; }
 
@@ -81,10 +77,10 @@ namespace NodeGraph.View
 
 		private void NodePortView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
-			_ViewModel = DataContext as NodePortViewModel;
-			if( null == _ViewModel )
+			ViewModel = DataContext as NodePortViewModel;
+			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodePortView." );
-			_ViewModel.View = this;
+			ViewModel.View = this;
 
 			OnConnectionChanged();
 		}
@@ -97,18 +93,18 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			Node node = _ViewModel.Model.Node;
+			Node node = ViewModel.Model.Node;
 			FlowChart flowChart = node.FlowChart;
 			Keyboard.Focus( flowChart.ViewModel.View );
 
 			if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
 			{
-				NodeGraphManager.DisconnectAll( _ViewModel.Model );
+				NodeGraphManager.DisconnectAll( ViewModel.Model );
 			}
 			else if( !NodeGraphManager.IsConnecting )
 			{
 				IsFilledPort = true;
-				NodeGraphManager.BeginConnection( _ViewModel.Model );
+				NodeGraphManager.BeginConnection( ViewModel.Model );
 			}
 
 			e.Handled = true;
@@ -122,10 +118,10 @@ namespace NodeGraph.View
 			{
 				if( NodeGraphManager.IsConnecting )
 				{
-					bool connectable = NodeGraphManager.CheckIfConnectable( _ViewModel.Model );
+					bool connectable = NodeGraphManager.CheckIfConnectable( ViewModel.Model );
 					if( connectable )
 					{
-						NodeGraphManager.SetOtherConnectionPort( _ViewModel.Model );
+						NodeGraphManager.SetOtherConnectionPort( ViewModel.Model );
 					}
 				}
 			}
@@ -169,7 +165,7 @@ namespace NodeGraph.View
 
 		public virtual void OnConnectionChanged()
 		{
-			IsFilledPort = ( 0 < _ViewModel.Model.Connectors.Count );
+			IsFilledPort = ( 0 < ViewModel.Model.Connectors.Count );
 		}
 
 		#endregion // Connections

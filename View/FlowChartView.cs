@@ -17,13 +17,13 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		protected FlowChartViewModel _ViewModel;
-
 		protected DispatcherTimer Timer = new DispatcherTimer();
 
 		#endregion // Fields
 
 		#region Properties
+
+		public FlowChartViewModel ViewModel { get; private set; }
 
 		private ZoomAndPan _ZoomAndPan = new ZoomAndPan();
 		public ZoomAndPan ZoomAndPan
@@ -115,11 +115,11 @@ namespace NodeGraph.View
 
 		private void FlowChartView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
-			_ViewModel = DataContext as FlowChartViewModel;
-			if( null == _ViewModel )
+			ViewModel = DataContext as FlowChartViewModel;
+			if( null == ViewModel )
 				return;
 
-			_ViewModel.View = this;
+			ViewModel.View = this;
 
 			if( null == _ConnectorCanvas )
 			{
@@ -161,7 +161,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
@@ -180,18 +180,18 @@ namespace NodeGraph.View
 
 				if( !bCtrl && !bShift && !bAlt )
 				{
-					NodeGraphManager.DeslectAllNodes( _ViewModel.Model );
+					NodeGraphManager.DeslectAllNodes( ViewModel.Model );
 				}
 
 				Point mousePos = e.GetPosition( this );
 
-				NodeGraphManager.BeginDragSelection( _ViewModel.Model,
+				NodeGraphManager.BeginDragSelection( ViewModel.Model,
 					_ZoomAndPan.MatrixInv.Transform( mousePos ) );
 
-				_ViewModel.SelectionStartX = mousePos.X;
-				_ViewModel.SelectionWidth = 0;
-				_ViewModel.SelectionStartY = mousePos.Y;
-				_ViewModel.SelectionHeight = 0;
+				ViewModel.SelectionStartX = mousePos.X;
+				ViewModel.SelectionWidth = 0;
+				ViewModel.SelectionStartY = mousePos.Y;
+				ViewModel.SelectionHeight = 0;
 			}
 		}
 
@@ -199,7 +199,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonUp( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
@@ -213,7 +213,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseRightButtonDown( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
@@ -230,23 +230,80 @@ namespace NodeGraph.View
 		{
 			base.OnMouseRightButtonUp( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
 
-			if( NodeGraphManager.IsDragging )
-			{
-				NodeGraphManager.EndConnection();
-				NodeGraphManager.EndDragNode();
-				NodeGraphManager.EndDragSelection( true );
-			}
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( true );
 
 			if( _IsDraggingCanvas )
 			{
 				_IsDraggingCanvas = false;
 				Mouse.Capture( null );
 			}
+
+			if( !_WasDraggingCanvas && !NodeGraphManager.IsDragging )
+			{
+				Point mousePos = Mouse.GetPosition( this );
+				HitTestResult hitResult = VisualTreeHelper.HitTest( this, mousePos );
+				if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
+				{
+					object sender = null;
+
+					BuildContextMenuArgs args = new BuildContextMenuArgs();
+					args.ViewSpaceMouseLocation = mousePos;
+					args.ModelSpaceMouseLocation = _ZoomAndPan.MatrixInv.Transform( mousePos );
+
+					DependencyObject hit = hitResult.VisualHit;
+					NodePortView portView = ViewUtil.FindFirstParent< NodePortView >( hit );
+					if( null != portView )
+					{
+						sender = portView;
+						if( typeof( NodePropertyPort ).IsAssignableFrom( portView.ViewModel.Model.GetType() ) )
+						{
+							args.ModelType = ModelType.PropertyPort;
+						}
+						else if( typeof( NodeFlowPort ).IsAssignableFrom( portView.ViewModel.Model.GetType() ) )
+						{
+							args.ModelType = ModelType.FlowPort;
+						}
+					}
+					else
+					{
+						NodeView nodeView = ViewUtil.FindFirstParent< NodeView >( hit );
+						if( null != nodeView )
+						{
+							sender = nodeView;
+							args.ModelType = ModelType.Node;
+						}
+						else
+						{
+							sender = this;
+							args.ModelType = ModelType.FlowChart;
+						}
+					}
+
+					if( null != sender )
+					{
+						ContextMenu = new ContextMenu();
+						ContextMenu.Closed += ContextMenu_Closed;
+						args.ContextMenu = ContextMenu;
+
+						if( !NodeGraphManager.InvokeBuildContextMenu( sender, args ) )
+						{
+							ContextMenu = null;
+						}
+					}
+				}
+			}
+		}
+
+		private void ContextMenu_Closed( object sender, RoutedEventArgs e )
+		{
+			ContextMenu = null;
 		}
 
 		private void UpdateDragging( Point mousePos, Point delta )
@@ -268,7 +325,7 @@ namespace NodeGraph.View
 				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
 				bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
 
-				NodeGraphManager.UpdateDragSelection( _ViewModel.Model,
+				NodeGraphManager.UpdateDragSelection( ViewModel.Model,
 					_ZoomAndPan.MatrixInv.Transform( mousePos ), bCtrl, bShift, bAlt );
 
 				Point startPos = _ZoomAndPan.Matrix.Transform( NodeGraphManager.SelectingStartPoint );
@@ -276,10 +333,10 @@ namespace NodeGraph.View
 				Point selectionStart = new Point( Math.Min( startPos.X, mousePos.X ), Math.Min( startPos.Y, mousePos.Y ) );
 				Point selectionEnd = new Point( Math.Max( startPos.X, mousePos.X ), Math.Max( startPos.Y, mousePos.Y ) );
 
-				_ViewModel.SelectionStartX = selectionStart.X;
-				_ViewModel.SelectionStartY = selectionStart.Y;
-				_ViewModel.SelectionWidth = selectionEnd.X - selectionStart.X;
-				_ViewModel.SelectionHeight = selectionEnd.Y - selectionStart.Y;
+				ViewModel.SelectionStartX = selectionStart.X;
+				ViewModel.SelectionStartY = selectionStart.Y;
+				ViewModel.SelectionWidth = selectionEnd.X - selectionStart.X;
+				ViewModel.SelectionHeight = selectionEnd.Y - selectionStart.Y;
 			}
 		}
 		
@@ -316,7 +373,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseMove( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
@@ -349,34 +406,28 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeave( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
 
-			if( NodeGraphManager.IsDragging )
-			{
-				NodeGraphManager.EndConnection();
-				NodeGraphManager.EndDragNode();
-				NodeGraphManager.EndDragSelection( true );
-			}
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( true );
 		}
 
 		protected override void OnLostFocus( RoutedEventArgs e )
 		{
 			base.OnLostFocus( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
 
-			if( NodeGraphManager.IsDragging )
-			{
-				NodeGraphManager.EndConnection();
-				NodeGraphManager.EndDragNode();
-				NodeGraphManager.EndDragSelection( true );
-			}
+			NodeGraphManager.EndConnection();
+			NodeGraphManager.EndDragNode();
+			NodeGraphManager.EndDragSelection( true );
 
 			if( _IsDraggingCanvas )
 			{
@@ -413,24 +464,24 @@ namespace NodeGraph.View
 		{
 			base.OnKeyDown( e );
 
-			if( null == _ViewModel )
+			if( null == ViewModel )
 			{
 				return;
 			}
 
 			if( Key.Delete == e.Key )
 			{
-				NodeGraphManager.DestroySelectedNodes( _ViewModel.Model );
+				NodeGraphManager.DestroySelectedNodes( ViewModel.Model );
 			}
 			else if( Key.Escape == e.Key )
 			{
-				NodeGraphManager.DeslectAllNodes( _ViewModel.Model );
+				NodeGraphManager.DeslectAllNodes( ViewModel.Model );
 			}
 			else if( Key.A == e.Key )
 			{
 				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
 				{
-					NodeGraphManager.SelectAllNodes( _ViewModel.Model );
+					NodeGraphManager.SelectAllNodes( ViewModel.Model );
 				}
 				else
 				{
@@ -486,7 +537,7 @@ namespace NodeGraph.View
 			double maxX;
 			double minY;
 			double maxY;
-			NodeGraphManager.CalculateContentSize( _ViewModel.Model, bOnlySelected, out minX, out maxX, out minY, out maxY );
+			NodeGraphManager.CalculateContentSize( ViewModel.Model, bOnlySelected, out minX, out maxX, out minY, out maxY );
 			if( ( minX == maxX ) || ( minY == maxY ) )
 			{
 				return;

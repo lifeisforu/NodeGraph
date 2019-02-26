@@ -19,13 +19,9 @@ namespace NodeGraph.View
 {
 	public class ConnectorView : ContentControl
 	{
-		#region Fields
-
-		protected ConnectorViewModel _ViewModel;
-
-		#endregion // Fields
-
 		#region Properties
+
+		public ConnectorViewModel ViewModel { get; private set; }
 
 		public string CurveData
 		{
@@ -61,15 +57,15 @@ namespace NodeGraph.View
 
 		private void ConnectorView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
-			_ViewModel = DataContext as ConnectorViewModel;
-			if( null == _ViewModel )
+			ViewModel = DataContext as ConnectorViewModel;
+			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in ConnectorView." );
-			_ViewModel.View = this;
+			ViewModel.View = this;
 		}
 
 		private void ConnectorView_LayoutUpdated( object sender, EventArgs e )
 		{
-			FlowChart flowChart = _ViewModel.Model.FlowChart;
+			FlowChart flowChart = ViewModel.Model.FlowChart;
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			BuildCurveData( Mouse.GetPosition( flowChartView ) );
 		}
@@ -80,7 +76,7 @@ namespace NodeGraph.View
 
 		public void BuildCurveData( Point mousePos )
 		{
-			Connector connector = _ViewModel.Model;
+			Connector connector = ViewModel.Model;
 			FlowChart flowChart = connector.FlowChart;
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 

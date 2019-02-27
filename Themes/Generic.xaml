@@ -16,8 +16,11 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate>
-					<Polygon VerticalAlignment="Center" HorizontalAlignment="Center" 
-									 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Points="0,0 8,0 16,8 8,16 0,16" Fill="Transparent" Margin="4"/>
+					<Grid>
+						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="26" Height="20" Background="Transparent"/>
+						<Polygon VerticalAlignment="Center" HorizontalAlignment="Center" 
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Points="0,0 8,0 16,8 8,16 0,16" Fill="Transparent"/>
+					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
@@ -29,8 +32,11 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate>
-					<Polygon VerticalAlignment="Center" HorizontalAlignment="Center" 
-									 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Points="0,0 8,0 16,8 8,16 0,16" Fill="White" Margin="4"/>
+					<Grid>
+						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="26" Height="20" Background="Transparent"/>
+						<Polygon VerticalAlignment="Center" HorizontalAlignment="Center" 
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Points="0,0 8,0 16,8 8,16 0,16" Fill="White"/>
+					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
@@ -42,8 +48,11 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate>
-					<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center"
-									 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="Transparent" Margin="4"/>
+					<Grid>
+						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" Background="Transparent"/>
+						<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center"
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="Transparent"/>
+					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
@@ -55,8 +64,11 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate>
-					<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" 
-									 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="White" Margin="4"/>
+					<Grid>
+						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" Background="Transparent"/>
+						<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" 
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="White"/>
+					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>

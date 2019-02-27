@@ -17,7 +17,7 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		protected DispatcherTimer Timer = new DispatcherTimer();
+		protected DispatcherTimer _EdgeDraggingTimer = new DispatcherTimer();
 
 		#endregion // Fields
 
@@ -77,9 +77,9 @@ namespace NodeGraph.View
 
 			SizeChanged += FlowChartView_SizeChanged;
 
-			Timer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
-			Timer.Tick += Timer_Tick;
-			Timer.Start();
+			_EdgeDraggingTimer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
+			_EdgeDraggingTimer.Tick += Timer_Tick;
+			_EdgeDraggingTimer.Start();
 		}
 
 		#endregion // Constructors
@@ -209,6 +209,7 @@ namespace NodeGraph.View
 			NodeGraphManager.EndConnection();
 			NodeGraphManager.EndDragNode();
 			NodeGraphManager.EndDragSelection( false );
+			
 		}
 
 		protected override void OnMouseRightButtonDown( MouseButtonEventArgs e )

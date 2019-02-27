@@ -548,6 +548,13 @@ namespace NodeGraph.View
 
 			double vsWidth = _ZoomAndPan.ViewWidth;
 			double vsHeight = _ZoomAndPan.ViewHeight;
+
+			Point margin = new Point( vsWidth * 0.05, vsHeight * 0.05 );
+			minX -= margin.X;
+			minY -= margin.Y;
+			maxX += margin.X;
+			maxY += margin.Y;
+
 			double contentWidth = maxX - minX;
 			double contentHeight = maxY - minY;
 

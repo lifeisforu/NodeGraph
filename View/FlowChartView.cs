@@ -153,7 +153,8 @@ namespace NodeGraph.View
 			}
 		}
 
-		protected Point _CanvasDraggingStartPos;
+		protected Point _RightButtonDownPos;
+		protected Point _LeftButtonDownPos;
 		protected Point _PrevMousePos;
 		protected bool _IsDraggingCanvas;
 
@@ -168,7 +169,8 @@ namespace NodeGraph.View
 
 			Keyboard.Focus( this );
 
-			_PrevMousePos = e.GetPosition( this );
+			_LeftButtonDownPos = e.GetPosition( this );
+			_PrevMousePos = _LeftButtonDownPos;
 
 			if( !NodeGraphManager.IsNodeDragging &&
 				!NodeGraphManager.IsConnecting &&
@@ -218,10 +220,11 @@ namespace NodeGraph.View
 				return;
 			}
 
+			_RightButtonDownPos = e.GetPosition( this );
+
 			if( !NodeGraphManager.IsDragging )
 			{
 				_IsDraggingCanvas = true;
-				_CanvasDraggingStartPos = e.GetPosition( this );
 				Mouse.Capture( this, CaptureMode.SubTree );
 			}
 		}
@@ -247,8 +250,8 @@ namespace NodeGraph.View
 
 			Point mousePos = Mouse.GetPosition( this );
 			Point diff = new Point	(
-				Math.Abs( _CanvasDraggingStartPos.X - mousePos.X ),
-				Math.Abs( _CanvasDraggingStartPos.Y - mousePos.Y ) );
+				Math.Abs( _RightButtonDownPos.X - mousePos.X ),
+				Math.Abs( _RightButtonDownPos.Y - mousePos.Y ) );
 
 			bool wasDraggingCanvas = ( 5.0 < diff.X ) || ( 5.0 < diff.Y );
 			if( !wasDraggingCanvas && !NodeGraphManager.IsDragging )

@@ -153,9 +153,9 @@ namespace NodeGraph.View
 			}
 		}
 
-		protected Point _PrevMousePosition;
+		protected Point _CanvasDraggingStartPos;
+		protected Point _PrevMousePos;
 		protected bool _IsDraggingCanvas;
-		protected bool _WasDraggingCanvas;
 
 		protected override void OnMouseLeftButtonDown( MouseButtonEventArgs e )
 		{
@@ -168,7 +168,7 @@ namespace NodeGraph.View
 
 			Keyboard.Focus( this );
 
-			_PrevMousePosition = e.GetPosition( this );
+			_PrevMousePos = e.GetPosition( this );
 
 			if( !NodeGraphManager.IsNodeDragging &&
 				!NodeGraphManager.IsConnecting &&
@@ -221,7 +221,7 @@ namespace NodeGraph.View
 			if( !NodeGraphManager.IsDragging )
 			{
 				_IsDraggingCanvas = true;
-				_WasDraggingCanvas = false;
+				_CanvasDraggingStartPos = e.GetPosition( this );
 				Mouse.Capture( this, CaptureMode.SubTree );
 			}
 		}
@@ -245,9 +245,14 @@ namespace NodeGraph.View
 				Mouse.Capture( null );
 			}
 
-			if( !_WasDraggingCanvas && !NodeGraphManager.IsDragging )
+			Point mousePos = Mouse.GetPosition( this );
+			Point diff = new Point	(
+				Math.Abs( _CanvasDraggingStartPos.X - mousePos.X ),
+				Math.Abs( _CanvasDraggingStartPos.Y - mousePos.Y ) );
+
+			bool wasDraggingCanvas = ( 5.0 < diff.X ) || ( 5.0 < diff.Y );
+			if( !wasDraggingCanvas && !NodeGraphManager.IsDragging )
 			{
-				Point mousePos = Mouse.GetPosition( this );
 				HitTestResult hitResult = VisualTreeHelper.HitTest( this, mousePos );
 				if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
 				{
@@ -381,8 +386,8 @@ namespace NodeGraph.View
 			Point mousePos = e.GetPosition( this );
 
 			MouseArea area = CheckMouseArea();
-			Point delta = new Point( mousePos.X - _PrevMousePosition.X,
-				mousePos.Y - _PrevMousePosition.Y );
+			Point delta = new Point( mousePos.X - _PrevMousePos.X,
+				mousePos.Y - _PrevMousePos.Y );
 
 			if( NodeGraphManager.IsDragging )
 			{
@@ -394,12 +399,10 @@ namespace NodeGraph.View
 				{
 					_ZoomAndPan.StartX -= delta.X;
 					_ZoomAndPan.StartY -= delta.Y;
-
-					_WasDraggingCanvas = true;
 				}
 			}
 
-			_PrevMousePosition = mousePos;
+			_PrevMousePos = mousePos;
 		}
 
 		protected override void OnMouseLeave( MouseEventArgs e )

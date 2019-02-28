@@ -292,15 +292,11 @@ namespace NodeGraph
 		public static Node CreateRouterNode( Guid guid, FlowChart flowChart, NodePort referencePort, double X, double Y, int ZIndex,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
-			//----- exceptions.
-
 			if( null == flowChart )
 				throw new ArgumentNullException( "flowChart of CreateNode() can not be null" );
 
 			if( null == referencePort )
 				throw new ArgumentNullException( "referencePort of CreateNode() can not be null" );
-
-			//----- create ports.
 
 			Type portType = referencePort.GetType();
 			bool isFlowPort = typeof( NodeFlowPort ).IsAssignableFrom( portType );
@@ -323,6 +319,75 @@ namespace NodeGraph
 				CreateNodePropertyPort( false, Guid.NewGuid(), node, "Output", "", false, false, false,
 					propertyPort.TypeOfValue, propertyPort.Value, propertyPortViewModelTypeOverride );
 			}
+
+			return node;
+		}
+		
+		public static Node CreateRouterNodeForPort( Guid guid, FlowChart flowChart, NodePort firstPort, double X, double Y, int ZIndex )
+		{
+			Node node = CreateRouterNode( guid, flowChart, firstPort, X, Y, ZIndex, typeof( RouterNodeViewModel ) );
+
+			BeginConnection( firstPort );
+
+			NodePort endPort = null;
+			Type sourcePortType = FirstConnectionPort.GetType();
+
+			if( typeof( NodeFlowPort ).IsAssignableFrom( sourcePortType ) )
+			{
+				if( FirstConnectionPort.IsInput )
+				{
+					endPort = node.OutputFlowPorts[ 0 ];
+				}
+				else
+				{
+					endPort = node.InputFlowPorts[ 0 ];
+				}
+
+				node.Header = "Flow";
+			}
+			else if( typeof( NodePropertyPort ).IsAssignableFrom( sourcePortType ) )
+			{
+				if( FirstConnectionPort.IsInput )
+				{
+					endPort = node.OutputPropertyPorts[ 0 ];
+				}
+				else
+				{
+					endPort = node.InputPropertyPorts[ 0 ];
+				}
+
+				node.Header = ( firstPort as NodePropertyPort ).TypeOfValue.Name;
+			}
+
+			EndConnection( endPort );
+
+			return node;
+		}
+
+		public static Node CreateRouterNodeForConnector( Guid guid, FlowChart flowChart, Connector connector, double X, double Y, int ZIndex )
+		{
+			NodePort startPort = connector.StartPort;
+			NodePort endPort = connector.EndPort;
+
+			DestroyConnector( connector.Guid );
+
+			Node node = CreateRouterNode( guid, flowChart, startPort, X, Y, ZIndex, typeof( RouterNodeViewModel ) );
+
+			BeginConnection( startPort );
+			if( startPort is NodeFlowPort )
+			{
+				EndConnection( node.InputFlowPorts[ 0 ] );
+
+				BeginConnection( node.OutputFlowPorts[ 0 ] );
+			}
+			else
+			{
+				EndConnection( node.InputPropertyPorts[ 0 ] );
+
+				BeginConnection( node.OutputPropertyPorts[ 0 ] );
+			}
+
+			EndConnection( endPort );
 
 			return node;
 		}
@@ -896,47 +961,6 @@ namespace NodeGraph
 			IsConnecting = false;
 			CurrentConnector = null;
 			FirstConnectionPort = null;
-		}
-
-		public static Node CreateRouterNodeForPort( Guid guid, FlowChart flowChart, NodePort firstPort, double X, double Y, int ZIndex )
-		{
-			Node node = CreateRouterNode( guid, flowChart, firstPort, X, Y, ZIndex, typeof( RouterNodeViewModel ) );
-
-			BeginConnection( firstPort );
-
-			NodePort endPort = null;
-			Type sourcePortType = FirstConnectionPort.GetType();
-
-			if( typeof( NodeFlowPort ).IsAssignableFrom( sourcePortType ) )
-			{
-				if( FirstConnectionPort.IsInput )
-				{
-					endPort = node.OutputFlowPorts[ 0 ];
-				}
-				else
-				{
-					endPort = node.InputFlowPorts[ 0 ];
-				}
-
-				node.Header = "Flow";
-			}
-			else if( typeof( NodePropertyPort ).IsAssignableFrom( sourcePortType ) )
-			{
-				if( FirstConnectionPort.IsInput )
-				{
-					endPort = node.OutputPropertyPorts[ 0 ];
-				}
-				else
-				{
-					endPort = node.InputPropertyPorts[ 0 ];
-				}
-
-				node.Header = ( firstPort as NodePropertyPort ).TypeOfValue.Name;
-			}
-
-			EndConnection( endPort );
-
-			return node;
 		}
 
 		public static void UpdateConnection( Point mousePos )

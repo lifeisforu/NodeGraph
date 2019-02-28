@@ -110,5 +110,28 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Curve
+
+		#region Mouse Events
+
+		protected override void OnMouseDoubleClick( MouseButtonEventArgs e )
+		{
+			base.OnMouseDoubleClick( e );
+
+			if( MouseButton.Left == e.ChangedButton )
+			{
+				Connector connector = ViewModel.Model;
+				FlowChart flowChart = connector.FlowChart;
+				FlowChartView flowChartView = flowChart.ViewModel.View;
+				Point vsMousePos = e.GetPosition( flowChartView );
+				Point nodePos = flowChartView.ZoomAndPan.MatrixInv.Transform( vsMousePos );
+
+				NodeGraphManager.CreateRouterNodeForConnector( Guid.NewGuid(), flowChart, connector,
+					nodePos.X, nodePos.Y, 0 );
+			}
+
+			e.Handled = true;
+		}
+
+		#endregion // Mouse Events
 	}
 }

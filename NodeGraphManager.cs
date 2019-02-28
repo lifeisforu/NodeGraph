@@ -1413,14 +1413,35 @@ namespace NodeGraph
 		#region ContextMenu
 
 		public delegate bool BuildContextMenuDelegate( object sender, BuildContextMenuArgs args );
-		public static event BuildContextMenuDelegate BuildContextMenu;
+		public static event BuildContextMenuDelegate BuildFlowChartContextMenu;
+		public static event BuildContextMenuDelegate BuildNodeContextMenu;
+		public static event BuildContextMenuDelegate BuildFlowPortContextMenu;
+		public static event BuildContextMenuDelegate BuildPropertyPortContextMenu;
 
 		public static bool InvokeBuildContextMenu( object sender, BuildContextMenuArgs args )
 		{
-			if( null == BuildContextMenu )
+			BuildContextMenuDelegate targetEvent = null;
+
+			switch( args.ModelType )
+			{
+				case ModelType.FlowChart:
+					targetEvent = BuildFlowChartContextMenu;
+					break;
+				case ModelType.Node:
+					targetEvent = BuildNodeContextMenu;
+					break;
+				case ModelType.FlowPort:
+					targetEvent = BuildFlowPortContextMenu;
+					break;
+				case ModelType.PropertyPort:
+					targetEvent = BuildPropertyPortContextMenu;
+					break;
+			}
+
+			if( null == targetEvent )
 				return false;
 
-			return BuildContextMenu.Invoke( sender, args );
+			return targetEvent.Invoke( sender, args );
 		}
 
 		#endregion // ContextMenu

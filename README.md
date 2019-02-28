@@ -134,7 +134,7 @@ By now, you can see an empty FlowChartView.
 
 Now, let's create nodes. By now, we don't have UI which could create nodes. So, we will create node with ContextMenu.
 
-First, add ContextMenu to MainWindow.
+First, add ContextMenu-related event handlers to MainWindow.
 
 <pre>
 "NodeGraphSamples/MainWindow.xaml.cs"
@@ -143,13 +143,15 @@ First, add ContextMenu to MainWindow.
 {
 	[ ... ]
 
-	ContextMenu = new ContextMenu();
-	ContextMenuOpening += MainWindow_ContextMenuOpening;
+	NodeGraphManager.BuildFlowChartContextMenu += NodeGraphManager_BuildFlowChartContextMenu;
+	NodeGraphManager.BuildNodeContextMenu += NodeGraphManager_BuildNodeContextMenu;
+	NodeGraphManager.BuildFlowPortContextMenu += NodeGraphManager_BuildFlowPortContextMenu;
+	NodeGraphManager.BuildPropertyPortContextMenu += NodeGraphManager_BuildPropertyPortContextMenu;
 
 	[ ... ]
 }</code></pre>
 
-Then, when ContextMenuOpening event invoked, add menu items to ContextMenu.
+Then, when NodeGraphManager_BuildFlowChartContextMenu event invoked, add menu items to ContextMenu.
 
 <pre>
 "NodeGraphSamples/MainWindow.xaml.cs"
@@ -165,12 +167,13 @@ Then, when ContextMenuOpening event invoked, add menu items to ContextMenu.
 
 private Point _ContextMenuLocation;
 
-private void MainWindow_ContextMenuOpening( object sender, ContextMenuEventArgs e )
+private bool NodeGraphManager_BuildFlowChartContextMenu( object sender, BuildContextMenuArgs args )
 {
-	FlowChartView flowChartView = FlowChartViewModel.View;
-	_ContextMenuLocation = Mouse.GetPosition( flowChartView );
+	ItemCollection items = args.ContextMenu.Items;
 
-	ContextMenu.Items.Clear();
+	_ContextMenuLocation = args.ModelSpaceMouseLocation;
+
+	items.Clear();
 
 	foreach( var nodeType in _NodeTypes )
 	{
@@ -182,10 +185,11 @@ private void MainWindow_ContextMenuOpening( object sender, ContextMenuEventArgs 
 
 		menuItem.Header = "Create " + NodeAttrs[ 0 ].Header;
 		menuItem.CommandParameter = nodeType;
-		menuItem.Click += FlowChartViewModel_ContextMenuItem_Click;
-		ContextMenu.Items.Add( menuItem );
-
+		menuItem.Click += FlowChart_ContextMenuItem_Click;
+		items.Add( menuItem );
 	}
+
+	return ( 0 < items.Count );
 }
 </code></pre>
 
@@ -200,7 +204,7 @@ What will happen, if you click "Create AutoOutputFlow" item. Let's find out.
 <pre>
 "NodeGraphSamples/MainWindow.xaml.cs"
 
-<code>protected virtual void FlowChartViewModel_ContextMenuItem_Click( object sender, RoutedEventArgs e )
+<code>protected virtual void FlowChart_ContextMenuItem_Click( object sender, RoutedEventArgs e )
 {
 	MenuItem menuItem = sender as MenuItem;
 	Type nodeType = menuItem.CommandParameter as Type;

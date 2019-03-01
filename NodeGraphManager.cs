@@ -12,6 +12,12 @@ using System.Xml;
 
 namespace NodeGraph
 {
+	public enum SelectionMode
+	{
+		Overlap,
+		Include,
+	}
+
 	public class NodeGraphManager
 	{
 		#region Fields
@@ -23,6 +29,7 @@ namespace NodeGraph
 		public static readonly Dictionary<Guid, NodePropertyPort> NodePropertyPorts = new Dictionary<Guid, NodePropertyPort>();
 		public static readonly Dictionary<Guid, List<Guid>> SelectedNodes = new Dictionary<Guid, List<Guid>>();
 		public static bool OutputDebugInfo = false;
+		public static SelectionMode SelectionMode = SelectionMode.Overlap;
 
 		#endregion // Fields
 
@@ -1228,11 +1235,21 @@ namespace NodeGraph
 						}
 					}
 
-					// outside.
-					if( ( nodeEnd.X < selectionStart.X ) ||
+					bool isOutside = ( nodeEnd.X < selectionStart.X ) ||
 						( nodeEnd.Y < selectionStart.Y ) ||
 						( nodeStart.X > selectionEnd.X ) ||
-						( nodeStart.Y > selectionEnd.Y ) )
+						( nodeStart.Y > selectionEnd.Y );
+
+					bool isIncluded = !isOutside &&
+						( nodeStart.X >= selectionStart.X ) &&
+						( nodeStart.Y >= selectionStart.Y ) &&
+						( nodeEnd.X <= selectionEnd.X ) &&
+						( nodeEnd.Y <= selectionEnd.Y );
+
+					bool isSelected = ( ( SelectionMode.Include == SelectionMode ) && isIncluded ) ||
+						( ( SelectionMode.Overlap == SelectionMode ) && !isOutside );
+
+					if( !isSelected )
 					{
 						if( isInOriginalSelection )
 						{

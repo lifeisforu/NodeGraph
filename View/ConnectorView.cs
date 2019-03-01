@@ -125,8 +125,12 @@ namespace NodeGraph.View
 				Point vsMousePos = e.GetPosition( flowChartView );
 				Point nodePos = flowChartView.ZoomAndPan.MatrixInv.Transform( vsMousePos );
 
-				NodeGraphManager.CreateRouterNodeForConnector( Guid.NewGuid(), flowChart, connector,
-					nodePos.X, nodePos.Y, 0 );
+				flowChart.History.BeginTransaction( "Creating RouterNode" );
+				{
+					NodeGraphManager.CreateRouterNodeForConnector( Guid.NewGuid(), flowChart, connector,
+						nodePos.X, nodePos.Y, 0 );
+				}
+				flowChart.History.EndTransaction( false );
 			}
 
 			e.Handled = true;

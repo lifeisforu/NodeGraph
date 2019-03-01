@@ -8,6 +8,7 @@
 	<!-- Background Colors -->
 	<SolidColorBrush x:Key="FlowChartViewBackGroundColor" Color="#303030"/>
 	<SolidColorBrush x:Key="NodeBackGroundColor" Color="#121212"/>
+	<SolidColorBrush x:Key="NodeBackGroundOverColor" Color="#323232"/>
 	<SolidColorBrush x:Key="NodeBorderColor" Color="#121212"/>
 
 	<!-- LinedFlowPort Style -->
@@ -173,7 +174,7 @@
 	<!-- RouterNodeView Style -->
 	<Style x:Key="RouterNodeViewStyle" TargetType="{x:Type v:NodeView}">
 		<Setter Property="Background" Value="{StaticResource NodeBackGroundColor}"/>
-		<Setter Property="BorderBrush" Value="{StaticResource NodeBackGroundColor}"/>
+		<Setter Property="BorderBrush" Value="{StaticResource NodeBorderColor}"/>
 		<Setter Property="Canvas.Left" Value="{Binding Model.X}"/>
 		<Setter Property="Canvas.Top" Value="{Binding Model.Y}"/>
 		<Setter Property="Canvas.ZIndex" Value="{Binding Model.ZIndex}"/>
@@ -260,6 +261,9 @@
 						<Trigger Property="IsSelected" Value="True">
 							<Setter TargetName="BorderSelection" Property="BorderBrush" Value="Orange"/>
 						</Trigger>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Background" Value="{StaticResource NodeBackGroundOverColor}"/>
+						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>
 			</Setter.Value>
@@ -269,7 +273,7 @@
 	<!-- DefaultNodeView Style -->
 	<Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
 		<Setter Property="Background" Value="{StaticResource NodeBackGroundColor}"/>
-		<Setter Property="BorderBrush" Value="{StaticResource NodeBackGroundColor}"/>
+		<Setter Property="BorderBrush" Value="{StaticResource NodeBorderColor}"/>
 		<Setter Property="Canvas.Left" Value="{Binding Model.X}"/>
 		<Setter Property="Canvas.Top" Value="{Binding Model.Y}"/>
 		<Setter Property="Canvas.ZIndex" Value="{Binding Model.ZIndex}"/>
@@ -379,6 +383,9 @@
 						<!-- Node Selection Trigger -->
 						<Trigger Property="IsSelected" Value="True">
 							<Setter TargetName="BorderSelection" Property="BorderBrush" Value="Orange"/>
+						</Trigger>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Background" Value="{StaticResource NodeBackGroundOverColor}"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>

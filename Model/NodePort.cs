@@ -121,7 +121,7 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "NodePort.OnDisconnect()" );
 		}
 
-		public virtual void OnPostLoad()
+		public virtual void OnDeserialize()
 		{
 
 		}

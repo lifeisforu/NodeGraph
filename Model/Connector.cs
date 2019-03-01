@@ -134,7 +134,7 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "Connector.OnDisconnect()" );
 		}
 
-		public virtual void OnPostLoad()
+		public virtual void OnDeserialize()
 		{
 			NodeGraphManager.ConnectTo( StartPort, this );
 			NodeGraphManager.ConnectTo( EndPort, this );
@@ -154,8 +154,10 @@ namespace NodeGraph.Model
 			writer.WriteAttributeString( "Owner", FlowChart.Guid.ToString() );
 			//} End Creation Info.
 
-			writer.WriteAttributeString( "StartPort", StartPort.Guid.ToString() );
-			writer.WriteAttributeString( "EndPort", EndPort.Guid.ToString() );
+			if( null != StartPort )
+				writer.WriteAttributeString( "StartPort", StartPort.Guid.ToString() );
+			if( null != EndPort )
+				writer.WriteAttributeString( "EndPort", EndPort.Guid.ToString() );
 		}
 
 		public override void ReadXml( XmlReader reader )

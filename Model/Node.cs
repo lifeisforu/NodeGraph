@@ -235,26 +235,26 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "Node.OnPostDestroy()" );
 		}
 
-		public virtual void OnPostLoad()
+		public virtual void OnDeserialize()
 		{
 			foreach( var port in InputFlowPorts )
 			{
-				port.OnPostLoad();
+				port.OnDeserialize();
 			}
 
 			foreach( var port in OutputFlowPorts )
 			{
-				port.OnPostLoad();
+				port.OnDeserialize();
 			}
 
 			foreach( var port in InputPropertyPorts )
 			{
-				port.OnPostLoad();
+				port.OnDeserialize();
 			}
 
 			foreach( var port in OutputPropertyPorts )
 			{
-				port.OnPostLoad();
+				port.OnDeserialize();
 			}
 		}
 

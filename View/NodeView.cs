@@ -12,12 +12,6 @@ namespace NodeGraph.View
 {
 	public class NodeView : ContentControl
 	{
-		#region Fields
-
-		protected NodeViewModel _ViewModel;
-
-		#endregion // Fields
-
 		#region Border Properties
 
 		public bool IsSelected
@@ -31,6 +25,8 @@ namespace NodeGraph.View
 		#endregion // Border Properties
 
 		#region Properties
+
+		public NodeViewModel ViewModel { get; private set; }
 
 		public bool HasConnection
 		{
@@ -78,10 +74,10 @@ namespace NodeGraph.View
 
 		private void NodeView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
-			_ViewModel = DataContext as NodeViewModel;
-			if( null == _ViewModel )
+			ViewModel = DataContext as NodeViewModel;
+			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodeView." );
-			_ViewModel.View = this;
+			ViewModel.View = this;
 		}
 
 		#endregion // Constructors
@@ -101,18 +97,39 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonUp( e );
 
-			FlowChart flowChart = _ViewModel.Model.FlowChart;
+			FlowChart flowChart = ViewModel.Model.FlowChart;
 
-			NodeGraphManager.EndConnection();
-			NodeGraphManager.EndDragSelection( false );
+			if( NodeGraphManager.IsConnecting )
+			{
+				bool bConnected;
+				flowChart.History.BeginTransaction( "Creating Connection" );
+				{
+					bConnected = NodeGraphManager.EndConnection();
+				}
+				flowChart.History.EndTransaction( !bConnected );
+			}
+
+			if( NodeGraphManager.IsSelecting )
+			{
+				bool bChanged = false;
+				flowChart.History.BeginTransaction( "Selecting" );
+				{
+					bChanged = NodeGraphManager.EndDragSelection( false );
+				}
+				flowChart.History.EndTransaction( !bChanged );
+			}
 
 			if( !NodeGraphManager.AreNodesReallyDragged &&
-				NodeGraphManager.MouseLeftDownNode == _ViewModel.Model )
+				NodeGraphManager.MouseLeftDownNode == ViewModel.Model )
 			{
-				NodeGraphManager.TrySelection( flowChart, _ViewModel.Model,
-					Keyboard.IsKeyDown( Key.LeftCtrl ),
-					Keyboard.IsKeyDown( Key.LeftShift ),
-					Keyboard.IsKeyDown( Key.LeftAlt ) );
+				flowChart.History.BeginTransaction( "Selection" );
+				{
+					NodeGraphManager.TrySelection( flowChart, ViewModel.Model,
+						Keyboard.IsKeyDown( Key.LeftCtrl ),
+						Keyboard.IsKeyDown( Key.LeftShift ),
+						Keyboard.IsKeyDown( Key.LeftAlt ) );
+				}
+				flowChart.History.EndTransaction( false );
 			}
 
 			NodeGraphManager.EndDragNode();
@@ -122,11 +139,12 @@ namespace NodeGraph.View
 			e.Handled = true;
 		}
 
+		private Point _DraggingStartPos;
 		protected override void OnMouseLeftButtonDown( MouseButtonEventArgs e )
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			FlowChart flowChart = _ViewModel.Model.FlowChart;
+			FlowChart flowChart = ViewModel.Model.FlowChart;
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			Keyboard.Focus( flowChartView );
 
@@ -134,11 +152,54 @@ namespace NodeGraph.View
 			NodeGraphManager.EndDragNode();
 			NodeGraphManager.EndDragSelection( false );
 
-			NodeGraphManager.MouseLeftDownNode = _ViewModel.Model;
+			NodeGraphManager.MouseLeftDownNode = ViewModel.Model;
 
 			NodeGraphManager.BeginDragNode( flowChart );
 
+			Node node = ViewModel.Model;
+			_DraggingStartPos = new Point( node.X, node.Y );
+
+			flowChart.History.BeginTransaction( "Moving node" );
+
 			e.Handled = true;
+		}
+
+		protected override void OnPreviewMouseLeftButtonUp( MouseButtonEventArgs e )
+		{
+			base.OnPreviewMouseLeftButtonUp( e );
+
+			if( NodeGraphManager.IsNodeDragging )
+			{
+				FlowChart flowChart = ViewModel.Model.FlowChart;
+
+				Node node = ViewModel.Model;
+				Point delta = new Point( node.X - _DraggingStartPos.X, node.Y - _DraggingStartPos.Y );
+
+				if( ( 0 != ( int )delta.X ) &&
+					( 0 != ( int ) delta.Y ) )
+				{
+					List<Guid> selectionList;
+					NodeGraphManager.SelectedNodes.TryGetValue( node.FlowChart.Guid, out selectionList );
+					if( null != selectionList )
+					{
+						foreach( var guid in selectionList )
+						{
+							Node currentNode = NodeGraphManager.FindNode( guid );
+
+							flowChart.History.AddCommand( new History.NodePropertyCommand(
+								"Node.X", currentNode.Guid, "X", currentNode.X - delta.X, currentNode.X ) );
+							flowChart.History.AddCommand( new History.NodePropertyCommand(
+								"Node.Y", currentNode.Guid, "Y", currentNode.Y - delta.Y, currentNode.Y ) );
+						}
+					}
+
+					flowChart.History.EndTransaction( false );
+				}
+				else
+				{
+					flowChart.History.EndTransaction( true );
+				}
+			}
 		}
 
 		protected override void OnMouseMove( MouseEventArgs e )
@@ -146,10 +207,12 @@ namespace NodeGraph.View
 			base.OnMouseMove( e );
 
 			if( NodeGraphManager.IsNodeDragging &&
-				( NodeGraphManager.MouseLeftDownNode == _ViewModel.Model ) &&
+				( NodeGraphManager.MouseLeftDownNode == ViewModel.Model ) &&
 				!IsSelected )
 			{
-				NodeGraphManager.TrySelection( _ViewModel.Model.FlowChart, _ViewModel.Model, false, false, false );
+				Node node = ViewModel.Model;
+				FlowChart flowChart = node.FlowChart;
+				NodeGraphManager.TrySelection( flowChart, node, false, false, false );
 			}
 		}
 
@@ -168,10 +231,10 @@ namespace NodeGraph.View
 
 		public virtual void OnPortConnectionChanged()
 		{
-			HasConnection = ( 0 < _ViewModel.InputFlowPortViewModels.Count ) ||
-				( 0 < _ViewModel.OutputFlowPortViewModels.Count ) ||
-				( 0 < _ViewModel.InputPropertyPortViewModels.Count ) ||
-				( 0 < _ViewModel.OutputPropertyPortViewModels.Count );
+			HasConnection = ( 0 < ViewModel.InputFlowPortViewModels.Count ) ||
+				( 0 < ViewModel.OutputFlowPortViewModels.Count ) ||
+				( 0 < ViewModel.InputPropertyPortViewModels.Count ) ||
+				( 0 < ViewModel.OutputPropertyPortViewModels.Count );
 		}
 
 		#endregion // Connection

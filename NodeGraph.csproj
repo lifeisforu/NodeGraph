@@ -59,6 +59,16 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="History\CreateConnectorCommand.cs" />
+    <Compile Include="History\CreateNodeCommand.cs" />
+    <Compile Include="History\CreateNodePortCommand.cs" />
+    <Compile Include="History\DestroyConnectorCommand.cs" />
+    <Compile Include="History\DestroyNodeCommand.cs" />
+    <Compile Include="History\DestroyNodePortCommand.cs" />
+    <Compile Include="History\NodePropertyCommand.cs" />
+    <Compile Include="History\NodeGraphCommand.cs" />
+    <Compile Include="History\NodeGraphHistory.cs" />
+    <Compile Include="History\ZoomAndPanCommand.cs" />
     <Compile Include="Model\Connector.cs" />
     <Compile Include="Model\ConnectorAttribute.cs" />
     <Compile Include="Model\FlowChartAttribute.cs" />

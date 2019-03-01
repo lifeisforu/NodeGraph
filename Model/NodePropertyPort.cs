@@ -52,7 +52,7 @@ namespace NodeGraph.Model
 
 		#region Overrides Callbacks
 
-		public override void OnPostLoad()
+		public override void OnDeserialize()
 		{
 
 		}

@@ -17,7 +17,8 @@ namespace NodeGraph.View
 	{
 		#region Fields
 
-		protected DispatcherTimer _EdgeDraggingTimer = new DispatcherTimer();
+		protected DispatcherTimer _Timer = new DispatcherTimer();
+		protected double _CurrentTime = 0.0;
 
 		#endregion // Fields
 
@@ -77,9 +78,9 @@ namespace NodeGraph.View
 
 			SizeChanged += FlowChartView_SizeChanged;
 
-			_EdgeDraggingTimer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
-			_EdgeDraggingTimer.Tick += Timer_Tick;
-			_EdgeDraggingTimer.Start();
+			_Timer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
+			_Timer.Tick += Timer_Tick;
+			_Timer.Start();
 		}
 
 		#endregion // Constructors
@@ -206,9 +207,21 @@ namespace NodeGraph.View
 				return;
 			}
 
+			FlowChart flowChart = ViewModel.Model;
+
+
 			NodeGraphManager.EndConnection();
 			NodeGraphManager.EndDragNode();
-			NodeGraphManager.EndDragSelection( false );
+
+			if( NodeGraphManager.IsSelecting )
+			{
+				bool bChanged = false;
+				flowChart.History.BeginTransaction( "Selecting" );
+				{
+					bChanged = NodeGraphManager.EndDragSelection( false );
+				}
+				flowChart.History.EndTransaction( !bChanged );
+			}
 			
 		}
 
@@ -221,12 +234,20 @@ namespace NodeGraph.View
 				return;
 			}
 
+			Keyboard.Focus( this );
+
 			_RightButtonDownPos = e.GetPosition( this );
 
 			if( !NodeGraphManager.IsDragging )
 			{
 				_IsDraggingCanvas = true;
+
+				_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
+
 				Mouse.Capture( this, CaptureMode.SubTree );
+
+				History.NodeGraphHistory history = ViewModel.Model.History;
+				history.BeginTransaction( "Panning" );
 			}
 		}
 
@@ -243,19 +264,33 @@ namespace NodeGraph.View
 			NodeGraphManager.EndDragNode();
 			NodeGraphManager.EndDragSelection( true );
 
-			if( _IsDraggingCanvas )
-			{
-				_IsDraggingCanvas = false;
-				Mouse.Capture( null );
-			}
-
 			Point mousePos = Mouse.GetPosition( this );
-			Point diff = new Point	(
+			Point diff = new Point(
 				Math.Abs( _RightButtonDownPos.X - mousePos.X ),
 				Math.Abs( _RightButtonDownPos.Y - mousePos.Y ) );
 
 			bool wasDraggingCanvas = ( 5.0 < diff.X ) || ( 5.0 < diff.Y );
-			if( !wasDraggingCanvas && !NodeGraphManager.IsDragging )
+
+			if( _IsDraggingCanvas )
+			{
+				_IsDraggingCanvas = false;
+				Mouse.Capture( null );
+
+				History.NodeGraphHistory history = ViewModel.Model.History;
+				if( wasDraggingCanvas )
+				{
+					history.AddCommand( new History.ZoomAndPanCommand(
+						"ZoomAndPan", ViewModel.Model, _ZoomAndPanStartMatrix, ZoomAndPan.Matrix ) );
+
+					history.EndTransaction( false );
+				}
+				else
+				{
+					history.EndTransaction( true );
+				}
+			}
+
+			if( !wasDraggingCanvas )
 			{
 				HitTestResult hitResult = VisualTreeHelper.HitTest( this, mousePos );
 				if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
@@ -348,35 +383,6 @@ namespace NodeGraph.View
 				ViewModel.SelectionHeight = selectionEnd.Y - selectionStart.Y;
 			}
 		}
-		
-		private void Timer_Tick( object sender, EventArgs e )
-		{
-			if( NodeGraphManager.IsDragging )
-			{
-				MouseArea area = CheckMouseArea();
-
-				if( MouseArea.None != area )
-				{
-					Point delta = new Point( 0.0, 0.0 );
-					if( MouseArea.Left == ( area & MouseArea.Left ) )
-						delta.X = -10.0;
-					if( MouseArea.Right == ( area & MouseArea.Right ) )
-						delta.X = 10.0;
-					if( MouseArea.Top == ( area & MouseArea.Top ) )
-						delta.Y = -10.0;
-					if( MouseArea.Bottom == ( area & MouseArea.Bottom ) )
-						delta.Y = 10.0;
-
-					Point mousePos = Mouse.GetPosition( this );
-					UpdateDragging( 
-						new Point( mousePos.X + delta.X, mousePos.Y + delta.Y ), // virtual mouse-position.
-						delta ); // virtual delta.
-
-					_ZoomAndPan.StartX += delta.X;
-					_ZoomAndPan.StartY += delta.Y;
-				}
-			}
-		}
 
 		protected override void OnMouseMove( MouseEventArgs e )
 		{
@@ -440,11 +446,27 @@ namespace NodeGraph.View
 			{
 				_IsDraggingCanvas = false;
 				Mouse.Capture( null );
+
+				History.NodeGraphHistory history = ViewModel.Model.History;
+				history.EndTransaction( true );
 			}
 		}
 
+		private bool _IsWheeling = false;
+		private double _WheelStartTime = 0.0;
+		private Matrix _ZoomAndPanStartMatrix;
 		protected override void OnMouseWheel( MouseWheelEventArgs e )
 		{
+			if( !_IsWheeling )
+			{
+				History.NodeGraphHistory history = ViewModel.Model.History;
+				history.BeginTransaction( "Zooming" );
+				_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
+			}
+
+			_WheelStartTime = _CurrentTime;
+			_IsWheeling = true;
+
 			base.OnMouseWheel( e );
 
 			double newScale = _ZoomAndPan.Scale;
@@ -465,6 +487,59 @@ namespace NodeGraph.View
 
 		#endregion // Mouse Events
 
+		#region Timer Events
+
+		private void Timer_Tick( object sender, EventArgs e )
+		{
+			_CurrentTime += _Timer.Interval.Milliseconds;
+
+			if( NodeGraphManager.IsDragging )
+			{
+				MouseArea area = CheckMouseArea();
+
+				if( MouseArea.None != area )
+				{
+					Point delta = new Point( 0.0, 0.0 );
+					if( MouseArea.Left == ( area & MouseArea.Left ) )
+						delta.X = -10.0;
+					if( MouseArea.Right == ( area & MouseArea.Right ) )
+						delta.X = 10.0;
+					if( MouseArea.Top == ( area & MouseArea.Top ) )
+						delta.Y = -10.0;
+					if( MouseArea.Bottom == ( area & MouseArea.Bottom ) )
+						delta.Y = 10.0;
+
+					Point mousePos = Mouse.GetPosition( this );
+					UpdateDragging(
+						new Point( mousePos.X + delta.X, mousePos.Y + delta.Y ), // virtual mouse-position.
+						delta ); // virtual delta.
+
+					_ZoomAndPan.StartX += delta.X;
+					_ZoomAndPan.StartY += delta.Y;
+				}
+			}
+			else if( _IsWheeling )
+			{
+				if( 200 < ( _CurrentTime - _WheelStartTime ) )
+				{
+					_IsWheeling = false;
+
+					History.NodeGraphHistory history = ViewModel.Model.History;
+
+					history.AddCommand( new History.ZoomAndPanCommand(
+						"ZoomAndPan", ViewModel.Model, _ZoomAndPanStartMatrix, ZoomAndPan.Matrix ) );
+
+					history.EndTransaction( false );
+				}
+			}
+			else
+			{
+				_CurrentTime = 0.0;
+			}
+		}
+
+		#endregion // Timer Events
+
 		#region Keyboard Events
 
 		protected override void OnKeyDown( KeyEventArgs e )
@@ -478,7 +553,12 @@ namespace NodeGraph.View
 
 			if( Key.Delete == e.Key )
 			{
-				NodeGraphManager.DestroySelectedNodes( ViewModel.Model );
+				FlowChart flowChart = ViewModel.Model;
+				flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+				{
+					NodeGraphManager.DestroySelectedNodes( ViewModel.Model );
+				}
+				flowChart.History.EndTransaction( false );
 			}
 			else if( Key.Escape == e.Key )
 			{
@@ -498,6 +578,22 @@ namespace NodeGraph.View
 			else if( Key.F == e.Key )
 			{
 				FitNodesToView( true );
+			}
+			else if( Key.Z == e.Key )
+			{
+				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+				{
+					History.NodeGraphHistory history = ViewModel.Model.History;
+					history.Undo();
+				}
+			}
+			else if( Key.Y == e.Key )
+			{
+				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+				{
+					History.NodeGraphHistory history = ViewModel.Model.History;
+					history.Redo();
+				}
 			}
 		}
 

@@ -56,6 +56,8 @@ namespace NodeGraph.Model
 			}
 		}
 
+		public History.NodeGraphHistory History { get; private set; }
+
 		#endregion // Properties
 
 		#region Constructor
@@ -65,7 +67,7 @@ namespace NodeGraph.Model
 		/// </summary>
 		public FlowChart( Guid guid ) : base( guid )
 		{
-			
+			History = new History.NodeGraphHistory( this, 100 );
 		}
 
 		#endregion // Constructor
@@ -108,16 +110,16 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "FlowChart.OnPostDestroy()" );
 		}
 
-		public virtual void OnPostLoad()
+		public virtual void OnDeserialize()
 		{
 			foreach( var node in Nodes )
 			{
-				node.OnPostLoad();
+				node.OnDeserialize();
 			}
 
 			foreach( var connector in Connectors )
 			{
-				connector.OnPostLoad();
+				connector.OnDeserialize();
 			}
 		}
 

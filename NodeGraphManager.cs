@@ -1725,6 +1725,37 @@ namespace NodeGraph
 		}
 
 		#endregion // Selection Events
+
+		#region Drag & Drop Events
+
+		public delegate void NodeGraphDragEventDelegate( object sender, NodeGraphDragEventArgs args );
+
+		public static event NodeGraphDragEventDelegate DragEnter;
+		public static event NodeGraphDragEventDelegate DragLeave;
+		public static event NodeGraphDragEventDelegate DragOver;
+		public static event NodeGraphDragEventDelegate Drop;
+
+		public static void InvokeDragEnter( object sender, NodeGraphDragEventArgs args )
+		{
+			DragEnter?.Invoke( sender, args );
+		}
+
+		public static void InvokeDragLeave( object sender, NodeGraphDragEventArgs args )
+		{
+			DragLeave?.Invoke( sender, args );
+		}
+
+		public static void InvokeDragOver( object sender, NodeGraphDragEventArgs args )
+		{
+			DragOver?.Invoke( sender, args );
+		}
+
+		public static void InvokeDrop( object sender, NodeGraphDragEventArgs args )
+		{
+			Drop?.Invoke( sender, args );
+		}
+
+		#endregion // Drag & Drop Events
 	}
 
 	public enum ModelType
@@ -1741,5 +1772,13 @@ namespace NodeGraph
 		public Point ModelSpaceMouseLocation { get; set; }
 		public ModelType ModelType { get; set; }
 		public System.Windows.Controls.ContextMenu ContextMenu { get; internal set; }
+	}
+
+	public class NodeGraphDragEventArgs
+	{
+		public Point ViewSpaceMouseLocation { get; set; }
+		public Point ModelSpaceMouseLocation { get; set; }
+		public ModelType ModelType { get; set; }
+		public DragEventArgs DragEventArgs { get; set; }
 	}
 }

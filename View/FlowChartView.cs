@@ -81,9 +81,67 @@ namespace NodeGraph.View
 			_Timer.Interval = new TimeSpan( 0, 0, 0, 0, 33 );
 			_Timer.Tick += Timer_Tick;
 			_Timer.Start();
+
+			AllowDrop = true;
+
+			DragEnter += FlowChartView_DragEnter;
+			DragLeave += FlowChartView_DragLeave;
+			DragOver += FlowChartView_DragOver;
+			Drop += FlowChartView_Drop;
 		}
 
 		#endregion // Constructors
+
+		#region Public Methods
+
+		public ModelBase FindModelUnderMouse( out Point viewSpacePos, out Point modelSpacePos, out ModelType modelType )
+		{
+			Point mousePos = Mouse.GetPosition( this );
+
+			ModelBase model = ViewModel.Model;
+
+			viewSpacePos = mousePos;
+			modelSpacePos = _ZoomAndPan.MatrixInv.Transform( mousePos );
+			modelType = ModelType.FlowChart;
+
+			HitTestResult hitResult = VisualTreeHelper.HitTest( this, mousePos );
+			if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
+			{
+
+				DependencyObject hit = hitResult.VisualHit;
+				NodePortView portView = ViewUtil.FindFirstParent<NodePortView>( hit );
+				if( null != portView )
+				{
+					model = portView.ViewModel.Model;
+					if( model is NodeFlowPort )
+					{
+						modelType = ModelType.PropertyPort;
+					}
+					else if( typeof( NodeFlowPort ).IsAssignableFrom( portView.ViewModel.Model.GetType() ) )
+					{
+						modelType = ModelType.FlowPort;
+					}
+				}
+				else
+				{
+					NodeView nodeView = ViewUtil.FindFirstParent<NodeView>( hit );
+					if( null != nodeView )
+					{
+						model = nodeView.ViewModel.Model;
+						modelType = ModelType.Node;
+					}
+					else
+					{
+						model = ViewModel.Model;
+						modelType = ModelType.FlowChart;
+					}
+				}
+			}
+
+			return model;
+		}
+
+		#endregion // Public Methods
 
 		#region Template
 
@@ -304,54 +362,24 @@ namespace NodeGraph.View
 
 			if( !wasDraggingCanvas )
 			{
-				HitTestResult hitResult = VisualTreeHelper.HitTest( this, mousePos );
-				if( ( null != hitResult ) && ( null != hitResult.VisualHit ) )
+				Point viewSpacePos;
+				Point modelSpacePos;
+				ModelType modelType;
+				ModelBase model = FindModelUnderMouse( out viewSpacePos, out modelSpacePos, out modelType );
+
+				if( null != model )
 				{
-					object sender = null;
-
 					BuildContextMenuArgs args = new BuildContextMenuArgs();
-					args.ViewSpaceMouseLocation = mousePos;
-					args.ModelSpaceMouseLocation = _ZoomAndPan.MatrixInv.Transform( mousePos );
+					args.ViewSpaceMouseLocation = viewSpacePos;
+					args.ModelSpaceMouseLocation = modelSpacePos;
+					args.ModelType = modelType;
+					ContextMenu = new ContextMenu();
+					ContextMenu.Closed += ContextMenu_Closed;
+					args.ContextMenu = ContextMenu;
 
-					DependencyObject hit = hitResult.VisualHit;
-					NodePortView portView = ViewUtil.FindFirstParent< NodePortView >( hit );
-					if( null != portView )
+					if( !NodeGraphManager.InvokeBuildContextMenu( model, args ) )
 					{
-						sender = portView;
-						if( typeof( NodePropertyPort ).IsAssignableFrom( portView.ViewModel.Model.GetType() ) )
-						{
-							args.ModelType = ModelType.PropertyPort;
-						}
-						else if( typeof( NodeFlowPort ).IsAssignableFrom( portView.ViewModel.Model.GetType() ) )
-						{
-							args.ModelType = ModelType.FlowPort;
-						}
-					}
-					else
-					{
-						NodeView nodeView = ViewUtil.FindFirstParent< NodeView >( hit );
-						if( null != nodeView )
-						{
-							sender = nodeView;
-							args.ModelType = ModelType.Node;
-						}
-						else
-						{
-							sender = this;
-							args.ModelType = ModelType.FlowChart;
-						}
-					}
-
-					if( null != sender )
-					{
-						ContextMenu = new ContextMenu();
-						ContextMenu.Closed += ContextMenu_Closed;
-						args.ContextMenu = ContextMenu;
-
-						if( !NodeGraphManager.InvokeBuildContextMenu( sender, args ) )
-						{
-							ContextMenu = null;
-						}
+						ContextMenu = null;
 					}
 				}
 			}
@@ -717,6 +745,71 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Fitting.
+
+		#region Drag & Drop Events
+
+		private ModelBase BuidNodeGraphDragEventArgs( DragEventArgs args, out NodeGraphDragEventArgs eventArgs )
+		{
+			Point viewSpacePos;
+			Point modelSpacePos;
+			ModelType modelType;
+			ModelBase model = FindModelUnderMouse( out viewSpacePos, out modelSpacePos, out modelType );
+
+			eventArgs = null;
+
+			if( null != model )
+			{
+				eventArgs = new NodeGraphDragEventArgs();
+				eventArgs.ViewSpaceMouseLocation = viewSpacePos;
+				eventArgs.ModelSpaceMouseLocation = modelSpacePos;
+				eventArgs.ModelType = modelType;
+				eventArgs.DragEventArgs = args;
+			}
+
+			return model;
+		}
+
+		private void FlowChartView_Drop( object sender, DragEventArgs args )
+		{
+			NodeGraphDragEventArgs eventArgs;
+			ModelBase model = BuidNodeGraphDragEventArgs( args, out eventArgs );
+			if( null != model )
+			{
+				NodeGraphManager.InvokeDrop( model, eventArgs );
+			}
+		}
+
+		private void FlowChartView_DragOver( object sender, DragEventArgs args )
+		{
+			NodeGraphDragEventArgs eventArgs;
+			ModelBase model = BuidNodeGraphDragEventArgs( args, out eventArgs );
+			if( null != model )
+			{
+				NodeGraphManager.InvokeDragOver( model, eventArgs );
+			}
+		}
+
+		private void FlowChartView_DragLeave( object sender, DragEventArgs args )
+		{
+			NodeGraphDragEventArgs eventArgs;
+			ModelBase model = BuidNodeGraphDragEventArgs( args, out eventArgs );
+			if( null != model )
+			{
+				NodeGraphManager.InvokeDragLeave( model, eventArgs );
+			}
+		}
+
+		private void FlowChartView_DragEnter( object sender, DragEventArgs args )
+		{
+			NodeGraphDragEventArgs eventArgs;
+			ModelBase model = BuidNodeGraphDragEventArgs( args, out eventArgs );
+			if( null != model )
+			{
+				NodeGraphManager.InvokeDragEnter( model, eventArgs );
+			}
+		}
+
+		#endregion // Drag & Drop Events
 	}
 
 	public class ZoomAndPan

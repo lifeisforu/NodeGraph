@@ -469,6 +469,13 @@ namespace NodeGraph.View
 		private Matrix _ZoomAndPanStartMatrix;
 		protected override void OnMouseWheel( MouseWheelEventArgs e )
 		{
+			base.OnMouseWheel( e );
+
+			if( null == ViewModel )
+			{
+				return;
+			}
+
 			if( !_IsWheeling )
 			{
 				History.NodeGraphHistory history = ViewModel.Model.History;
@@ -478,8 +485,6 @@ namespace NodeGraph.View
 
 			_WheelStartTime = _CurrentTime;
 			_IsWheeling = true;
-
-			base.OnMouseWheel( e );
 
 			double newScale = _ZoomAndPan.Scale;
 			newScale += ( 0.0 > e.Delta ) ? -0.05 : 0.05;
@@ -504,6 +509,11 @@ namespace NodeGraph.View
 		private void Timer_Tick( object sender, EventArgs e )
 		{
 			_CurrentTime += _Timer.Interval.Milliseconds;
+
+			if( null == ViewModel )
+			{
+				return;
+			}
 
 			if( NodeGraphManager.IsDragging )
 			{

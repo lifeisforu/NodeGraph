@@ -21,7 +21,7 @@ namespace NodeGraph.History
 
 		public override void Undo()
 		{
-			NodeGraphManager.DeserializeConnector( UndoParams as string );
+			NodeGraphManager.DeserializeNodePort( UndoParams as string );
 		}
 
 		public override void Redo()

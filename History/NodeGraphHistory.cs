@@ -229,7 +229,7 @@ namespace NodeGraph.History
 				return;
 			}
 			
-			if( !bCancel || ( 0 == _TransactionAdding.Commands.Count ) )
+			if( !bCancel && ( 0 != _TransactionAdding.Commands.Count ) )
 			{
 				int nextPos = _CurrentPos + 1;
 				if( nextPos >= _Transactions.Count ) // shift
@@ -253,7 +253,7 @@ namespace NodeGraph.History
 
 			if( NodeGraphManager.OutputDebugInfo )
 			{
-				if( bCancel )
+				if( bCancel || ( 0 == _TransactionAdding.Commands.Count ) )
 					System.Diagnostics.Debug.WriteLine( string.Format( "CancelTransaction {0}", _TransactionAdding.Name ) );
 				else
 					System.Diagnostics.Debug.WriteLine( string.Format( "EndTransaction {0}", _TransactionAdding.Name ) );

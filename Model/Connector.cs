@@ -169,7 +169,7 @@ namespace NodeGraph.Model
 				throw new InvalidOperationException( "StartPort can not be null in Connector.ReadXml()." );
 
 			EndPort = NodeGraphManager.FindNodePort( Guid.Parse( reader.GetAttribute( "EndPort" ) ) );
-			if( null == StartPort )
+			if( null == EndPort )
 				throw new InvalidOperationException( "EndPort can not be null in Connector.ReadXml()." );
 		}
 

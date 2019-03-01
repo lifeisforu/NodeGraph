@@ -86,17 +86,6 @@ namespace NodeGraph
 			flowChart.OnPreDestroy();
 
 			List<Guid> guids = new List<Guid>();
-			foreach( var connector in flowChart.Connectors )
-			{
-				guids.Add( connector.Guid );
-			}
-
-			foreach( var connectorGuid in guids )
-			{
-				DestroyConnector( connectorGuid );
-			}
-
-			guids.Clear();
 			foreach( var node in flowChart.Nodes )
 			{
 				guids.Add( node.Guid );
@@ -105,6 +94,11 @@ namespace NodeGraph
 			foreach( var nodeGuid in guids )
 			{
 				DestroyNode( nodeGuid );
+			}
+
+			if( 0 < flowChart.Connectors.Count )
+			{
+				throw new InvalidOperationException( "Connectors are not removed." );
 			}
 
 			flowChart.OnPostDestroy();
@@ -246,45 +240,59 @@ namespace NodeGraph
 			Node node;
 			if( Nodes.TryGetValue( guid, out node ) )
 			{
-				//----- history.
-
-				node.FlowChart.History.AddCommand( new NodeGraph.History.DestroyNodeCommand(
-					"Creating node", SerializeNode( node ), node.Guid ) );
-
 				//----- destroy.
 
 				node.OnPreDestroy();
 
-				List<Guid> guids = new List<Guid>();
+				List<Guid> connectorGuids = new List<Guid>();
+				List<Guid> portGuids = new List<Guid>();
 
 				foreach( var port in node.InputFlowPorts )
 				{
-					guids.Add( port.Guid );
+					foreach( var connector in port.Connectors )
+					{
+						if( !connectorGuids.Contains( connector.Guid ) )
+							connectorGuids.Add( connector.Guid );
+					}
+					portGuids.Add( port.Guid );
 				}
 
 				foreach( var port in node.OutputFlowPorts )
 				{
-					guids.Add( port.Guid );
+					foreach( var connector in port.Connectors )
+					{
+						if( !connectorGuids.Contains( connector.Guid ) )
+							connectorGuids.Add( connector.Guid );
+					}
+					portGuids.Add( port.Guid );
 				}
-
-				foreach( var portGuid in guids )
-				{
-					DestroyNodePort( portGuid );
-				}
-
-				guids = new List<Guid>();
 
 				foreach( var port in node.InputPropertyPorts )
 				{
-					guids.Add( port.Guid );
+					foreach( var connector in port.Connectors )
+					{
+						if( !connectorGuids.Contains( connector.Guid ) )
+							connectorGuids.Add( connector.Guid );
+					}
+					portGuids.Add( port.Guid );
 				}
 
 				foreach( var port in node.OutputPropertyPorts )
 				{
-					guids.Add( port.Guid );
+					foreach( var connector in port.Connectors )
+					{
+						if( !connectorGuids.Contains( connector.Guid ) )
+							connectorGuids.Add( connector.Guid );
+					}
+					portGuids.Add( port.Guid );
 				}
 
-				foreach( var portGuid in guids )
+				foreach( var connectorGuid in connectorGuids )
+				{
+					DestroyConnector( connectorGuid );
+				}
+
+				foreach( var portGuid in portGuids )
 				{
 					DestroyNodePort( portGuid );
 				}
@@ -298,6 +306,10 @@ namespace NodeGraph
 				selectionList.RemoveAll( ( currentGuid ) => currentGuid == guid );
 
 				node.OnPostDestroy();
+
+				node.FlowChart.History.AddCommand( new NodeGraph.History.DestroyNodeCommand(
+					"Destroying node", SerializeNode( node ), node.Guid ) );
+
 				Nodes.Remove( guid );
 			}
 		}
@@ -485,7 +497,7 @@ namespace NodeGraph
 			Node node = port.Node;
 
 			node.FlowChart.History.AddCommand( new History.DestroyNodePortCommand(
-				"Creating port", SerializeNodePort( port ), port.Guid ) );
+				"Destroying port", SerializeNodePort( port ), port.Guid ) );
 
 			//----- destroy.
 

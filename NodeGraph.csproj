@@ -59,6 +59,8 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Externals\EditableTextBlock.cs" />
+    <Compile Include="Externals\EditableTextBlockAdorner.cs" />
     <Compile Include="History\CreateConnectorCommand.cs" />
     <Compile Include="History\CreateNodeCommand.cs" />
     <Compile Include="History\CreateNodePortCommand.cs" />

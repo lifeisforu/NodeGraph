@@ -130,11 +130,13 @@ namespace NodeGraph
 		/// <param name="x">Location along X axis( Canvas.Left ).</param>
 		/// <param name="y">Location along Y axis( Canvas.Top )</param>
 		/// <param name="ZIndex">Z index( Canvas.ZIndex ).</param>
+		/// <param name="headerOverride">User defined header.</param>
 		/// <param name="nodeViewModelTypeOverride">NodeViewModel to override.</param>
 		/// <param name="flowPortViewModelTypeOverride">FlowPortViewModel to override.</param>
 		/// <param name="propertyPortViewModelTypeOverride">PropertyPortViewmodel to override.</param>
 		/// <returns>Created node instance.</returns>
 		public static Node CreateNode( bool isDeserializing, Guid guid, FlowChart flowChart, Type nodeType, double x, double y, int ZIndex,
+			string headerOverride = null,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -165,7 +167,7 @@ namespace NodeGraph
 			flowChart.ViewModel.NodeViewModels.Add( node.ViewModel );
 			flowChart.Nodes.Add( node );
 
-			node.Header = nodeAttr.Header;
+			node.Header = !string.IsNullOrEmpty( headerOverride ) ? headerOverride : nodeAttr.Header;
 			node.HeaderBackgroundColor = new SolidColorBrush( ( Color )ColorConverter.ConvertFromString( nodeAttr.HeaderBackgroundColor ) );
 			node.HeaderFontColor = new SolidColorBrush( ( Color )ColorConverter.ConvertFromString( nodeAttr.HeaderFontColor ) );
 
@@ -319,7 +321,7 @@ namespace NodeGraph
 			if( !isFlowPort && !isPropertyPort )
 				throw new ArgumentException( "CreateRouterNode() is only supported for NodeFlowPort or NodePropertyPort" );
 
-			Node node = CreateNode( false, guid, flowChart, typeof( Node ), X, Y, ZIndex,
+			Node node = CreateNode( false, guid, flowChart, typeof( Node ), X, Y, ZIndex, null,
 				( null == nodeViewModelTypeOverride ) ? typeof( RouterNodeViewModel ) : nodeViewModelTypeOverride, 
 				flowPortViewModelTypeOverride, propertyPortViewModelTypeOverride );
 			if( isFlowPort )
@@ -1517,8 +1519,9 @@ namespace NodeGraph
 						double x = double.Parse( reader.GetAttribute( "X" ) );
 						double y = double.Parse( reader.GetAttribute( "Y" ) );
 						int zIndex = int.Parse( reader.GetAttribute( "ZIndex" ) );
+						string header = reader.GetAttribute( "Header" );
 
-						Node node = CreateNode( true, guid, flowChart, type, x, y, zIndex, vmType );
+						Node node = CreateNode( true, guid, flowChart, type, x, y, zIndex, header, vmType );
 						node.ReadXml( reader );
 
 						node.OnDeserialize();

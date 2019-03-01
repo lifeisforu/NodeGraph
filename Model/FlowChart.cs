@@ -172,12 +172,13 @@ namespace NodeGraph.Model
 
 						if( "Node" == prevReaderName )
 						{
+							string header = reader.GetAttribute( "Header" );
 							Type vmType = Type.GetType( reader.GetAttribute( "ViewModelType" ) );
 							double x = double.Parse( reader.GetAttribute( "X" ) );
 							double y = double.Parse( reader.GetAttribute( "Y" ) );
 							int zIndex = int.Parse( reader.GetAttribute( "ZIndex" ) );
 
-							Node node = NodeGraphManager.CreateNode( true, guid, flowChart, type, x, y, zIndex, vmType );
+							Node node = NodeGraphManager.CreateNode( true, guid, flowChart, type, x, y, zIndex, header, vmType );
 							node.ReadXml( reader );
 						}
 						else

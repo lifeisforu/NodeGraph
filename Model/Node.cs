@@ -273,6 +273,7 @@ namespace NodeGraph.Model
 			writer.WriteAttributeString( "X", X.ToString() );
 			writer.WriteAttributeString( "Y", Y.ToString() );
 			writer.WriteAttributeString( "ZIndex", ZIndex.ToString() );
+			writer.WriteAttributeString( "Header", Header );
 			//} End creation info.
 
 			writer.WriteStartElement( "InputFlowPorts" );

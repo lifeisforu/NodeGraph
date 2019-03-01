@@ -2,6 +2,7 @@
 using NodeGraph.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -181,19 +182,15 @@ namespace NodeGraph.View
 				if( ( 0 != ( int )delta.X ) &&
 					( 0 != ( int ) delta.Y ) )
 				{
-					List<Guid> selectionList;
-					NodeGraphManager.SelectedNodes.TryGetValue( node.FlowChart.Guid, out selectionList );
-					if( null != selectionList )
+					ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.FlowChart );
+					foreach( var guid in selectionList )
 					{
-						foreach( var guid in selectionList )
-						{
-							Node currentNode = NodeGraphManager.FindNode( guid );
+						Node currentNode = NodeGraphManager.FindNode( guid );
 
-							flowChart.History.AddCommand( new History.NodePropertyCommand(
-								"Node.X", currentNode.Guid, "X", currentNode.X - delta.X, currentNode.X ) );
-							flowChart.History.AddCommand( new History.NodePropertyCommand(
-								"Node.Y", currentNode.Guid, "Y", currentNode.Y - delta.Y, currentNode.Y ) );
-						}
+						flowChart.History.AddCommand( new History.NodePropertyCommand(
+							"Node.X", currentNode.Guid, "X", currentNode.X - delta.X, currentNode.X ) );
+						flowChart.History.AddCommand( new History.NodePropertyCommand(
+							"Node.Y", currentNode.Guid, "Y", currentNode.Y - delta.Y, currentNode.Y ) );
 					}
 
 					flowChart.History.AddCommand( new History.ZoomAndPanCommand(

@@ -1,6 +1,7 @@
 ﻿using NodeGraph.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -78,8 +79,7 @@ namespace NodeGraph.History
 		{
 			Node node = NodeGraphManager.FindNode( Guid );
 
-			List<Guid> selectionList;
-			NodeGraphManager.SelectedNodes.TryGetValue( node.FlowChart.Guid, out selectionList );
+			ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.FlowChart );
 
 			node.ViewModel.IsSelected = isSelected;
 

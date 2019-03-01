@@ -3,6 +3,8 @@ using NodeGraph.View;
 using NodeGraph.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -27,7 +29,7 @@ namespace NodeGraph
 		public static readonly Dictionary<Guid, Connector> Connectors = new Dictionary<Guid, Connector>();
 		public static readonly Dictionary<Guid, NodeFlowPort> NodeFlowPorts = new Dictionary<Guid, NodeFlowPort>();
 		public static readonly Dictionary<Guid, NodePropertyPort> NodePropertyPorts = new Dictionary<Guid, NodePropertyPort>();
-		public static readonly Dictionary<Guid, List<Guid>> SelectedNodes = new Dictionary<Guid, List<Guid>>();
+		public static readonly Dictionary<Guid, ObservableCollection<Guid>> SelectedNodes = new Dictionary<Guid, ObservableCollection<Guid>>();
 		public static bool OutputDebugInfo = false;
 		public static SelectionMode SelectionMode = SelectionMode.Overlap;
 
@@ -61,7 +63,9 @@ namespace NodeGraph
 
 			//----- create selection list.
 
-			SelectedNodes.Add( flowChart.Guid, new List<Guid>() );
+			ObservableCollection<Guid> selectionList = new ObservableCollection<Guid>();
+			selectionList.CollectionChanged += Node_SelectionList_CollectionChanged;
+			SelectedNodes.Add( flowChart.Guid, selectionList );
 
 			//----- invocke create callback.
 
@@ -85,7 +89,7 @@ namespace NodeGraph
 
 			flowChart.OnPreDestroy();
 
-			List<Guid> guids = new List<Guid>();
+			ObservableCollection<Guid> guids = new ObservableCollection<Guid>();
 			foreach( var node in flowChart.Nodes )
 			{
 				guids.Add( node.Guid );
@@ -301,9 +305,8 @@ namespace NodeGraph
 				flowChart.ViewModel.NodeViewModels.Remove( node.ViewModel );
 				flowChart.Nodes.Remove( node );
 
-				List<Guid> selectionList;
-				SelectedNodes.TryGetValue( node.FlowChart.Guid, out selectionList );
-				selectionList.RemoveAll( ( currentGuid ) => currentGuid == guid );
+				ObservableCollection<Guid> selectionList = GetSelectionList( node.FlowChart );
+				selectionList.Remove( guid );
 
 				node.OnPostDestroy();
 
@@ -341,7 +344,7 @@ namespace NodeGraph
 				throw new ArgumentException( "CreateRouterNode() is only supported for NodeFlowPort or NodePropertyPort" );
 
 			Node node = CreateNode( false, guid, flowChart, typeof( Node ), X, Y, ZIndex, null,
-				( null == nodeViewModelTypeOverride ) ? typeof( RouterNodeViewModel ) : nodeViewModelTypeOverride, 
+				( null == nodeViewModelTypeOverride ) ? typeof( RouterNodeViewModel ) : nodeViewModelTypeOverride,
 				flowPortViewModelTypeOverride, propertyPortViewModelTypeOverride );
 			if( isFlowPort )
 			{
@@ -359,7 +362,7 @@ namespace NodeGraph
 
 			return node;
 		}
-		
+
 		public static Node CreateRouterNodeForConnector( Guid guid, FlowChart flowChart, Connector connector, double X, double Y, int ZIndex )
 		{
 			NodePort startPort = connector.StartPort;
@@ -473,7 +476,7 @@ namespace NodeGraph
 		#endregion // Connector
 
 		#region Port
-		
+
 		public static NodePort FindNodePort( Guid guid )
 		{
 			NodePort port = FindNodeFlowPort( guid );
@@ -1017,7 +1020,7 @@ namespace NodeGraph
 
 			AreNodesReallyDragged = true;
 
-			List<Guid> selectedNodes;
+			ObservableCollection<Guid> selectedNodes;
 			if( SelectedNodes.TryGetValue( _NodeDraggingFlowChartGuid, out selectedNodes ) )
 			{
 				foreach( var guid in selectedNodes )
@@ -1073,9 +1076,9 @@ namespace NodeGraph
 
 		public static Node MouseLeftDownNode { get; set; }
 
-		public static List<Guid> GetSelectionList( FlowChart flowChart )
+		public static ObservableCollection<Guid> GetSelectionList( FlowChart flowChart )
 		{
-			List<Guid> selectionList;
+			ObservableCollection<Guid> selectionList;
 			if( !SelectedNodes.TryGetValue( flowChart.Guid, out selectionList ) )
 				return null;
 			return selectionList;
@@ -1131,7 +1134,7 @@ namespace NodeGraph
 				return;
 			}
 
-			List<Guid> selectionList = GetSelectionList( node.FlowChart );
+			ObservableCollection<Guid> selectionList = GetSelectionList( node.FlowChart );
 			if( !selectionList.Contains( node.Guid ) )
 			{
 				node.ViewModel.IsSelected = true;
@@ -1143,14 +1146,14 @@ namespace NodeGraph
 
 		public static void RemoveSelection( Node node )
 		{
-			List<Guid> selectionList = GetSelectionList( node.FlowChart );
+			ObservableCollection<Guid> selectionList = GetSelectionList( node.FlowChart );
 			node.ViewModel.IsSelected = false;
 			selectionList.Remove( node.Guid );
 		}
 
 		public static void DeselectAllNodes( FlowChart flowChart )
 		{
-			List<Guid> selectionList = GetSelectionList( flowChart );
+			ObservableCollection<Guid> selectionList = GetSelectionList( flowChart );
 
 			foreach( var guid in selectionList )
 			{
@@ -1167,8 +1170,7 @@ namespace NodeGraph
 		{
 			DeselectAllNodes( flowChart );
 
-			List<Guid> selectionList;
-			SelectedNodes.TryGetValue( flowChart.Guid, out selectionList );
+			ObservableCollection<Guid> selectionList = GetSelectionList( flowChart );
 			foreach( var pair in Nodes )
 			{
 				Node node = pair.Value;
@@ -1198,10 +1200,10 @@ namespace NodeGraph
 			_FlowChartSelecting = flowChart;
 			_FlowChartSelecting.ViewModel.SelectionVisibility = Visibility.Visible;
 
-			List<Guid> temp = new List<Guid>();
+			ObservableCollection<Guid> temp = new ObservableCollection<Guid>();
 			SelectedNodes.TryGetValue( flowChart.Guid, out temp );
 			_OriginalSelections = new Guid[ temp.Count ];
-			temp.CopyTo( _OriginalSelections );
+			temp.CopyTo( _OriginalSelections, 0 );
 		}
 
 		public static void UpdateDragSelection( FlowChart flowChart, Point end, bool bCtrl, bool bShift, bool bAlt )
@@ -1327,7 +1329,7 @@ namespace NodeGraph
 				{
 					if( null != _FlowChartSelecting )
 					{
-						List<Guid> selectionList = GetSelectionList( _FlowChartSelecting );
+						ObservableCollection<Guid> selectionList = GetSelectionList( _FlowChartSelecting );
 						foreach( var guid in _OriginalSelections )
 						{
 							if( !selectionList.Contains( guid ) )
@@ -1396,7 +1398,7 @@ namespace NodeGraph
 		{
 			List<Guid> guids = new List<Guid>();
 
-			List<Guid> selectedNodeGuids;
+			ObservableCollection<Guid> selectedNodeGuids;
 			SelectedNodes.TryGetValue( flowChart.Guid, out selectedNodeGuids );
 
 			foreach( var guid in selectedNodeGuids )
@@ -1702,6 +1704,27 @@ namespace NodeGraph
 		}
 
 		#endregion // ContextMenu
+
+		#region Selection Events
+
+		public delegate void NodeSelectionChangedDelegate( FlowChart flowChart, ObservableCollection<Guid> nodes, NotifyCollectionChangedEventArgs args );
+		public static event NodeSelectionChangedDelegate NodeSelectionChanged;
+
+		private static void Node_SelectionList_CollectionChanged( object sender, NotifyCollectionChangedEventArgs args )
+		{
+			FlowChart flowChart = null;
+			foreach( var pair in SelectedNodes )
+			{
+				if( pair.Value == sender )
+				{
+					flowChart = FindFlowChart( pair.Key );
+				}
+			}
+
+			NodeSelectionChanged?.Invoke( flowChart, sender as ObservableCollection<Guid>, args );
+		}
+
+		#endregion // Selection Events
 	}
 
 	public enum ModelType

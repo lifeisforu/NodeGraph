@@ -40,7 +40,7 @@ namespace NodeGraph.History
 
 			if( "IsSelected" == PropertyName )
 			{
-				node.ViewModel.IsSelected = ( bool )UndoParams;
+				UpdateSelection( ( bool )UndoParams );
 			}
 			else
 			{
@@ -60,7 +60,7 @@ namespace NodeGraph.History
 
 			if( "IsSelected" == PropertyName )
 			{
-				node.ViewModel.IsSelected = ( bool )RedoParams;
+				UpdateSelection( ( bool )RedoParams );
 			}
 			else
 			{
@@ -71,5 +71,36 @@ namespace NodeGraph.History
 		}
 
 		#endregion // Overrides NodeGraphCommand
+
+		#region Private Methods
+
+		private void UpdateSelection( bool isSelected )
+		{
+			Node node = NodeGraphManager.FindNode( Guid );
+
+			List<Guid> selectionList;
+			NodeGraphManager.SelectedNodes.TryGetValue( node.FlowChart.Guid, out selectionList );
+
+			node.ViewModel.IsSelected = isSelected;
+
+			if( node.ViewModel.IsSelected )
+			{
+				System.Diagnostics.Debug.WriteLine( "True" );
+				if( !selectionList.Contains( Guid ) )
+				{
+					selectionList.Add( Guid );
+				}
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine( "False" );
+				if( selectionList.Contains( Guid ) )
+				{
+					selectionList.Remove( Guid );
+				}
+			}
+		}
+
+		#endregion // Private Methods
 	}
 }

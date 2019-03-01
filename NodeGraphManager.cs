@@ -1086,7 +1086,7 @@ namespace NodeGraph
 			}
 			else
 			{
-				DeslectAllNodes( flowChart );
+				DeselectAllNodes( flowChart );
 				bAdd = true;
 			}
 
@@ -1136,20 +1136,24 @@ namespace NodeGraph
 			selectionList.Remove( node.Guid );
 		}
 
-		public static void DeslectAllNodes( FlowChart flowChart )
+		public static void DeselectAllNodes( FlowChart flowChart )
 		{
 			List<Guid> selectionList = GetSelectionList( flowChart );
+
 			foreach( var guid in selectionList )
 			{
 				Node node = FindNode( guid );
 				node.ViewModel.IsSelected = false;
+
+				flowChart.History.AddCommand( new History.NodePropertyCommand(
+					"Deselection", node.Guid, "IsSelected", true, false ) );
 			}
 			selectionList.Clear();
 		}
 
 		public static void SelectAllNodes( FlowChart flowChart )
 		{
-			DeslectAllNodes( flowChart );
+			DeselectAllNodes( flowChart );
 
 			List<Guid> selectionList;
 			SelectedNodes.TryGetValue( flowChart.Guid, out selectionList );
@@ -1299,7 +1303,7 @@ namespace NodeGraph
 				{
 					if( ( null != _FlowChartSelecting ) && ( null != _OriginalSelections ) )
 					{
-						DeslectAllNodes( _FlowChartSelecting );
+						DeselectAllNodes( _FlowChartSelecting );
 
 						foreach( var guid in _OriginalSelections )
 						{

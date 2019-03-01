@@ -179,15 +179,6 @@ namespace NodeGraph.View
 				!NodeGraphManager.IsConnecting &&
 				!NodeGraphManager.IsSelecting )
 			{
-				bool bCtrl = Keyboard.IsKeyDown( Key.LeftCtrl );
-				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
-				bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
-
-				if( !bCtrl && !bShift && !bAlt )
-				{
-					NodeGraphManager.DeslectAllNodes( ViewModel.Model );
-				}
-
 				Point mousePos = e.GetPosition( this );
 
 				NodeGraphManager.BeginDragSelection( ViewModel.Model,
@@ -197,6 +188,15 @@ namespace NodeGraph.View
 				ViewModel.SelectionWidth = 0;
 				ViewModel.SelectionStartY = mousePos.Y;
 				ViewModel.SelectionHeight = 0;
+
+				bool bCtrl = Keyboard.IsKeyDown( Key.LeftCtrl );
+				bool bShift = Keyboard.IsKeyDown( Key.LeftShift );
+				bool bAlt = Keyboard.IsKeyDown( Key.LeftAlt );
+
+				if( !bCtrl && !bShift && !bAlt )
+				{
+					NodeGraphManager.DeselectAllNodes( ViewModel.Model );
+				}
 			}
 		}
 
@@ -574,7 +574,12 @@ namespace NodeGraph.View
 			}
 			else if( Key.Escape == e.Key )
 			{
-				NodeGraphManager.DeslectAllNodes( ViewModel.Model );
+				FlowChart flowChart = ViewModel.Model;
+				flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+				{
+					NodeGraphManager.DeselectAllNodes( ViewModel.Model );
+				}
+				flowChart.History.EndTransaction( false );
 			}
 			else if( Key.A == e.Key )
 			{
@@ -658,33 +663,47 @@ namespace NodeGraph.View
 				return;
 			}
 
-			double vsWidth = _ZoomAndPan.ViewWidth;
-			double vsHeight = _ZoomAndPan.ViewHeight;
+			FlowChart flowChart = ViewModel.Model;
+			flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+			{
+				_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
+				
+				double vsWidth = _ZoomAndPan.ViewWidth;
+				double vsHeight = _ZoomAndPan.ViewHeight;
 
-			Point margin = new Point( vsWidth * 0.05, vsHeight * 0.05 );
-			minX -= margin.X;
-			minY -= margin.Y;
-			maxX += margin.X;
-			maxY += margin.Y;
+				Point margin = new Point( vsWidth * 0.05, vsHeight * 0.05 );
+				minX -= margin.X;
+				minY -= margin.Y;
+				maxX += margin.X;
+				maxY += margin.Y;
 
-			double contentWidth = maxX - minX;
-			double contentHeight = maxY - minY;
+				double contentWidth = maxX - minX;
+				double contentHeight = maxY - minY;
 
-			_ZoomAndPan.StartX = ( minX + maxX - vsWidth ) * 0.5;
-			_ZoomAndPan.StartY = ( minY + maxY - vsHeight ) * 0.5;
-			_ZoomAndPan.Scale = 1.0;
+				_ZoomAndPan.StartX = ( minX + maxX - vsWidth ) * 0.5;
+				_ZoomAndPan.StartY = ( minY + maxY - vsHeight ) * 0.5;
+				_ZoomAndPan.Scale = 1.0;
 
-			Point vsZoomCenter = new Point( vsWidth * 0.5, vsHeight * 0.5 );
-			Point zoomCenter = _ZoomAndPan.MatrixInv.Transform( vsZoomCenter );
+				Point vsZoomCenter = new Point( vsWidth * 0.5, vsHeight * 0.5 );
+				Point zoomCenter = _ZoomAndPan.MatrixInv.Transform( vsZoomCenter );
 
-			double newScale = Math.Min( vsWidth / contentWidth, vsHeight / contentHeight );
-			_ZoomAndPan.Scale = Math.Max( 0.1, Math.Min( 1.0, newScale ) );
+				double newScale = Math.Min( vsWidth / contentWidth, vsHeight / contentHeight );
+				_ZoomAndPan.Scale = Math.Max( 0.1, Math.Min( 1.0, newScale ) );
 
-			Point vsNextZoomCenter = _ZoomAndPan.Matrix.Transform( zoomCenter );
-			Point vsDelta = new Point( vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y );
+				Point vsNextZoomCenter = _ZoomAndPan.Matrix.Transform( zoomCenter );
+				Point vsDelta = new Point( vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y );
 
-			_ZoomAndPan.StartX -= vsDelta.X;
-			_ZoomAndPan.StartY -= vsDelta.Y;
+				_ZoomAndPan.StartX -= vsDelta.X;
+				_ZoomAndPan.StartY -= vsDelta.Y;
+
+				if( 0 != ( int )( _ZoomAndPan.Matrix.OffsetX - _ZoomAndPanStartMatrix.OffsetX ) ||
+					0 != ( int )( _ZoomAndPan.Matrix.OffsetX - _ZoomAndPanStartMatrix.OffsetX ) )
+				{
+					flowChart.History.AddCommand( new History.ZoomAndPanCommand(
+						"ZoomAndPan", ViewModel.Model, _ZoomAndPanStartMatrix, ZoomAndPan.Matrix ) );
+				}
+			}
+			flowChart.History.EndTransaction( false );
 		}
 
 		#endregion // Fitting.

@@ -17,7 +17,7 @@ namespace NodeGraph.History
 		{
 			public string Name { get; private set; }
 
-			public List<NodeGraphCommand> _Commands = new List<NodeGraphCommand>();
+			public List<NodeGraphCommand> Commands = new List<NodeGraphCommand>();
 
 			public Transaction( string name )
 			{
@@ -26,22 +26,22 @@ namespace NodeGraph.History
 
 			public void Add( NodeGraphCommand command )
 			{
-				_Commands.Add( command );
+				Commands.Add( command );
 			}
 
 			internal void Undo()
 			{
-				for( int i = _Commands.Count - 1; i >= 0; --i )
+				for( int i = Commands.Count - 1; i >= 0; --i )
 				{
-					_Commands[ i ].Undo();
+					Commands[ i ].Undo();
 				}
 			}
 
 			internal void Redo()
 			{
-				for( int i = 0; i < _Commands.Count; ++i )
+				for( int i = 0; i < Commands.Count; ++i )
 				{
-					_Commands[ i ].Redo();
+					Commands[ i ].Redo();
 				}
 			}
 		};
@@ -228,8 +228,8 @@ namespace NodeGraph.History
 			{
 				return;
 			}
-
-			if( !bCancel )
+			
+			if( !bCancel || ( 0 == _TransactionAdding.Commands.Count ) )
 			{
 				int nextPos = _CurrentPos + 1;
 				if( nextPos >= _Transactions.Count ) // shift

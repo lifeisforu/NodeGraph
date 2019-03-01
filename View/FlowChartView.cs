@@ -170,6 +170,8 @@ namespace NodeGraph.View
 
 			Keyboard.Focus( this );
 
+			_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
+
 			_LeftButtonDownPos = e.GetPosition( this );
 			_PrevMousePos = _LeftButtonDownPos;
 
@@ -209,7 +211,6 @@ namespace NodeGraph.View
 
 			FlowChart flowChart = ViewModel.Model;
 
-
 			NodeGraphManager.EndConnection();
 			NodeGraphManager.EndDragNode();
 
@@ -220,6 +221,17 @@ namespace NodeGraph.View
 				{
 					bChanged = NodeGraphManager.EndDragSelection( false );
 				}
+
+				Point mousePos = e.GetPosition( this );
+
+				if( ( 0 != ( int )( mousePos.X - _LeftButtonDownPos.X ) ) ||
+					( 0 != ( int )( mousePos.Y - _LeftButtonDownPos.Y ) ) )
+				{
+					flowChart.History.AddCommand( new History.ZoomAndPanCommand(
+						"ZoomAndPan", ViewModel.Model, _ZoomAndPanStartMatrix, ZoomAndPan.Matrix ) );
+					bChanged = true;
+				}
+
 				flowChart.History.EndTransaction( !bChanged );
 			}
 			
@@ -238,11 +250,11 @@ namespace NodeGraph.View
 
 			_RightButtonDownPos = e.GetPosition( this );
 
+			_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
+
 			if( !NodeGraphManager.IsDragging )
 			{
 				_IsDraggingCanvas = true;
-
-				_ZoomAndPanStartMatrix = ZoomAndPan.Matrix;
 
 				Mouse.Capture( this, CaptureMode.SubTree );
 

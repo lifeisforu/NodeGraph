@@ -140,6 +140,7 @@ namespace NodeGraph.View
 		}
 
 		private Point _DraggingStartPos;
+		private Matrix _ZoomAndPanStartMatrix;
 		protected override void OnMouseLeftButtonDown( MouseButtonEventArgs e )
 		{
 			base.OnMouseLeftButtonDown( e );
@@ -160,6 +161,8 @@ namespace NodeGraph.View
 			_DraggingStartPos = new Point( node.X, node.Y );
 
 			flowChart.History.BeginTransaction( "Moving node" );
+
+			_ZoomAndPanStartMatrix = flowChartView.ZoomAndPan.Matrix;
 
 			e.Handled = true;
 		}
@@ -192,6 +195,9 @@ namespace NodeGraph.View
 								"Node.Y", currentNode.Guid, "Y", currentNode.Y - delta.Y, currentNode.Y ) );
 						}
 					}
+
+					flowChart.History.AddCommand( new History.ZoomAndPanCommand(
+						"ZoomAndPan", flowChart, _ZoomAndPanStartMatrix, flowChart.ViewModel.View.ZoomAndPan.Matrix ) );
 
 					flowChart.History.EndTransaction( false );
 				}

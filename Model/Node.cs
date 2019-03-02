@@ -478,7 +478,7 @@ namespace NodeGraph.Model
 			base.RaisePropertyChanged( propertyName );
 
 			NodePropertyPort port = NodeGraphManager.FindNodePropertyPort( this, propertyName );
-			if( ( null != port ) && port.IsDynamic )
+			if( null != port )
 			{
 				Type nodeType = GetType();
 

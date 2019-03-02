@@ -46,7 +46,15 @@ namespace NodeGraph.Model
 			}
 			set
 			{
-				object prevValue = _Value;
+				object prevValue;
+				if( IsDynamic )
+				{
+					prevValue = _Value;
+				}
+				else
+				{
+					prevValue = ( null != _FieldInfo ) ? _FieldInfo.GetValue( Owner ) : _PropertyInfo.GetValue( Owner );
+				}
 				
 				if( value != prevValue )
 				{

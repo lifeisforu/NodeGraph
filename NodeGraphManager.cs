@@ -1566,8 +1566,13 @@ namespace NodeGraph
 			}
 		}
 
-		public static void Deserialize( string filePath )
+		public static bool Deserialize( string filePath )
 		{
+			if( !File.Exists( filePath ) )
+			{
+				return false;
+			}
+
 			List<FlowChart> loadedFlowCharts = new List<FlowChart>();
 
 			using( XmlReader reader = XmlReader.Create( filePath ) )
@@ -1593,6 +1598,8 @@ namespace NodeGraph
 			{
 				flowChart.OnDeserialize();
 			}
+
+			return true;
 		}
 
 		public static string SerializeNode( Node node )

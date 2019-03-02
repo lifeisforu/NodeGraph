@@ -139,6 +139,44 @@ namespace NodeGraph.View
 
 		#region Mouse Events
 
+		protected override void OnMouseEnter( MouseEventArgs e )
+		{
+			base.OnMouseEnter( e );
+
+			Connector connector = ViewModel.Model;
+
+			if( null != connector.StartPort )
+			{
+				NodePortView portView = connector.StartPort.ViewModel.View;
+				portView.IsConnectorMouseOver = true;
+			}
+
+			if( null != connector.EndPort )
+			{
+				NodePortView portView = connector.EndPort.ViewModel.View;
+				portView.IsConnectorMouseOver = true;
+			}
+		}
+
+		protected override void OnMouseLeave( MouseEventArgs e )
+		{
+			base.OnMouseLeave( e );
+
+			Connector connector = ViewModel.Model;
+
+			if( null != connector.StartPort )
+			{
+				NodePortView portView = connector.StartPort.ViewModel.View;
+				portView.IsConnectorMouseOver = false;
+			}
+
+			if( null != connector.EndPort )
+			{
+				NodePortView portView = connector.EndPort.ViewModel.View;
+				portView.IsConnectorMouseOver = false;
+			}
+		}
+
 		protected override void OnMouseDoubleClick( MouseButtonEventArgs e )
 		{
 			base.OnMouseDoubleClick( e );

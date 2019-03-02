@@ -69,6 +69,14 @@ namespace NodeGraph.View
 		public static readonly DependencyProperty ToolTipTextProperty =
 			DependencyProperty.Register( "ToolTipText", typeof( string ), typeof( NodePortView ), new PropertyMetadata( "" ) );
 
+		public bool IsConnectorMouseOver
+		{
+			get { return ( bool )GetValue( IsConnectorMouseOverProperty ); }
+			set { SetValue( IsConnectorMouseOverProperty, value ); }
+		}
+		public static readonly DependencyProperty IsConnectorMouseOverProperty =
+			DependencyProperty.Register( "IsConnectorMouseOver", typeof( bool ), typeof( NodePortView ), new PropertyMetadata( false ) );
+
 		#endregion // Properteis
 
 		#region Template

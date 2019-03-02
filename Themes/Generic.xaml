@@ -134,6 +134,10 @@
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
 						</Trigger>
+						<Trigger Property="IsConnectorMouseOver" Value="True">
+							<Setter TargetName="PART_Port" Property="Foreground" Value="Yellow"/>
+							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Yellow"/>
+						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>
 							<Setter Property="IsHitTestVisible" Value="False"/>
@@ -182,6 +186,10 @@
 						<Trigger Property="IsMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
+						</Trigger>
+						<Trigger Property="IsConnectorMouseOver" Value="True">
+							<Setter TargetName="PART_Port" Property="Foreground" Value="Yellow"/>
+							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Yellow"/>
 						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>

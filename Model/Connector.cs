@@ -95,22 +95,30 @@ namespace NodeGraph.Model
 			RaisePropertyChanged( "Model" );
 		}
 
-		public virtual void OnPreExecute( NodeFlowPort prevPort )
+		public virtual void OnPreExecute()
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Connector.OnPreExecute()" );
 		}
 
-		public virtual void OnExecute( NodeFlowPort prevPort )
+		public virtual void OnExecute()
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Connector.OnExecute()" );
 		}
 
-		public virtual void OnPostExecute( NodeFlowPort prevPort )
+		public virtual void OnPostExecute()
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Connector.OnPostExecute()" );
+
+			if( null != EndPort )
+			{
+				Node node = EndPort.Owner;
+				node.OnPreExecute( this );
+				node.OnExecute( this );
+				node.OnPostExecute( this );
+			}
 		}
 
 		public virtual void OnPreDestroy()

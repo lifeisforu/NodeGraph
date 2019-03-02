@@ -6,26 +6,26 @@ namespace NodeGraph.Model
 	[AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
 	public class NodePropertyPortAttribute : NodePortAttribute
 	{
-		public Type Type;
+		public Type ValueType;
 		public Type ViewModelType = typeof( NodePropertyPortViewModel );
 		public object DefaultValue;
 
-		public NodePropertyPortAttribute( string displayName, Type type, bool isInput, object defaultValue ) : base( displayName, isInput )
+		public NodePropertyPortAttribute( string displayName, Type valueType, bool isInput, object defaultValue ) : base( displayName, isInput )
 		{
 			if( null != defaultValue )
 			{
-				if( defaultValue.GetType() != type )
+				if( defaultValue.GetType() != valueType )
 				{
-					throw new ArgumentException( "Type of value is not same as typeOfvalue." );
+					throw new ArgumentException( "Type of value is not same as ValueType." );
 				}
 			}
 
-			if( !type.IsClass && ( null == defaultValue ) )
+			if( !valueType.IsClass && ( null == defaultValue ) )
 			{
-				throw new ArgumentException( "If typeOfValue is not a class, you cannot specify value as null" );
+				throw new ArgumentException( "If ValueType is not a class, you cannot specify value as null" );
 			}
 
-			Type = type;
+			ValueType = valueType;
 			IsInput = isInput;
 			DefaultValue = defaultValue;
 			AllowMultipleInput = false;

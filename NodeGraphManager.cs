@@ -201,9 +201,9 @@ namespace NodeGraph
 					{
 						foreach( var attr in nodePropertyAttrs )
 						{
-							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.Type, attr.DefaultValue,
+							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.ValueType, attr.DefaultValue, propertyInfo.Name,
 								( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType,
-								propertyInfo.Name, attr.DisplayName,attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
+								attr.DisplayName,attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
 						}
 					}
 				}
@@ -218,9 +218,9 @@ namespace NodeGraph
 					{
 						foreach( var attr in nodePropertyAttrs )
 						{
-							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.Type, attr.DefaultValue,
+							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.ValueType, attr.DefaultValue, fieldInfo.Name,
 								( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType,
-								fieldInfo.Name, attr.DisplayName, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
+								attr.DisplayName, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
 						}
 					}
 				}
@@ -320,6 +320,22 @@ namespace NodeGraph
 			return node;
 		}
 
+		public static List<Node> FindNode( FlowChart flowChart, string header )
+		{
+			List<Node> nodes = new List<Node>();
+
+			foreach( var pair in Nodes )
+			{
+				Node node = pair.Value;
+				if( ( flowChart == node.Owner ) && ( header == node.Header ) )
+				{
+					nodes.Add( node );
+				}
+			}
+
+			return nodes;
+		}
+
 		#endregion // Node
 
 		#region RouterNode
@@ -350,12 +366,12 @@ namespace NodeGraph
 			else if( isPropertyPort )
 			{
 				NodePropertyPort propertyPort = referencePort as NodePropertyPort;
-				CreateNodePropertyPort( false, Guid.NewGuid(), node, true, propertyPort.TypeOfValue, propertyPort.Value, 
+				CreateNodePropertyPort( false, Guid.NewGuid(), node, true, propertyPort.ValueType, propertyPort.Value, "Input",
 					propertyPortViewModelTypeOverride,
-					"Input", "", false, false, true, true );
-				CreateNodePropertyPort( false, Guid.NewGuid(), node, false, propertyPort.TypeOfValue, propertyPort.Value, 
+					"", false, false, true, true );
+				CreateNodePropertyPort( false, Guid.NewGuid(), node, false, propertyPort.ValueType, propertyPort.Value, "Output",
 					propertyPortViewModelTypeOverride,
-					"Output", "", false, false, true, true );
+					"", false, false, true, true );
 			}
 
 			return node;
@@ -622,6 +638,20 @@ namespace NodeGraph
 			return port;
 		}
 
+		public static NodeFlowPort FindNodeFlowPort( Node node, string propertyName )
+		{
+			foreach( var pair in NodeFlowPorts )
+			{
+				NodeFlowPort port = pair.Value;
+				if( ( node == port.Owner ) && ( propertyName == port.Name ) )
+				{
+					return port;
+				}
+			}
+
+			return null;
+		}
+
 		#endregion // FlowPort
 
 		#region PropertyPort
@@ -642,20 +672,19 @@ namespace NodeGraph
 		/// <param name="defaultValue">Default property value.</param>
 		// <param name="portViewModelTypeOverride">ViewModelType to override.</param>
 		/// <returns>Created NodePropertyPort instance.</returns>
-		public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, bool isInput, Type valueType, object defaultValue, Type portViewModelTypeOverride = null,
-			string name = "None", string displayName = "None", bool allowMultipleInput = false, bool allowMultipleOutput = true, bool isPortEnabled = true, bool isEnabled = true )
+		public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, bool isInput, Type valueType, object defaultValue, string name,
+			Type portViewModelTypeOverride = null, string displayName = "", bool allowMultipleInput = false, bool allowMultipleOutput = true, bool isPortEnabled = true, bool isEnabled = true )
 		{
 			//----- exceptions.
 
 			if( null == node )
 				throw new ArgumentNullException( "node of CreateNodePropertyPort() can not be null" );
-
+			
 			//----- create port.
 
 			// create propertyPort model.
 			NodePropertyPort port = Activator.CreateInstance( typeof( NodePropertyPort ),
-				new object[] { guid, node, isInput, valueType, defaultValue } ) as NodePropertyPort;
-			port.Name = name;
+				new object[] { guid, node, isInput, valueType, defaultValue, name } ) as NodePropertyPort;
 			port.DisplayName = displayName;
 			port.AllowMultipleInput = allowMultipleInput;
 			port.AllowMultipleOutput = allowMultipleOutput;
@@ -702,6 +731,20 @@ namespace NodeGraph
 			NodePropertyPort port;
 			NodePropertyPorts.TryGetValue( guid, out port );
 			return port;
+		}
+
+		public static NodePropertyPort FindNodePropertyPort( Node node, string propertyName )
+		{
+			foreach( var pair in NodePropertyPorts )
+			{
+				NodePropertyPort port = pair.Value;
+				if( ( node == port.Owner ) && ( propertyName == port.Name ) )
+				{
+					return port;
+				}
+			}
+
+			return null;
 		}
 
 		#endregion // PropertyPort
@@ -863,11 +906,21 @@ namespace NodeGraph
 			{
 				NodePropertyPort firstPropPort = FirstConnectionPort as NodePropertyPort;
 				NodePropertyPort otherPropPort = otherPort as NodePropertyPort;
-
-				if( firstPropPort.TypeOfValue != otherPropPort.TypeOfValue )
+				if( !firstPropPort.IsInput )
 				{
-					error = "Value type is not same";
-					return false;
+					if( !otherPropPort.ValueType.IsAssignableFrom( firstPropPort.ValueType ) )
+					{
+						error = "Value type is not assignable";
+						return false;
+					}
+				}
+				else
+				{
+					if( !firstPropPort.ValueType.IsAssignableFrom( otherPropPort.ValueType ) )
+					{
+						error = "Value type is not assignable";
+						return false;
+					}
 				}
 			}
 
@@ -1665,8 +1718,11 @@ namespace NodeGraph
 						}
 						else
 						{
+							string name = reader.GetAttribute( "Name" );
+							Type valueType = Type.GetType( reader.GetAttribute( "ValueType" ) );
+
 							NodePropertyPort port = CreateNodePropertyPort(
-								true, guid, node, isInput, type, null, vmType );
+								true, guid, node, isInput, valueType, null, name, vmType );
 							port.ReadXml( reader );
 							port.OnDeserialize();
 						}

@@ -13,9 +13,13 @@ namespace NodeGraph.Model
 	[Node()]
 	public class Node : ModelBase
 	{
-		#region Properties
+		#region Fields
 
 		public readonly FlowChart Owner;
+
+		#endregion // Fields
+
+		#region Properties
 
 		protected NodeViewModel _ViewModel;
 		public NodeViewModel ViewModel
@@ -401,14 +405,17 @@ namespace NodeGraph.Model
 
 						if( "PropertyPort" == prevReaderName )
 						{
+							string name = reader.GetAttribute( "Name" );
+							Type valueType = Type.GetType( reader.GetAttribute( "ValueType" ) );
+
 							NodePropertyPort port = NodeGraphManager.CreateNodePropertyPort(
-								false, guid, node, isInput, type, null, vmType );
+								true, guid, node, isInput, valueType, null, name, vmType );
 							port.ReadXml( reader );
 						}
 						else
 						{
 							NodeFlowPort port = NodeGraphManager.CreateNodeFlowPort(
-								false, guid, node, isInput, vmType );
+								true, guid, node, isInput, vmType );
 							port.ReadXml( reader );
 						}
 					}
@@ -463,5 +470,34 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // History
+
+		#region PropertyChanged
+
+		public override void RaisePropertyChanged( string propertyName )
+		{
+			base.RaisePropertyChanged( propertyName );
+
+			NodePropertyPort port = NodeGraphManager.FindNodePropertyPort( this, propertyName );
+			if( ( null != port ) && port.IsDynamic )
+			{
+				Type nodeType = GetType();
+
+				PropertyInfo propertyInfo = nodeType.GetProperty( propertyName );
+				if( null != propertyInfo )
+				{
+					port.Value = propertyInfo.GetValue( this );
+				}
+				else
+				{
+					FieldInfo fieldInfo = nodeType.GetField( propertyName );
+					if( null != fieldInfo )
+					{
+						port.Value = fieldInfo.GetValue( this );
+					}
+				}				
+			}
+		}
+
+		#endregion // PropertyChanged
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using NodeGraph.Model;
 using NodeGraph.ViewModel;
 using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -61,6 +62,14 @@ namespace NodeGraph.View
 		{
 			get { return _PartDragAndSelectionCanvas; }
 		}
+
+		public ObservableCollection<string> Logs
+		{
+			get { return ( ObservableCollection<string> )GetValue( LogsProperty ); }
+			set { SetValue( LogsProperty, value ); }
+		}
+		public static readonly DependencyProperty LogsProperty =
+			DependencyProperty.Register( "Logs", typeof( ObservableCollection<string> ), typeof( FlowChartView ), new PropertyMetadata( new ObservableCollection<string>() ) );
 
 		#endregion // Properties
 
@@ -137,6 +146,21 @@ namespace NodeGraph.View
 			}
 
 			return model;
+		}
+
+		public void AddLog( string log )
+		{
+			Logs.Add( log );
+		}
+
+		public void RemoveLog( string log )
+		{
+			Logs.Remove( log );
+		}
+
+		public void ClearLogs()
+		{
+			Logs.Clear();
 		}
 
 		#endregion // Public Methods

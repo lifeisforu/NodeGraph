@@ -12,6 +12,16 @@
 	<SolidColorBrush x:Key="NodeBackGroundOverColor" Color="#323232"/>
 	<SolidColorBrush x:Key="NodeBorderColor" Color="#121212"/>
 
+	<!-- LogTextBlock Style -->
+	<Style x:Key="LogTextBlockStyle" TargetType="TextBlock">
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Effect">
+			<Setter.Value>
+				<DropShadowEffect BlurRadius="3" ShadowDepth="3" Color="Black"/>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
 	<!-- LinedFlowPort Style -->
 	<Style x:Key="LinedFlowPort" TargetType="{x:Type ContentControl}">
 		<Setter Property="Content" Value=""/>
@@ -475,6 +485,17 @@
 										Background="LightBlue"
 										Opacity="0.4"/>
 							</Canvas>
+							<!-- Log -->
+							<Grid>
+								<ListView BorderThickness="0" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Left" ItemsSource="{TemplateBinding Logs}">
+									<ListView.ItemTemplate>
+										<DataTemplate>
+											<TextBlock Style="{StaticResource LogTextBlockStyle}" Text="{Binding}"/>
+										</DataTemplate>
+									</ListView.ItemTemplate>
+								</ListView>
+							</Grid>
+							
 						</Grid>
 					</Border>
 				</ControlTemplate>

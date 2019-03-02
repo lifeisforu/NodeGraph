@@ -203,7 +203,7 @@ namespace NodeGraph
 						{
 							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.ValueType, attr.DefaultValue, propertyInfo.Name,
 								( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType,
-								attr.DisplayName,attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
+								attr.DisplayName, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
 						}
 					}
 				}
@@ -679,7 +679,7 @@ namespace NodeGraph
 
 			if( null == node )
 				throw new ArgumentNullException( "node of CreateNodePropertyPort() can not be null" );
-			
+
 			//----- create port.
 
 			// create propertyPort model.
@@ -1822,6 +1822,28 @@ namespace NodeGraph
 		}
 
 		#endregion // Drag & Drop Events
+
+		#region Logs
+
+		public static void AddScreenLog( FlowChart flowChart, string log )
+		{
+			FlowChartView view = flowChart.ViewModel.View;
+			view.AddLog( log );
+		}
+
+		public static void RemoveScreenLog( FlowChart flowChart, string log )
+		{
+			FlowChartView view = flowChart.ViewModel.View;
+			view.RemoveLog( log );
+		}
+
+		public static void ClearScreenLogs( FlowChart flowChart )
+		{
+			FlowChartView view = flowChart.ViewModel.View;
+			view.ClearLogs();
+		}
+
+		#endregion // Logs
 	}
 
 	public enum ModelType

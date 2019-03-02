@@ -422,7 +422,7 @@
                             BorderThickness="0"
                             Margin="{TemplateBinding Margin}"
                             Padding="0">
-						<Grid>
+						<Grid ClipToBounds="True">
 							<!-- Connections -->
 							<v:ConnectorViewsContainer x:Name="PART_ConnectorViewsContainer"
 													   ItemsSource="{Binding ConnectorViewModels}">

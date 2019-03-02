@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Media;
 using System.Xml;
 
 namespace NodeGraph.Model
 {
-	[Node("")]
+	[Node()]
 	public class Node : ModelBase
 	{
 		#region Properties
@@ -44,7 +45,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected SolidColorBrush _HeaderBackgroundColor;
+		protected SolidColorBrush _HeaderBackgroundColor = Brushes.Black;
 		public SolidColorBrush HeaderBackgroundColor
 		{
 			get { return _HeaderBackgroundColor; }
@@ -58,7 +59,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected SolidColorBrush _HeaderFontColor;
+		protected SolidColorBrush _HeaderFontColor = Brushes.White;
 		public SolidColorBrush HeaderFontColor
 		{
 			get { return _HeaderFontColor; }
@@ -72,7 +73,35 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected double _X;
+		private bool _AllowEditingHeader = true;
+		public bool AllowEditingHeader
+		{
+			get { return _AllowEditingHeader; }
+			set
+			{
+				if( value != _AllowEditingHeader )
+				{
+					_AllowEditingHeader = value;
+					RaisePropertyChanged( "AllowEditingHeader" );
+				}
+			}
+		}
+
+		private bool _AllowCircularConnection = false;
+		public bool AllowCircularConnection
+		{
+			get { return _AllowCircularConnection; }
+			set
+			{
+				if( value != _AllowCircularConnection )
+				{
+					_AllowCircularConnection = value;
+					RaisePropertyChanged( "AllowCircularConnection" );
+				}
+			}
+		}
+
+		protected double _X = 0.0;
 		public double X
 		{
 			get { return _X; }
@@ -86,7 +115,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected double _Y;
+		protected double _Y = 0.0;
 		public double Y
 		{
 			get { return _Y; }
@@ -100,7 +129,7 @@ namespace NodeGraph.Model
 			}
 		}
 
-		protected int _ZIndex;
+		protected int _ZIndex = 1;
 		public int ZIndex
 		{
 			get { return _ZIndex; }
@@ -170,8 +199,6 @@ namespace NodeGraph.Model
 			}
 		}
 
-		public bool AllowCircularConnection { get; private set; }
-
 		#endregion // Properties
 
 		#region Constructor
@@ -179,11 +206,9 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNode() method.
 		/// </summary>
-		public Node( Guid guid, FlowChart flowChart, bool allowCircularConnection ) : base( guid )
+		public Node( Guid guid, FlowChart flowChart ) : base( guid )
 		{
 			FlowChart = flowChart;
-
-			AllowCircularConnection = allowCircularConnection;
 		}
 
 		#endregion // Constructor
@@ -270,11 +295,18 @@ namespace NodeGraph.Model
 			// These are automatically serialized in FlowChart.ReadXml().
 			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().FullName );
 			writer.WriteAttributeString( "Owner", FlowChart.Guid.ToString() );
+			//} End creation info.
+
+			writer.WriteAttributeString( "Header", Header );
+			writer.WriteAttributeString( "HeaderBackgroundColor", HeaderBackgroundColor.ToString() );
+			writer.WriteAttributeString( "HeaderFontColor", HeaderFontColor.ToString() );
+			writer.WriteAttributeString( "AllowEditingHeader", AllowEditingHeader.ToString() );
+
+			writer.WriteAttributeString( "AllowCircularConnection", AllowCircularConnection.ToString() );
+
 			writer.WriteAttributeString( "X", X.ToString() );
 			writer.WriteAttributeString( "Y", Y.ToString() );
 			writer.WriteAttributeString( "ZIndex", ZIndex.ToString() );
-			writer.WriteAttributeString( "Header", Header );
-			//} End creation info.
 
 			writer.WriteStartElement( "InputFlowPorts" );
 			foreach( var port in InputFlowPorts )
@@ -316,6 +348,19 @@ namespace NodeGraph.Model
 		public override void ReadXml( XmlReader reader )
 		{
 			base.ReadXml( reader );
+
+			Header = reader.GetAttribute( "Header" );
+			HeaderBackgroundColor = new SolidColorBrush(
+				( Color )ColorConverter.ConvertFromString( reader.GetAttribute( "HeaderBackgroundColor" ) ) );
+			HeaderFontColor = new SolidColorBrush( ( Color )ColorConverter.ConvertFromString( 
+				reader.GetAttribute( "HeaderFontColor" ) ) );
+			AllowEditingHeader = bool.Parse( reader.GetAttribute( "AllowEditingHeader" ) );
+
+			AllowCircularConnection = bool.Parse( reader.GetAttribute( "AllowCircularConnection" ) );
+
+			X = double.Parse( reader.GetAttribute( "X" ) );
+			Y = double.Parse( reader.GetAttribute( "Y" ) );
+			ZIndex = int.Parse( reader.GetAttribute( "ZIndex" ) );
 
 			bool isInputFlowPortsEnd = false;
 			bool isOutputFlowPortsEnd = false;

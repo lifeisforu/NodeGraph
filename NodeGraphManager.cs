@@ -141,7 +141,6 @@ namespace NodeGraph
 		/// <param name="propertyPortViewModelTypeOverride">PropertyPortViewmodel to override.</param>
 		/// <returns>Created node instance.</returns>
 		public static Node CreateNode( bool isDeserializing, Guid guid, FlowChart flowChart, Type nodeType, double x, double y, int ZIndex,
-			string headerOverride = null,
 			Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, Type propertyPortViewModelTypeOverride = null )
 		{
 			//----- exceptions.
@@ -160,7 +159,7 @@ namespace NodeGraph
 			var nodeAttr = nodeAttrs[ 0 ];
 
 			// create node model.
-			Node node = Activator.CreateInstance( nodeType, new object[] { guid, flowChart, nodeAttr.AllowCircularConnection } ) as Node;
+			Node node = Activator.CreateInstance( nodeType, new object[] { guid, flowChart } ) as Node;
 			node.X = x;
 			node.Y = y;
 			node.ZIndex = ZIndex;
@@ -171,10 +170,6 @@ namespace NodeGraph
 				new object[] { node } ) as NodeViewModel;
 			flowChart.ViewModel.NodeViewModels.Add( node.ViewModel );
 			flowChart.Nodes.Add( node );
-
-			node.Header = !string.IsNullOrEmpty( headerOverride ) ? headerOverride : nodeAttr.Header;
-			node.HeaderBackgroundColor = new SolidColorBrush( ( Color )ColorConverter.ConvertFromString( nodeAttr.HeaderBackgroundColor ) );
-			node.HeaderFontColor = new SolidColorBrush( ( Color )ColorConverter.ConvertFromString( nodeAttr.HeaderFontColor ) );
 
 			//---- history.
 
@@ -343,7 +338,7 @@ namespace NodeGraph
 			if( !isFlowPort && !isPropertyPort )
 				throw new ArgumentException( "CreateRouterNode() is only supported for NodeFlowPort or NodePropertyPort" );
 
-			Node node = CreateNode( false, guid, flowChart, typeof( Node ), X, Y, ZIndex, null,
+			Node node = CreateNode( false, guid, flowChart, typeof( Node ), X, Y, ZIndex,
 				( null == nodeViewModelTypeOverride ) ? typeof( RouterNodeViewModel ) : nodeViewModelTypeOverride,
 				flowPortViewModelTypeOverride, propertyPortViewModelTypeOverride );
 			if( isFlowPort )
@@ -1549,14 +1544,9 @@ namespace NodeGraph
 						Guid guid = Guid.Parse( reader.GetAttribute( "Guid" ) );
 						Type type = Type.GetType( reader.GetAttribute( "Type" ) );
 						FlowChart flowChart = FindFlowChart( Guid.Parse( reader.GetAttribute( "Owner" ) ) );
-
 						Type vmType = Type.GetType( reader.GetAttribute( "ViewModelType" ) );
-						double x = double.Parse( reader.GetAttribute( "X" ) );
-						double y = double.Parse( reader.GetAttribute( "Y" ) );
-						int zIndex = int.Parse( reader.GetAttribute( "ZIndex" ) );
-						string header = reader.GetAttribute( "Header" );
 
-						Node node = CreateNode( true, guid, flowChart, type, x, y, zIndex, header, vmType );
+						Node node = CreateNode( true, guid, flowChart, type, 0.0, 0.0, 0, vmType );
 						node.ReadXml( reader );
 
 						node.OnDeserialize();

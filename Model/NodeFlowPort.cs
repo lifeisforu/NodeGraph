@@ -26,7 +26,7 @@ namespace NodeGraph.Model
 
 		public override void OnDeserialize()
 		{
-
+			base.OnDeserialize();
 		}
 
 		#endregion // Overrides Callbacks

@@ -7,6 +7,18 @@ namespace NodeGraph.Model
 {
 	public class NodePropertyPort : NodePort
 	{
+		#region Events
+
+		public delegate void ValueChangedDelegate( NodePropertyPort port, object prevValue, object newValue );
+		public event ValueChangedDelegate ValueChanged;
+
+		protected virtual void OnValueChanged( object prevValue, object newValue )
+		{
+			ValueChanged?.Invoke( this, prevValue, newValue );
+		}
+
+		#endregion // Events
+
 		#region Properties
 
 		private object _Value;
@@ -17,8 +29,11 @@ namespace NodeGraph.Model
 			{
 				if( value != _Value )
 				{
+					object prevValue = _Value;
 					_Value = value;
+
 					RaisePropertyChanged( "Value" );
+					OnValueChanged( prevValue, value );
 				}
 			}
 		}
@@ -54,7 +69,7 @@ namespace NodeGraph.Model
 
 		public override void OnDeserialize()
 		{
-
+			base.OnDeserialize();
 		}
 
 		#endregion // Overrides Callbacks

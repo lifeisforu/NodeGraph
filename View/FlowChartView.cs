@@ -94,10 +94,8 @@ namespace NodeGraph.View
 
 		#region Public Methods
 
-		public ModelBase FindModelUnderMouse( out Point viewSpacePos, out Point modelSpacePos, out ModelType modelType )
+		public ModelBase FindModelUnderMouse( Point mousePos, out Point viewSpacePos, out Point modelSpacePos, out ModelType modelType )
 		{
-			Point mousePos = Mouse.GetPosition( this );
-
 			ModelBase model = ViewModel.Model;
 
 			viewSpacePos = mousePos;
@@ -348,7 +346,7 @@ namespace NodeGraph.View
 			NodeGraphManager.EndDragNode();
 			NodeGraphManager.EndDragSelection( true );
 
-			Point mousePos = Mouse.GetPosition( this );
+			Point mousePos = e.GetPosition( this );
 			Point diff = new Point(
 				Math.Abs( _RightButtonDownPos.X - mousePos.X ),
 				Math.Abs( _RightButtonDownPos.Y - mousePos.Y ) );
@@ -379,7 +377,7 @@ namespace NodeGraph.View
 				Point viewSpacePos;
 				Point modelSpacePos;
 				ModelType modelType;
-				ModelBase model = FindModelUnderMouse( out viewSpacePos, out modelSpacePos, out modelType );
+				ModelBase model = FindModelUnderMouse( mousePos, out viewSpacePos, out modelSpacePos, out modelType );
 
 				if( null != model )
 				{
@@ -766,12 +764,12 @@ namespace NodeGraph.View
 
 		#region Drag & Drop Events
 
-		private ModelBase BuidNodeGraphDragEventArgs( DragEventArgs args, out NodeGraphDragEventArgs eventArgs )
+		private ModelBase BuidNodeGraphDragEventArgs(DragEventArgs args, out NodeGraphDragEventArgs eventArgs )
 		{
 			Point viewSpacePos;
 			Point modelSpacePos;
 			ModelType modelType;
-			ModelBase model = FindModelUnderMouse( out viewSpacePos, out modelSpacePos, out modelType );
+			ModelBase model = FindModelUnderMouse( args.GetPosition( this ), out viewSpacePos, out modelSpacePos, out modelType );
 
 			eventArgs = null;
 

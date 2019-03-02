@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -135,11 +136,22 @@ namespace NodeGraph.ViewModel
 
 		#region Constructor
 
-		public FlowChartViewModel( FlowChart flowChart )
+		public FlowChartViewModel( FlowChart flowChart ) : base( flowChart )
 		{
 			Model = flowChart;
 		}
 
 		#endregion // Constructor
+
+		#region Events
+
+		protected override void ModelPropertyChanged( object sender, PropertyChangedEventArgs e )
+		{
+			base.ModelPropertyChanged( sender, e );
+
+			RaisePropertyChanged( e.PropertyName );
+		}
+
+		#endregion // Events
 	}
 }

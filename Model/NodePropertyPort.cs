@@ -47,18 +47,22 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodePropertyPort() method.
 		/// </summary>
-		public NodePropertyPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMltipleOutput, Type typeOfValue, object value ) : 
-			base( guid, node, name, displayName, isInput, allowMultipleInput, allowMltipleOutput )
+		public NodePropertyPort( Guid guid, Node node, bool isInput, Type typeOfValue, object value ) : 
+			base( guid, node, isInput )
 		{
 			if( null != value )
 			{
 				if( value.GetType() != typeOfValue )
+				{
 					throw new ArgumentException( "Type of value is not same as typeOfvalue." );
+				}
 				Value = value;
 			}
 
 			if( !typeOfValue.IsClass && ( null == value ) )
+			{
 				throw new ArgumentNullException( "If typeOfValue is not a class, you cannot specify value as null" );
+			}
 
 			TypeOfValue = typeOfValue;
 		}

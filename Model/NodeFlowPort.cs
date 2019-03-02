@@ -15,8 +15,8 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodeFlowPort() method.
 		/// </summary>
-		public NodeFlowPort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput ) :
-			base( guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput )
+		public NodeFlowPort( Guid guid, Node node, bool isInput ) :
+			base( guid, node, isInput )
 		{
 		}
 

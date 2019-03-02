@@ -23,7 +23,7 @@ namespace NodeGraph.Model
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected void RaisePropertyChanged( string propertyName )
+		public virtual void RaisePropertyChanged( string propertyName )
 		{
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
 		}

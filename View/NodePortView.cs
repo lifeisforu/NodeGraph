@@ -27,6 +27,8 @@ namespace NodeGraph.View
 
 		public FrameworkElement PartPort { get; private set; }
 
+		public TextBlock PartToolTip { get; private set; }
+
 		public bool IsInput
 		{
 			get { return ( bool )GetValue( IsInputProperty ); }
@@ -42,6 +44,30 @@ namespace NodeGraph.View
 		}
 		public static readonly DependencyProperty IsFilledPortProperty =
 			DependencyProperty.Register( "IsFilledPort", typeof( bool ), typeof( NodePortView ), new PropertyMetadata( false ) );
+
+		public bool IsPortEnabled
+		{
+			get { return ( bool )GetValue( IsPortEnabledProperty ); }
+			set { SetValue( IsPortEnabledProperty, value ); }
+		}
+		public static readonly DependencyProperty IsPortEnabledProperty =
+			DependencyProperty.Register( "IsPortEnabled", typeof( bool ), typeof( NodePortView ), new PropertyMetadata( true ) );
+
+		public bool ToolTipVisibility
+		{
+			get { return ( bool )GetValue( ToolTipVisibilityProperty ); }
+			set { SetValue( ToolTipVisibilityProperty, value ); }
+		}
+		public static readonly DependencyProperty ToolTipVisibilityProperty =
+			DependencyProperty.Register( "ToolTipVisibility", typeof( bool ), typeof( NodePortView ), new PropertyMetadata( false ) );
+
+		public string ToolTipText
+		{
+			get { return ( string )GetValue( ToolTipTextProperty ); }
+			set { SetValue( ToolTipTextProperty, value ); }
+		}
+		public static readonly DependencyProperty ToolTipTextProperty =
+			DependencyProperty.Register( "ToolTipText", typeof( string ), typeof( NodePortView ), new PropertyMetadata( "" ) );
 
 		#endregion // Properteis
 
@@ -69,11 +95,17 @@ namespace NodeGraph.View
 		{
 			IsInput = isInput;
 			DataContextChanged += NodePortView_DataContextChanged;
+			Loaded += NodePortView_Loaded;
 		}
 
 		#endregion // Constructor
 
-		#region DataContext
+		#region Events
+
+		private void NodePortView_Loaded( object sender, RoutedEventArgs e )
+		{
+			SynchronizeProperties();
+		}
 
 		private void NodePortView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
 		{
@@ -81,11 +113,37 @@ namespace NodeGraph.View
 			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodePortView." );
 			ViewModel.View = this;
+			ViewModel.PropertyChanged += ViewModelPropertyChanged;
 
-			OnConnectionChanged();
+			SynchronizeProperties();
 		}
 
-		#endregion // DataContext
+		protected virtual void SynchronizeProperties()
+		{
+			if( null == ViewModel )
+			{
+				return;
+			}
+
+			NodePort port = ViewModel.Model;
+			IsInput = port.IsInput;
+			IsFilledPort = ( 0 < port.Connectors.Count );
+			IsPortEnabled = port.IsPortEnabled;
+			IsEnabled = port.IsEnabled;
+		}
+
+		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
+		{
+			if( ( "Model" == e.PropertyName ) ||
+				( "Connectors" == e.PropertyName ) ||
+				( "IsPortEnabled" == e.PropertyName ) ||
+				( "IsEnabled" == e.PropertyName ) )
+			{
+				SynchronizeProperties();
+			}
+		}
+
+		#endregion // Events
 
 		#region Mouse Events
 
@@ -93,8 +151,8 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			Node node = ViewModel.Model.Node;
-			FlowChart flowChart = node.FlowChart;
+			Node node = ViewModel.Model.Owner;
+			FlowChart flowChart = node.Owner;
 			Keyboard.Focus( flowChart.ViewModel.View );
 
 			if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
@@ -118,22 +176,26 @@ namespace NodeGraph.View
 			{
 				if( NodeGraphManager.IsConnecting )
 				{
-					bool connectable = NodeGraphManager.CheckIfConnectable( ViewModel.Model );
+					string error;
+					bool connectable = NodeGraphManager.CheckIfConnectable( ViewModel.Model, out error );
 					if( connectable )
 					{
 						NodeGraphManager.SetOtherConnectionPort( ViewModel.Model );
+						ToolTipVisibility = false;
+					}
+					else
+					{
+						if( string.IsNullOrEmpty( error ) )
+						{
+							ToolTipVisibility = false;
+						}
+						else
+						{
+							ToolTipText = error;
+							ToolTipVisibility = true;
+						}
 					}
 				}
-			}
-		}
-
-		protected override void OnLostFocus( RoutedEventArgs e )
-		{
-			base.OnLostFocus( e );
-
-			if( NodeGraphManager.IsConnecting )
-			{
-				NodeGraphManager.SetOtherConnectionPort( null );
 			}
 		}
 
@@ -145,6 +207,20 @@ namespace NodeGraph.View
 			{
 				NodeGraphManager.SetOtherConnectionPort( null );
 			}
+
+			ToolTipVisibility = false;
+		}
+
+		protected override void OnLostFocus( RoutedEventArgs e )
+		{
+			base.OnLostFocus( e );
+
+			if( NodeGraphManager.IsConnecting )
+			{
+				NodeGraphManager.SetOtherConnectionPort( null );
+			}
+
+			ToolTipVisibility = false;
 		}
 
 		#endregion // Mouse Events
@@ -160,14 +236,5 @@ namespace NodeGraph.View
 		}
 
 		#endregion // HitTest
-
-		#region Connections
-
-		public virtual void OnConnectionChanged()
-		{
-			IsFilledPort = ( 0 < ViewModel.Model.Connectors.Count );
-		}
-
-		#endregion // Connections
 	}
 }

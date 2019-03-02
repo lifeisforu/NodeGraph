@@ -3,6 +3,7 @@ using NodeGraph.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace NodeGraph.ViewModel
 
 		#region Constructor
 
-		public NodePortViewModel( NodePort nodePort )
+		public NodePortViewModel( NodePort nodePort ) : base( nodePort )
 		{
 			Model = nodePort ?? throw new ArgumentNullException( "NodePort can not be null in NodePortViewModel constructor." );
 			Model.Connectors.CollectionChanged += _ConnectorViewModels_CollectionChanged;
@@ -50,14 +51,13 @@ namespace NodeGraph.ViewModel
 
 		private void _ConnectorViewModels_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
 		{
-			Node node = Model.Node;
+			Node node = Model.Owner;
 
 			if( null != e.OldItems )
 			{
 				foreach( var item in e.OldItems )
 				{
-					var removedConnector = item as Connector;
-					node.ViewModel.OnConnectionRemoved( this );
+					node.ViewModel.RaisePropertyChanged( "Connectors" );
 				}
 			}
 
@@ -66,16 +66,27 @@ namespace NodeGraph.ViewModel
 				foreach( var item in e.NewItems )
 				{
 					var addedConnector = item as Connector;
-					node.ViewModel.OnConnectionAdded( this );
+					node.ViewModel.RaisePropertyChanged( "Connectors" );
 				}
 			}
 
 			if( null != View )
 			{
-				View.OnConnectionChanged();
+				RaisePropertyChanged( "Connectors" );
 			}
 		}
 
 		#endregion // Collection Events
+
+		#region Events
+
+		protected override void ModelPropertyChanged( object sender, PropertyChangedEventArgs e )
+		{
+			base.ModelPropertyChanged( sender, e );
+
+			RaisePropertyChanged( e.PropertyName );
+		}
+
+		#endregion // Events
 	}
 }

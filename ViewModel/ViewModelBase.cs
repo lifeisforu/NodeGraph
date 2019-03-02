@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeGraph.Model;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,11 +12,29 @@ namespace NodeGraph.ViewModel
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected void RaisePropertyChanged( string propertyName )
+		public void RaisePropertyChanged( string propertyName )
 		{
 			PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
 		}
 
 		#endregion // Overrides INotifyPropertyChanged
+
+		#region Constructor
+
+		public ViewModelBase( ModelBase model )
+		{
+			model.PropertyChanged += ModelPropertyChanged;
+		}
+
+		#endregion // Constructor
+
+		#region Model PropertyChanged
+
+		protected virtual void ModelPropertyChanged( object sender, PropertyChangedEventArgs e )
+		{
+			
+		}
+
+		#endregion // Model PropertyChanged
 	}
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -84,7 +85,6 @@ namespace NodeGraph.ViewModel
 				if( value != _IsSelected )
 				{
 					_IsSelected = value;
-					View.OnSelectionChanged( _IsSelected );
 					RaisePropertyChanged( "IsSelected" );
 				}
 			}
@@ -136,31 +136,22 @@ namespace NodeGraph.ViewModel
 
 		#region Constructors
 
-		public NodeViewModel( Node node )
+		public NodeViewModel( Node node ) : base( node )
 		{
 			Model = node ?? throw new ArgumentException( "Node can not be null in NodeViewModel constructor" );
 		}
 
 		#endregion // Constructors
 		
-		#region Connection Events
+		#region Events
 
-		public virtual void OnConnectionRemoved( NodePortViewModel portViewModel )
+		protected override void ModelPropertyChanged( object sender, PropertyChangedEventArgs e )
 		{
-			if( null != View )
-			{
-				View.OnPortConnectionChanged();
-			}
+			base.ModelPropertyChanged( sender, e );
+
+			RaisePropertyChanged( e.PropertyName );
 		}
 
-		public virtual void OnConnectionAdded( NodePortViewModel portViewModel )
-		{
-			if( null != View )
-			{
-				View.OnPortConnectionChanged();
-			}
-		}
-
-		#endregion // Connection Events
+		#endregion // Events
 	}
 }

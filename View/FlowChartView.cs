@@ -179,6 +179,7 @@ namespace NodeGraph.View
 				return;
 
 			ViewModel.View = this;
+			ViewModel.PropertyChanged += ViewModelPropertyChanged;
 
 			if( null == _ConnectorCanvas )
 			{
@@ -195,6 +196,19 @@ namespace NodeGraph.View
 			}
 
 			_ZoomAndPan.UpdateTransform += _ZoomAndPan_UpdateTransform;
+		}
+
+		protected virtual void SynchronizeProperties()
+		{
+			if( null == ViewModel )
+			{
+				return;
+			}
+		}
+
+		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
+		{
+			SynchronizeProperties();
 		}
 
 		#endregion // Events
@@ -464,9 +478,13 @@ namespace NodeGraph.View
 				return;
 			}
 
-			NodeGraphManager.EndConnection();
-			NodeGraphManager.EndDragNode();
-			NodeGraphManager.EndDragSelection( true );
+			// This case does not occur because of ClipCursor.
+			// Becuase this event is invoked when mouse is on port-view tooltip context,
+			// consequentially, connection will be broken by EndConnection() call.
+			// So, below lines are commented.
+			//NodeGraphManager.EndConnection();
+			//NodeGraphManager.EndDragNode();
+			//NodeGraphManager.EndDragSelection( true );
 		}
 
 		protected override void OnLostFocus( RoutedEventArgs e )

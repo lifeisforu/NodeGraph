@@ -79,7 +79,7 @@ namespace NodeGraph.History
 		{
 			Node node = NodeGraphManager.FindNode( Guid );
 
-			ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.FlowChart );
+			ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.Owner );
 
 			node.ViewModel.IsSelected = isSelected;
 

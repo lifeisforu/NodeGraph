@@ -79,6 +79,8 @@ namespace NodeGraph.Model
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "FlowChart.OnCreate()" );
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 
 		public virtual void OnPreExecute()
@@ -127,6 +129,8 @@ namespace NodeGraph.Model
 			}
 
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 
 		#endregion // Callbacks

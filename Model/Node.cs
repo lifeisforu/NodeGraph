@@ -15,7 +15,7 @@ namespace NodeGraph.Model
 	{
 		#region Properties
 
-		public FlowChart FlowChart { get; private set; }
+		public readonly FlowChart Owner;
 
 		protected NodeViewModel _ViewModel;
 		public NodeViewModel ViewModel
@@ -213,7 +213,7 @@ namespace NodeGraph.Model
 		/// </summary>
 		public Node( Guid guid, FlowChart flowChart ) : base( guid )
 		{
-			FlowChart = flowChart;
+			Owner = flowChart;
 		}
 
 		#endregion // Constructor
@@ -235,6 +235,8 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "Node.OnPreExecute()" );
 
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 		
 		public virtual void OnPreExecute( Connector prevConnector )
@@ -293,6 +295,8 @@ namespace NodeGraph.Model
 			}
 
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 
 		#endregion // Callbacks
@@ -306,7 +310,7 @@ namespace NodeGraph.Model
 			//{ Begin Creation info : You need not deserialize this block in ReadXml().
 			// These are automatically serialized in FlowChart.ReadXml().
 			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().FullName );
-			writer.WriteAttributeString( "Owner", FlowChart.Guid.ToString() );
+			writer.WriteAttributeString( "Owner", Owner.Guid.ToString() );
 			//} End creation info.
 
 			writer.WriteAttributeString( "Header", Header );
@@ -390,11 +394,7 @@ namespace NodeGraph.Model
 						Guid guid = Guid.Parse( reader.GetAttribute( "Guid" ) );
 						Type type = Type.GetType( reader.GetAttribute( "Type" ) );
 						Type vmType = Type.GetType( reader.GetAttribute( "ViewModelType" ) );
-						string name = reader.GetAttribute( "Name" );
-						string displayName = reader.GetAttribute( "DisplayName" );
 						bool isInput = bool.Parse( reader.GetAttribute( "IsInput" ) );
-						bool allowMultipleInput = bool.Parse( reader.GetAttribute( "AllowMultipleInput" ) );
-						bool allowMultipleOutput = bool.Parse( reader.GetAttribute( "AllowMultipleOutput" ) );
 
 						string ownerGuidString = reader.GetAttribute( "Owner" );
 						Node node = NodeGraphManager.FindNode( Guid.Parse( ownerGuidString ) );
@@ -402,13 +402,13 @@ namespace NodeGraph.Model
 						if( "PropertyPort" == prevReaderName )
 						{
 							NodePropertyPort port = NodeGraphManager.CreateNodePropertyPort(
-								false, guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput, type, null, vmType );
+								false, guid, node, isInput, type, null, vmType );
 							port.ReadXml( reader );
 						}
 						else
 						{
 							NodeFlowPort port = NodeGraphManager.CreateNodeFlowPort(
-								false, guid, node, name, displayName, isInput, allowMultipleInput, allowMultipleOutput, vmType );
+								false, guid, node, isInput, vmType );
 							port.ReadXml( reader );
 						}
 					}
@@ -454,12 +454,12 @@ namespace NodeGraph.Model
 				return;
 			}
 
-			FlowChart.History.BeginTransaction( "Setting Property" );
+			Owner.History.BeginTransaction( "Setting Property" );
 
-			FlowChart.History.AddCommand( new History.NodePropertyCommand(
+			Owner.History.AddCommand( new History.NodePropertyCommand(
 				propertyName, Guid, propertyName, prevValue, newValue ) );
 
-			FlowChart.History.EndTransaction( false );
+			Owner.History.EndTransaction( false );
 		}
 
 		#endregion // History

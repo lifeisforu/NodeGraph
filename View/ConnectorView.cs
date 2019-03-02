@@ -53,6 +53,16 @@ namespace NodeGraph.View
 		{
 			LayoutUpdated += ConnectorView_LayoutUpdated;
 			DataContextChanged += ConnectorView_DataContextChanged;
+			Loaded += ConnectorView_Loaded;
+		}
+
+		#endregion // Constructor
+
+		#region Events
+
+		private void ConnectorView_Loaded( object sender, RoutedEventArgs e )
+		{
+			SynchronizeProperties();
 		}
 
 		private void ConnectorView_DataContextChanged( object sender, DependencyPropertyChangedEventArgs e )
@@ -61,6 +71,9 @@ namespace NodeGraph.View
 			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in ConnectorView." );
 			ViewModel.View = this;
+			ViewModel.PropertyChanged += ViewModelPropertyChanged;
+
+			SynchronizeProperties();
 		}
 
 		private void ConnectorView_LayoutUpdated( object sender, EventArgs e )
@@ -70,7 +83,20 @@ namespace NodeGraph.View
 			BuildCurveData( Mouse.GetPosition( flowChartView ) );
 		}
 
-		#endregion // Constructor
+		protected virtual void SynchronizeProperties()
+		{
+			if( null == ViewModel )
+			{
+				return;
+			}
+		}
+		
+		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
+		{
+			SynchronizeProperties();
+		}
+
+		#endregion // Events
 
 		#region Curve
 

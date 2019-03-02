@@ -2,6 +2,7 @@
 using NodeGraph.View;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,11 +37,22 @@ namespace NodeGraph.ViewModel
 
 		#region Constructor
 
-		public ConnectorViewModel( Connector connection )
+		public ConnectorViewModel( Connector connection ) : base( connection )
 		{
 			Model = connection;
 		}
 
 		#endregion // Constructor
+
+		#region Events
+
+		protected override void ModelPropertyChanged( object sender, PropertyChangedEventArgs e )
+		{
+			base.ModelPropertyChanged( sender, e );
+
+			RaisePropertyChanged( e.PropertyName );
+		}
+
+		#endregion // Events
 	}
 }

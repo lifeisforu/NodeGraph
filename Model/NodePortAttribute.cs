@@ -14,6 +14,8 @@ namespace NodeGraph.Model
 		public bool IsInput = false;
 		public bool AllowMultipleInput = false;
 		public bool AllowMultipleOutput = false;
+		public bool IsPortEnabled = true;
+		public bool IsEnabled = true;
 
 		public NodePortAttribute( string displayName, bool isInput )
 		{

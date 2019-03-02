@@ -20,7 +20,7 @@
 				<ControlTemplate>
 					<Grid>
 						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="26" Height="20" Background="Transparent"/>
-						<Polygon VerticalAlignment="Center" HorizontalAlignment="Center" 
+						<Polygon VerticalAlignment="Center" HorizontalAlignment="Center"
 								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Points="0,0 8,0 16,8 8,16 0,16" Fill="Transparent"/>
 					</Grid>
 				</ControlTemplate>
@@ -107,6 +107,10 @@
 						<TextBlock x:Name="PART_PortTextBlock" Grid.Column="1" IsHitTestVisible="False"
 								   Text="{Binding Model.DisplayName}" Foreground="White" TextAlignment="Left"
 								   VerticalAlignment="Center" HorizontalAlignment="Left"/>
+						<Popup IsOpen="{TemplateBinding ToolTipVisibility}" IsHitTestVisible="False">
+							<TextBlock IsHitTestVisible="False" Grid.Column="1"
+									   Foreground="Red" Margin="3" Text="{TemplateBinding ToolTipText}"/>
+						</Popup>
 					</Grid>
 					<ControlTemplate.Triggers>
 						<Trigger Property="IsFilledPort" Value="False">
@@ -124,6 +128,10 @@
 						<Trigger Property="IsMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
+						</Trigger>
+						<Trigger Property="IsPortEnabled" Value="False">
+							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>
+							<Setter Property="IsHitTestVisible" Value="False"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>
@@ -148,6 +156,10 @@
 						<TextBlock x:Name="PART_PortTextBlock" Grid.Column="1" IsHitTestVisible="False"
 								   Text="{Binding Model.DisplayName}" Foreground="White" TextAlignment="Left" 
 								   VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+						<Popup IsOpen="{TemplateBinding ToolTipVisibility}" IsHitTestVisible="False">
+							<TextBlock x:Name="PART_ToolTip" IsHitTestVisible="False"
+									   Margin="3" Foreground="Red" Text="{TemplateBinding ToolTipText}" />
+						</Popup>
 					</Grid>
 					<ControlTemplate.Triggers>
 						<Trigger Property="IsFilledPort" Value="False">
@@ -165,6 +177,10 @@
 						<Trigger Property="IsMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
+						</Trigger>
+						<Trigger Property="IsPortEnabled" Value="False">
+							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>
+							<Setter Property="IsHitTestVisible" Value="False"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>

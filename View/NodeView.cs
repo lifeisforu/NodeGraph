@@ -64,9 +64,14 @@ namespace NodeGraph.View
 			Unloaded += NodeView_Unloaded;
 		}
 
+		#endregion // Constructors
+
+		#region Events
+
 		private void NodeView_Loaded( object sender, RoutedEventArgs e )
 		{
 			OnCanvasRenderTransformChanged();
+			SynchronizeProperties();
 		}
 
 		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
@@ -79,9 +84,36 @@ namespace NodeGraph.View
 			if( null == ViewModel )
 				throw new Exception( "ViewModel must be bound as DataContext in NodeView." );
 			ViewModel.View = this;
+			ViewModel.PropertyChanged += ViewModelPropertyChanged;
+
+			SynchronizeProperties();
 		}
 
-		#endregion // Constructors
+		protected virtual void SynchronizeProperties()
+		{
+			if( null == ViewModel )
+			{
+				return;
+			}
+
+			IsSelected = ViewModel.IsSelected;
+			HasConnection = ( 0 < ViewModel.InputFlowPortViewModels.Count ) ||
+				( 0 < ViewModel.OutputFlowPortViewModels.Count ) ||
+				( 0 < ViewModel.InputPropertyPortViewModels.Count ) ||
+				( 0 < ViewModel.OutputPropertyPortViewModels.Count );
+		}
+
+		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
+		{
+			if( ( "Model" == e.PropertyName ) ||
+				( "IsSelected" == e.PropertyName ) ||
+				( "Connectors" == e.PropertyName ) )
+			{
+				SynchronizeProperties();
+			}
+		}
+
+		#endregion // Events
 
 		#region Template Events
 
@@ -98,7 +130,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonUp( e );
 
-			FlowChart flowChart = ViewModel.Model.FlowChart;
+			FlowChart flowChart = ViewModel.Model.Owner;
 
 			if( NodeGraphManager.IsConnecting )
 			{
@@ -146,7 +178,7 @@ namespace NodeGraph.View
 		{
 			base.OnMouseLeftButtonDown( e );
 
-			FlowChart flowChart = ViewModel.Model.FlowChart;
+			FlowChart flowChart = ViewModel.Model.Owner;
 			FlowChartView flowChartView = flowChart.ViewModel.View;
 			Keyboard.Focus( flowChartView );
 
@@ -174,7 +206,7 @@ namespace NodeGraph.View
 
 			if( NodeGraphManager.IsNodeDragging )
 			{
-				FlowChart flowChart = ViewModel.Model.FlowChart;
+				FlowChart flowChart = ViewModel.Model.Owner;
 
 				Node node = ViewModel.Model;
 				Point delta = new Point( node.X - _DraggingStartPos.X, node.Y - _DraggingStartPos.Y );
@@ -182,7 +214,7 @@ namespace NodeGraph.View
 				if( ( 0 != ( int )delta.X ) &&
 					( 0 != ( int ) delta.Y ) )
 				{
-					ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.FlowChart );
+					ObservableCollection<Guid> selectionList = NodeGraphManager.GetSelectionList( node.Owner );
 					foreach( var guid in selectionList )
 					{
 						Node currentNode = NodeGraphManager.FindNode( guid );
@@ -214,34 +246,13 @@ namespace NodeGraph.View
 				!IsSelected )
 			{
 				Node node = ViewModel.Model;
-				FlowChart flowChart = node.FlowChart;
+				FlowChart flowChart = node.Owner;
 				NodeGraphManager.TrySelection( flowChart, node, false, false, false );
 			}
 		}
 
 		#endregion // Mouse Events
-
-		#region Selection
-
-		public void OnSelectionChanged( bool isSelected )
-		{
-			IsSelected = isSelected;
-		}
-
-		#endregion // Selection
 		
-		#region Connection
-
-		public virtual void OnPortConnectionChanged()
-		{
-			HasConnection = ( 0 < ViewModel.InputFlowPortViewModels.Count ) ||
-				( 0 < ViewModel.OutputFlowPortViewModels.Count ) ||
-				( 0 < ViewModel.InputPropertyPortViewModels.Count ) ||
-				( 0 < ViewModel.OutputPropertyPortViewModels.Count );
-		}
-
-		#endregion // Connection
-
 		#region RenderTrasnform
 
 		public void OnCanvasRenderTransformChanged()

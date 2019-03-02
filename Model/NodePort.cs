@@ -9,21 +9,57 @@ namespace NodeGraph.Model
 	{
 		#region Fields
 
-		public NodePortViewModel ViewModel;
-
-		public readonly string Name;
-
 		public readonly bool IsInput;
 
-		public readonly bool AllowMultipleInput;
-
-		public readonly bool AllowMultipleOutput;
+		public readonly Node Owner;
 
 		#endregion // Fields
 
 		#region Properties
 
-		public Node Node { get; private set; }
+		public NodePortViewModel ViewModel { get; set; }
+
+		private string _Name;
+		public string Name
+		{
+			get { return _Name; }
+			set
+			{
+				if( value != _Name )
+				{
+					_Name = value;
+					RaisePropertyChanged( "Name" );
+				}
+			}
+		}
+
+		private bool _AllowMultipleInput;
+		public bool AllowMultipleInput
+		{
+			get { return _AllowMultipleInput; }
+			set
+			{
+				if( value != _AllowMultipleInput )
+				{
+					_AllowMultipleInput = value;
+					RaisePropertyChanged( "AllowMultipleInput" );
+				}
+			}
+		}
+
+		private bool _AllowMultipleOutput;
+		public bool AllowMultipleOutput
+		{
+			get { return _AllowMultipleOutput; }
+			set
+			{
+				if( value != _AllowMultipleOutput )
+				{
+					_AllowMultipleOutput = value;
+					RaisePropertyChanged( "AllowMultipleOutput" );
+				}
+			}
+		}
 
 		private string _DisplayName;
 		public string DisplayName
@@ -53,6 +89,34 @@ namespace NodeGraph.Model
 			}
 		}
 
+		private bool _IsPortEnabled = true;
+		public bool IsPortEnabled
+		{
+			get { return _IsPortEnabled; }
+			set
+			{
+				if( value != _IsPortEnabled )
+				{
+					_IsPortEnabled = value;
+					RaisePropertyChanged( "IsPortEnabled" );
+				}
+			}
+		}
+
+		private bool _IsEnabled = true;
+		public bool IsEnabled
+		{
+			get { return _IsEnabled; }
+			set
+			{
+				if( value != _IsEnabled )
+				{
+					_IsEnabled = value;
+					RaisePropertyChanged( "IsEnabled" );
+				}
+			}
+		}
+		
 		#endregion // Properties
 
 		#region Constructor
@@ -60,14 +124,10 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodeFlowPort() or GraphManager.CreateNodePropertyPort() method.
 		/// </summary>
-		protected NodePort( Guid guid, Node node, string name, string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput ) : base( guid )
+		protected NodePort( Guid guid, Node node, bool isInput ) : base( guid )
 		{
-			Node = node;
-			Name = name;
-			DisplayName = displayName;
+			Owner = node;
 			IsInput = isInput;
-			AllowMultipleInput = allowMultipleInput;
-			AllowMultipleOutput = allowMultipleOutput;
 		}
 
 		#endregion // Constructor
@@ -82,8 +142,9 @@ namespace NodeGraph.Model
 				
 		#region Methods
 
-		public virtual bool IsConnectable( NodePort otherPort )
+		public virtual bool IsConnectable( NodePort otherPort, out string error )
 		{
+			error = "";
 			return true;
 		}
 
@@ -97,6 +158,8 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "NodePort.OnCreate()" );
 
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 
 		public virtual void OnPreDestroy()
@@ -129,6 +192,8 @@ namespace NodeGraph.Model
 				System.Diagnostics.Debug.WriteLine( "NodePort.OnDeserialize()" );
 
 			IsInitialized = true;
+
+			RaisePropertyChanged( "Model" );
 		}
 
 		#endregion // Callbacks
@@ -142,18 +207,28 @@ namespace NodeGraph.Model
 			//{ Begin Creation info : You need not deserialize this block in ReadXml().
 			// These are automatically serialized in Node.ReadXml().
 			writer.WriteAttributeString( "ViewModelType", ViewModel.GetType().AssemblyQualifiedName );
-			writer.WriteAttributeString( "Owner", Node.Guid.ToString() );
+			writer.WriteAttributeString( "Owner", Owner.Guid.ToString() );
+			writer.WriteAttributeString( "IsInput", IsInput.ToString() );
+			//} End Creation Info.
+
 			writer.WriteAttributeString( "Name", Name );
 			writer.WriteAttributeString( "DisplayName", DisplayName );
-			writer.WriteAttributeString( "IsInput", IsInput.ToString() );
 			writer.WriteAttributeString( "AllowMultipleInput", AllowMultipleInput.ToString() );
 			writer.WriteAttributeString( "AllowMultipleOutput", AllowMultipleOutput.ToString() );
-			//} End Creation Info.
+			writer.WriteAttributeString( "IsPortEnabled", IsPortEnabled.ToString() );
+			writer.WriteAttributeString( "IsEnabled", IsEnabled.ToString() );
 		}
 
 		public override void ReadXml( XmlReader reader )
 		{
 			base.ReadXml( reader );
+
+			Name = reader.GetAttribute( "Name" );
+			DisplayName = reader.GetAttribute( "DisplayName" );
+			AllowMultipleInput = bool.Parse( reader.GetAttribute( "AllowMultipleInput" ) );
+			AllowMultipleOutput = bool.Parse( reader.GetAttribute( "AllowMultipleOutput" ) );
+			IsPortEnabled = bool.Parse( reader.GetAttribute( "IsPortEnabled" ) );
+			IsEnabled = bool.Parse( reader.GetAttribute( "IsEnabled" ) );
 		}
 
 		#endregion // Overrides IXmlSerializable

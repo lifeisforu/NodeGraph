@@ -78,6 +78,7 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "FlowChart.OnCreate()" );
+			IsInitialized = true;
 		}
 
 		public virtual void OnPreExecute()
@@ -112,6 +113,9 @@ namespace NodeGraph.Model
 
 		public virtual void OnDeserialize()
 		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "FlowChart.OnDeserialize()" );
+
 			foreach( var node in Nodes )
 			{
 				node.OnDeserialize();
@@ -121,6 +125,8 @@ namespace NodeGraph.Model
 			{
 				connector.OnDeserialize();
 			}
+
+			IsInitialized = true;
 		}
 
 		#endregion // Callbacks

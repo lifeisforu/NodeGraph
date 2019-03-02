@@ -95,6 +95,8 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "NodePort.OnCreate()" );
+
+			IsInitialized = true;
 		}
 
 		public virtual void OnPreDestroy()
@@ -123,7 +125,10 @@ namespace NodeGraph.Model
 
 		public virtual void OnDeserialize()
 		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "NodePort.OnDeserialize()" );
 
+			IsInitialized = true;
 		}
 
 		#endregion // Callbacks

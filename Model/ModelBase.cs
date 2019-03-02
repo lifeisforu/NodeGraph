@@ -13,6 +13,12 @@ namespace NodeGraph.Model
 {
 	public class ModelBase : INotifyPropertyChanged, IXmlSerializable
 	{
+		#region Properties
+
+		public bool IsInitialized { get; protected set; } = false;
+
+		#endregion // Properties
+
 		#region INotifyPropertyChanged
 
 		public event PropertyChangedEventHandler PropertyChanged;

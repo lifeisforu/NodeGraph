@@ -39,6 +39,7 @@ namespace NodeGraph.Model
 			{
 				if( value != _Header )
 				{
+					AddNodePropertyCommand( "Header", _Header, value );
 					_Header = value;
 					RaisePropertyChanged( "Header" );
 				}
@@ -53,6 +54,7 @@ namespace NodeGraph.Model
 			{
 				if( value != _HeaderBackgroundColor )
 				{
+					AddNodePropertyCommand( "HeaderBackgroundColor", _HeaderBackgroundColor, value );
 					_HeaderBackgroundColor = value;
 					RaisePropertyChanged( "HeaderBackgroundColor" );
 				}
@@ -67,6 +69,7 @@ namespace NodeGraph.Model
 			{
 				if( value != _HeaderFontColor )
 				{
+					AddNodePropertyCommand( "HeaderFontColor", _HeaderFontColor, value );
 					_HeaderFontColor = value;
 					RaisePropertyChanged( "HeaderFontColor" );
 				}
@@ -81,6 +84,7 @@ namespace NodeGraph.Model
 			{
 				if( value != _AllowEditingHeader )
 				{
+					AddNodePropertyCommand( "AllowEditingHeader", _AllowEditingHeader, value );
 					_AllowEditingHeader = value;
 					RaisePropertyChanged( "AllowEditingHeader" );
 				}
@@ -95,6 +99,7 @@ namespace NodeGraph.Model
 			{
 				if( value != _AllowCircularConnection )
 				{
+					AddNodePropertyCommand( "AllowCircularConnection", _AllowCircularConnection, value );
 					_AllowCircularConnection = value;
 					RaisePropertyChanged( "AllowCircularConnection" );
 				}
@@ -228,6 +233,8 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Node.OnPreExecute()" );
+
+			IsInitialized = true;
 		}
 		
 		public virtual void OnPreExecute( Connector prevConnector )
@@ -262,6 +269,9 @@ namespace NodeGraph.Model
 
 		public virtual void OnDeserialize()
 		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Node.OnDeserialize()" );
+
 			foreach( var port in InputFlowPorts )
 			{
 				port.OnDeserialize();
@@ -281,6 +291,8 @@ namespace NodeGraph.Model
 			{
 				port.OnDeserialize();
 			}
+
+			IsInitialized = true;
 		}
 
 		#endregion // Callbacks
@@ -432,5 +444,24 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // Overrides IXmlSerializable
+
+		#region History
+
+		protected virtual void AddNodePropertyCommand( string propertyName, object prevValue, object newValue )
+		{
+			if( !IsInitialized )
+			{
+				return;
+			}
+
+			FlowChart.History.BeginTransaction( "Setting Property" );
+
+			FlowChart.History.AddCommand( new History.NodePropertyCommand(
+				propertyName, Guid, propertyName, prevValue, newValue ) );
+
+			FlowChart.History.EndTransaction( false );
+		}
+
+		#endregion // History
 	}
 }

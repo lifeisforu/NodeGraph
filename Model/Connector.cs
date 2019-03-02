@@ -90,6 +90,7 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Connector.OnCreate()" );
+			IsInitialized = true;
 		}
 
 		public virtual void OnPreExecute( NodeFlowPort prevPort )
@@ -136,8 +137,12 @@ namespace NodeGraph.Model
 
 		public virtual void OnDeserialize()
 		{
+			if( NodeGraphManager.OutputDebugInfo )
+				System.Diagnostics.Debug.WriteLine( "Connector.OnDeserialize()" );
+
 			NodeGraphManager.ConnectTo( StartPort, this );
 			NodeGraphManager.ConnectTo( EndPort, this );
+			IsInitialized = true;
 		}
 
 		#endregion // Callbacks

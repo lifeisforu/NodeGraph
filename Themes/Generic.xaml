@@ -63,7 +63,7 @@
 					<Grid>
 						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" Background="Transparent"/>
 						<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center"
-								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="Transparent"/>
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" StrokeThickness="2" Width="8" Height="8" Fill="Transparent"/>
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
@@ -79,7 +79,7 @@
 					<Grid>
 						<Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" Background="Transparent"/>
 						<Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" 
-								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" Width="8" Height="8" Fill="White"/>
+								 IsHitTestVisible="False" Stroke="{TemplateBinding Foreground}" StrokeThickness="2" Width="8" Height="8" Fill="White"/>
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
@@ -87,7 +87,7 @@
 	</Style>
 
 	<!-- ConnectorView Style -->
-	<Style TargetType="{x:Type v:ConnectorView}">
+	<Style x:Key="DefaultConnectorViewStyle" TargetType="{x:Type v:ConnectorView}">
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type v:ConnectorView}">
@@ -97,7 +97,7 @@
 					</Grid>
 					<ControlTemplate.Triggers>
 						<Trigger Property="IsMouseOver" Value="True">
-							<Setter TargetName="ConnectorCurve" Property="Stroke" Value="Yellow"/>
+							<Setter TargetName="ConnectorCurve" Property="Stroke" Value="DarkOrange"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>
@@ -145,8 +145,8 @@
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
 						</Trigger>
 						<Trigger Property="IsConnectorMouseOver" Value="True">
-							<Setter TargetName="PART_Port" Property="Foreground" Value="Yellow"/>
-							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Yellow"/>
+							<Setter TargetName="PART_Port" Property="Foreground" Value="DarkOrange"/>
+							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="DarkOrange"/>
 						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>
@@ -198,8 +198,8 @@
 							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
 						</Trigger>
 						<Trigger Property="IsConnectorMouseOver" Value="True">
-							<Setter TargetName="PART_Port" Property="Foreground" Value="Yellow"/>
-							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Yellow"/>
+							<Setter TargetName="PART_Port" Property="Foreground" Value="DarkOrange"/>
+							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="DarkOrange"/>
 						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>

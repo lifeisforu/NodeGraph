@@ -32,21 +32,7 @@ namespace NodeGraph.View
 			DependencyProperty.Register( "CurveData", typeof( string ), typeof( ConnectorView ), new PropertyMetadata( "" ) );
 
 		#endregion // Properties
-
-		#region Template
-
-		static ConnectorView()
-		{
-			DefaultStyleKeyProperty.OverrideMetadata( typeof( ConnectorView ), new FrameworkPropertyMetadata( typeof( ConnectorView ) ) );
-		}
-
-		public override void OnApplyTemplate()
-		{
-			base.OnApplyTemplate();
-		}
-
-		#endregion // Template
-
+		
 		#region Constructor
 
 		public ConnectorView()

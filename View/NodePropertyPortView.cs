@@ -20,15 +20,6 @@ namespace NodeGraph.View
 {
 	public class NodePropertyPortView : NodePortView
 	{
-		#region Template
-
-		public override void OnApplyTemplate()
-		{
-			base.OnApplyTemplate();
-		}
-
-		#endregion // Template
-
 		#region Constructor
 
 		public NodePropertyPortView( bool isInput ) : base( isInput )

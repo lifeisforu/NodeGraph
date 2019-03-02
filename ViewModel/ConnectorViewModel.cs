@@ -1,4 +1,5 @@
-﻿using NodeGraph.Model;
+﻿using ConnectorGraph.ViewModel;
+using NodeGraph.Model;
 using NodeGraph.View;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace NodeGraph.ViewModel
 {
+	[ConnectorViewModel()]
 	public class ConnectorViewModel : ViewModelBase
 	{
 		#region Fields

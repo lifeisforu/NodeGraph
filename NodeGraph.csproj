@@ -99,6 +99,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ViewModel\ConnectorViewModel.cs" />
+    <Compile Include="ViewModel\ConnectorViewModelAttribute.cs" />
     <Compile Include="ViewModel\FlowChartViewModel.cs" />
     <Compile Include="ViewModel\NodeFlowPortViewModel.cs" />
     <Compile Include="ViewModel\NodeFlowPortViewModelAttribute.cs" />

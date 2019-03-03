@@ -12,6 +12,55 @@ A node can be divided as 3 parts, shown in below image; Node itself, FlowPorts, 
 * A FlowPort is used for specifying a execution flow between two nodes. The connection can be made for a FlowPort with different direction. For example, an input FlowPort can be connected with an output FlowPort.
 * A PropertyPort is used for specifying data-transfer between two nodes. The connection can be made for a PropertyPort with differenct direction. For example, an input PropertyPort can be connected with an output PropertyPort.
 
+## Features
+
+This provide below features:
+
+* Creating/Destroying FlowChart.
+* Creating/Destroying Node.
+* Custom Node ViewModel and Styling.
+* Creating/Destroying NodeFlowPort.
+* Custom NodeFlowPort ViewModel and Styling.
+* Supporting PropertyEditor for default types( bool, byte, short, int, long, float, double, string, enum, Media.Color ).
+* Creating/Destroying NodePropertyPort.
+* Custom NodePropertyPort ViewModel and Styling.
+* Creating/Destroying Connector.
+* Custom Connector ViewModel and Styling.
+* Supporting Zoom & Pan.
+* Supporting miscellaneous selection mode.
+* Supporting History( undo/redo ).
+* Serialization/Deserialization for XML.
+
+## Controlling
+
+### Connection
+
+Drag-Drop between ports : Connects.
+Ctrl + Left on port : Disconnects.
+
+### Selection
+
+Left : Select node and deselect all.
+Ctrl + Left : XOR selection.
+Shift + Left : Additive selection.
+Alt + Left : Subtractive selection.
+
+Ctrl + Left Dragging : XOR selection.
+Shift + Left Dragging : Additive selection.
+Alt + Left Dragging: Subtractive selection.
+
+Ctrl + "A" : Select all nodes.
+
+### Deletion
+
+ "Delete" : Delete selected nodes.
+
+### Zoom & Pan
+
+"F" : Focus selected nodes.
+"A" : Focus all nodes.
+Right Dragging on flowchart : Panning.
+
 ## Class Diagram
 
 NodeGraph supports MVVM( Model-View-ViewModel ) pattern.

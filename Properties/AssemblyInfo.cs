@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Graph")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle( "NodeGraph" )]
+[assembly: AssemblyDescription( "NodeGraph inspired by UE4's Blueprint Editor" )]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Graph")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCompany( "Lifeisforu" )]
+[assembly: AssemblyProduct( "NodeGraph" )]
+[assembly: AssemblyCopyright( "Copyright ©  2019 lifeisforu" )]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,8 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion( "0.2.0.0" )]
+[assembly: AssemblyFileVersion( "0.2.0.0" )]
+[assembly: NeutralResourcesLanguage( "en" )]
+[assembly: Guid( "27904BB5-ED08-410C-B3FF-E90BB518E1DB" )]
+

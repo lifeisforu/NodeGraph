@@ -41,7 +41,7 @@ And, in filter text box, search "nodegraph" and press a "Install" button.
 
 ![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/InstallNodeGraph.png)
 
-Then, popup window will be opened. And it shows you that "Lifeis.NodeGraph" and "PropertyTools.Wpf" will be installed.
+Then, popup window will be opened. And it shows you that "Lifeisforu.NodeGraph" and "PropertyTools.Wpf" will be installed.
 
 ![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/InstallNodeGraph2.png)
 
@@ -91,7 +91,7 @@ If you don't need special ViewModel or View, you can create node with basic appe
 
 ## Creating FlowChartView
 
-Creating FlowChartView is start by adding NodeGraph.dll assembly as your project's reference. If you already downloaded it with Nuget Manager, it is not needed.
+Creating FlowChartView is start by adding NodeGraph.dll assembly as your project's reference. If you already downloaded it with Nuget Manager, it is not needed( Notice : Don't forget add "PropertyTools.Wpf" ).
 
 ![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/NodeGraph_Reference.png)
 

@@ -31,6 +31,24 @@ This provide below features:
 * Supporting History( undo/redo ).
 * Serialization/Deserialization for XML.
 
+## Install
+
+First, in solution explorer, open context menu and select "Manage Nuget Packages...".
+
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/ManageNodeGraph.png)
+
+And, in filter text box, search "nodegraph" and press a "Install" button.
+
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/InstallNodeGraph.png)
+
+Then, popup window will be opened. And it shows you that "Lifeis.NodeGraph" and "PropertyTools.Wpf" will be installed.
+
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/InstallNodeGraph2.png)
+
+And then assemblies will be added in "References".
+
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/InstallNodeGraph3.png)
+
 ## Controlling
 
 ### Connection

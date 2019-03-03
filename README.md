@@ -3,7 +3,7 @@
 
 WPF control librarty for node graph.
 
-This library is inspired by a BlueprintEditor of UnrealEngine4.
+This library is inspired by a BlueprintEditor of UnrealEngine4. Below image shows a snapshot of a sample with this library. It makes two integers as array, and print values in top-left corner of screen during loop.
 
 ![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/NodeGraphCalculatorExample.png)
 

@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace NodeGraph.View
@@ -21,6 +22,8 @@ namespace NodeGraph.View
 		private EditableTextBlock _Part_Header;
 		private DispatcherTimer _ClickTimer = new DispatcherTimer();
 		private int _ClickCount = 0;
+
+		private BitmapImage[] _ExecutionStateImages;
 
 		#endregion // Fields
 
@@ -60,6 +63,15 @@ namespace NodeGraph.View
 		public static readonly DependencyProperty CornerRadiusProperty =
 			DependencyProperty.Register( "CornerRadius", typeof( double ), typeof( NodeView ), new PropertyMetadata( 8.0 ) );
 
+		public BitmapImage ExecutionStateImage
+		{
+			get { return ( BitmapImage )GetValue( ExecutionStateImageProperty ); }
+			set { SetValue( ExecutionStateImageProperty, value ); }
+		}
+		public static readonly DependencyProperty ExecutionStateImageProperty =
+			DependencyProperty.Register( "ExecutionStateImage", typeof( BitmapImage ), typeof( NodeView ),
+				new PropertyMetadata( null ) );
+
 		#endregion // Properties
 
 		#region Constructors
@@ -69,6 +81,28 @@ namespace NodeGraph.View
 			DataContextChanged += NodeView_DataContextChanged;
 			Loaded += NodeView_Loaded;
 			Unloaded += NodeView_Unloaded;
+
+			_ExecutionStateImages = new BitmapImage[ 3 ];
+			BitmapImage image = new BitmapImage();
+			image.BeginInit();
+			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Unexecuted.png" );
+			image.CacheOption = BitmapCacheOption.OnLoad;
+			image.EndInit();
+			_ExecutionStateImages[ 0 ] = image;
+
+			image = new BitmapImage();
+			image.BeginInit();
+			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executing.png" );
+			image.CacheOption = BitmapCacheOption.OnLoad;
+			image.EndInit();
+			_ExecutionStateImages[ 1 ] = image;
+
+			image = new BitmapImage();
+			image.BeginInit();
+			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executed.png" );
+			image.CacheOption = BitmapCacheOption.OnLoad;
+			image.EndInit();
+			_ExecutionStateImages[ 2 ] = image;
 		}
 
 		#endregion // Constructors
@@ -77,8 +111,8 @@ namespace NodeGraph.View
 
 		private void NodeView_Loaded( object sender, RoutedEventArgs e )
 		{
-			OnCanvasRenderTransformChanged();
 			SynchronizeProperties();
+			OnCanvasRenderTransformChanged();
 
 			_ClickTimer.Interval = TimeSpan.FromMilliseconds( 300 );
 			_ClickTimer.Tick += _ClickTimer_Tick;
@@ -117,6 +151,8 @@ namespace NodeGraph.View
 				( 0 < ViewModel.OutputFlowPortViewModels.Count ) ||
 				( 0 < ViewModel.InputPropertyPortViewModels.Count ) ||
 				( 0 < ViewModel.OutputPropertyPortViewModels.Count );
+
+			ExecutionStateImage = _ExecutionStateImages[ ( int )ViewModel.Model.ExecutionState ];
 		}
 
 		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )

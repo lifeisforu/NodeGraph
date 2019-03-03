@@ -442,6 +442,11 @@
 								</Grid>
 							</Grid>
 						</Border>
+						<!-- Execution State -->
+						<Image Source="{TemplateBinding ExecutionStateImage}" 
+							   HorizontalAlignment="Left" VerticalAlignment="Top" 
+							   Width="16" Height="16"
+							   IsHitTestVisible="False"/>
 					</Grid>
 					<ControlTemplate.Triggers>
 						<!-- Node Selection Trigger -->
@@ -510,7 +515,7 @@
 							</Canvas>
 							<!-- Log -->
 							<Grid>
-								<ListView BorderThickness="0" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Left" ItemsSource="{TemplateBinding Logs}">
+								<ListView IsHitTestVisible="False" BorderThickness="0" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Left" ItemsSource="{TemplateBinding Logs}">
 									<ListView.ItemTemplate>
 										<DataTemplate>
 											<TextBlock Style="{StaticResource LogTextBlockStyle}" Text="{Binding}"/>

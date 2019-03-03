@@ -208,6 +208,21 @@ namespace NodeGraph.Model
 			}
 		}
 
+		private NodeExecutionState _ExecutionState;
+		public NodeExecutionState ExecutionState
+		{
+			get { return _ExecutionState; }
+			set
+			{
+				if( value != _ExecutionState )
+				{
+					_ExecutionState = value;
+					RaisePropertyChanged( "ExecutionState" );
+				}
+			}
+		}
+
+
 		#endregion // Properties
 
 		#region Constructor
@@ -247,6 +262,8 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Node.OnPreExecute()" );
+
+			ExecutionState = NodeExecutionState.Executing;
 		}
 
 		public virtual void OnExecute( Connector prevConnector )
@@ -259,6 +276,8 @@ namespace NodeGraph.Model
 		{
 			if( NodeGraphManager.OutputDebugInfo )
 				System.Diagnostics.Debug.WriteLine( "Node.OnPostExecute()" );
+
+			ExecutionState = NodeExecutionState.Executed;
 		}
 
 		public virtual void OnPreDestroy()
@@ -500,5 +519,12 @@ namespace NodeGraph.Model
 		}
 
 		#endregion // PropertyChanged
+	}
+
+	public enum NodeExecutionState
+	{
+		Unexecuted,
+		Executing,
+		Executed
 	}
 }

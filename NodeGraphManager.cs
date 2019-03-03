@@ -1855,6 +1855,22 @@ namespace NodeGraph
 		}
 
 		#endregion // Logs
+
+		#region Execution
+
+		public static void ClearNodeExecutionStates( FlowChart flowChart )
+		{
+			foreach( var pair in Nodes )
+			{
+				Node node = pair.Value;
+				if( flowChart == node.Owner )
+				{
+					node.ExecutionState = NodeExecutionState.Unexecuted;
+				}
+			}
+		}
+
+		#endregion // Execution
 	}
 
 	public enum ModelType

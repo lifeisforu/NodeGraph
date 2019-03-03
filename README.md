@@ -35,31 +35,31 @@ This provide below features:
 
 ### Connection
 
-Drag-Drop between ports : Connects.
-Ctrl + Left on port : Disconnects.
+* Drag-Drop between ports : Connects.
+* Ctrl + Left on port : Disconnects.
 
 ### Selection
 
-Left : Select node and deselect all.
-Ctrl + Left : XOR selection.
-Shift + Left : Additive selection.
-Alt + Left : Subtractive selection.
+* Left : Select node and deselect all.
+* Ctrl + Left : XOR selection.
+* Shift + Left : Additive selection.
+* Alt + Left : Subtractive selection.
 
-Ctrl + Left Dragging : XOR selection.
-Shift + Left Dragging : Additive selection.
-Alt + Left Dragging: Subtractive selection.
+* Ctrl + Left Dragging : XOR selection.
+* Shift + Left Dragging : Additive selection.
+* Alt + Left Dragging: Subtractive selection.
 
-Ctrl + "A" : Select all nodes.
+* Ctrl + "A" : Select all nodes.
 
 ### Deletion
 
- "Delete" : Delete selected nodes.
+* "Delete" : Delete selected nodes.
 
 ### Zoom & Pan
 
-"F" : Focus selected nodes.
-"A" : Focus all nodes.
-Right Dragging on flowchart : Panning.
+* "F" : Focus selected nodes.
+* "A" : Focus all nodes.
+* Right Dragging on flowchart : Panning.
 
 ## Class Diagram
 

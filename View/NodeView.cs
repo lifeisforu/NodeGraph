@@ -1,5 +1,6 @@
 ﻿using NodeGraph.Model;
 using NodeGraph.ViewModel;
+using PropertyTools.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,12 +9,24 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace NodeGraph.View
 {
+	[TemplatePart( Name = "PART_Header", Type = typeof( EditableTextBlock ) ) ]
 	public class NodeView : ContentControl
 	{
-		#region Border Properties
+		#region Fields
+
+		private EditableTextBlock _Part_Header;
+		private DispatcherTimer _ClickTimer = new DispatcherTimer();
+		private int _ClickCount = 0;
+
+		#endregion // Fields
+
+		#region Properties
+
+		public NodeViewModel ViewModel { get; private set; }
 
 		public bool IsSelected
 		{
@@ -22,12 +35,6 @@ namespace NodeGraph.View
 		}
 		public static readonly DependencyProperty IsSelectedProperty =
 			DependencyProperty.Register( "IsSelected", typeof( bool ), typeof( NodeView ), new PropertyMetadata( false ) );
-
-		#endregion // Border Properties
-
-		#region Properties
-
-		public NodeViewModel ViewModel { get; private set; }
 
 		public bool HasConnection
 		{
@@ -72,6 +79,15 @@ namespace NodeGraph.View
 		{
 			OnCanvasRenderTransformChanged();
 			SynchronizeProperties();
+
+			_ClickTimer.Interval = TimeSpan.FromMilliseconds( 300 );
+			_ClickTimer.Tick += _ClickTimer_Tick;
+		}
+
+		private void _ClickTimer_Tick( object sender, EventArgs e )
+		{
+			_ClickCount = 0;
+			_ClickTimer.Stop();
 		}
 
 		private void NodeView_Unloaded( object sender, RoutedEventArgs e )
@@ -120,9 +136,39 @@ namespace NodeGraph.View
 		public override void OnApplyTemplate()
 		{
 			base.OnApplyTemplate();
+
+			_Part_Header = Template.FindName( "PART_Header", this ) as EditableTextBlock;
+			if( null != _Part_Header )
+			{
+				_Part_Header.MouseDown += _Part_Header_MouseDown;
+			}
 		}
 
 		#endregion // Template Events
+
+		#region Header Events
+
+		private void _Part_Header_MouseDown( object sender, MouseButtonEventArgs e )
+		{
+			Keyboard.Focus( _Part_Header );
+
+			if( 0 == _ClickCount )
+			{
+				_ClickTimer.Start();
+				_ClickCount++;
+			}
+			else if( 1 == _ClickCount )
+			{
+				_Part_Header.IsEditing = true;
+				Keyboard.Focus( _Part_Header );
+				_ClickCount = 0;
+				_ClickTimer.Stop();
+
+				e.Handled = true;
+			}
+		}
+
+		#endregion // Header Events
 
 		#region Mouse Events
 
@@ -252,7 +298,7 @@ namespace NodeGraph.View
 		}
 
 		#endregion // Mouse Events
-		
+
 		#region RenderTrasnform
 
 		public void OnCanvasRenderTransformChanged()

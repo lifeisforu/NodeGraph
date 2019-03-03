@@ -641,53 +641,56 @@ namespace NodeGraph.View
 				return;
 			}
 
-			if( Key.Delete == e.Key )
+			if( IsFocused )
 			{
-				FlowChart flowChart = ViewModel.Model;
-				flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+				if( Key.Delete == e.Key )
 				{
-					NodeGraphManager.DestroySelectedNodes( ViewModel.Model );
+					FlowChart flowChart = ViewModel.Model;
+					flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+					{
+						NodeGraphManager.DestroySelectedNodes( ViewModel.Model );
+					}
+					flowChart.History.EndTransaction( false );
 				}
-				flowChart.History.EndTransaction( false );
-			}
-			else if( Key.Escape == e.Key )
-			{
-				FlowChart flowChart = ViewModel.Model;
-				flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+				else if( Key.Escape == e.Key )
 				{
-					NodeGraphManager.DeselectAllNodes( ViewModel.Model );
+					FlowChart flowChart = ViewModel.Model;
+					flowChart.History.BeginTransaction( "Destroy Selected Nodes" );
+					{
+						NodeGraphManager.DeselectAllNodes( ViewModel.Model );
+					}
+					flowChart.History.EndTransaction( false );
 				}
-				flowChart.History.EndTransaction( false );
-			}
-			else if( Key.A == e.Key )
-			{
-				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+				else if( Key.A == e.Key )
 				{
-					NodeGraphManager.SelectAllNodes( ViewModel.Model );
+					if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+					{
+						NodeGraphManager.SelectAllNodes( ViewModel.Model );
+					}
+					else
+					{
+						FitNodesToView( false );
+					}
 				}
-				else
+				else if( Key.F == e.Key )
 				{
-					FitNodesToView( false );
+					FitNodesToView( true );
 				}
-			}
-			else if( Key.F == e.Key )
-			{
-				FitNodesToView( true );
-			}
-			else if( Key.Z == e.Key )
-			{
-				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+				else if( Key.Z == e.Key )
 				{
-					History.NodeGraphHistory history = ViewModel.Model.History;
-					history.Undo();
+					if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+					{
+						History.NodeGraphHistory history = ViewModel.Model.History;
+						history.Undo();
+					}
 				}
-			}
-			else if( Key.Y == e.Key )
-			{
-				if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+				else if( Key.Y == e.Key )
 				{
-					History.NodeGraphHistory history = ViewModel.Model.History;
-					history.Redo();
+					if( Keyboard.IsKeyDown( Key.LeftCtrl ) )
+					{
+						History.NodeGraphHistory history = ViewModel.Model.History;
+						history.Redo();
+					}
 				}
 			}
 		}

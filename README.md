@@ -91,7 +91,7 @@ If you don't need special ViewModel or View, you can create node with basic appe
 
 ## Creating FlowChartView
 
-Creating FlowChartView is start by adding NodeGraph.dll assembly as your project's reference.
+Creating FlowChartView is start by adding NodeGraph.dll assembly as your project's reference. If you already downloaded it with Nuget Manager, it is not needed.
 
 ![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/NodeGraph_Reference.png)
 

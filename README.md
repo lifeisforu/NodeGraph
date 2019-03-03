@@ -5,6 +5,8 @@ WPF control librarty for node graph.
 
 This library is inspired by a BlueprintEditor of UnrealEngine4.
 
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/NodeGraphCalculatorExample.png)
+
 A node can be divided as 3 parts, shown in below image; Node itself, FlowPorts, PropertyPorts.
 
 ![](/Documents/Images/NodeParts.png)

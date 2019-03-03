@@ -23,7 +23,7 @@ This provide below features:
 * Custom Node ViewModel and Styling.
 * Creating/Destroying NodeFlowPort.
 * Custom NodeFlowPort ViewModel and Styling.
-* Supporting PropertyEditor for default types( bool, byte, short, int, long, float, double, string, enum, Media.Color ).
+* Supporting PropertyEditor for default types( bool, byte, short, int, long, float, double, string, enum, Media.Color, etc. I will add more type editors in the future and have a plan to support custom editor ).
 * Creating/Destroying NodePropertyPort.
 * Custom NodePropertyPort ViewModel and Styling.
 * Creating/Destroying Connector.

@@ -261,7 +261,7 @@ Let's see an implementation of this class.
 <pre>
 "NodeGraphSample/Model/AutoOutputFlow"
 
-<code>[Node( "AutoOutputFlow", HeaderBackgroundColor = "Maroon", HeaderFontColor = "White" )]
+<code>[Node()]
 [NodeFlowPort( "Output", "", false )]
 public class AutoOutputFlow : Node
 {
@@ -270,10 +270,10 @@ public class AutoOutputFlow : Node
 	/// <summary>
 	/// Never call this constructor directly. Use Node.Create() method.
 	/// </summary>
-	public AutoOutputFlow( Guid guid, FlowChart flowChart, bool allowCircular ) : 
-		base( guid, flowChart, allowCircular )
+	public AutoOutputFlow( Guid guid, FlowChart flowChart ) : base( guid, flowChart )
 	{
-		
+		Header = "AutoInOutFlow";
+		HeaderBackgroundColor = Brushes.Maroon;
 	}
 
 	#endregion // Constructor
@@ -281,7 +281,7 @@ public class AutoOutputFlow : Node
 
 So Simple!!! There are two attributes and one construtor. You just need to define a class with attributes.
 
-In NodeAttribute attribute, you could specify Header, HeaderBackgroundColor, HeaderFontColor, and ViewModel.
+In Constructor you can specify Header, HeaderBackgroundColor, HeaderFontColor, and in NodeAttribute you can specify ViewModel.
 
 <pre>
 "NodeGraph/Model/NodeAttribute"
@@ -359,7 +359,7 @@ As you can expect, this is acheived by adding simple attribute.
 <pre>
 "NodeGraphSamples/Model/AutoNodeProperty.cs"
 
-<code>[Node( "AutoNodeProperty", HeaderBackgroundColor = "DarkBlue", HeaderFontColor = "White" )]
+<code>[Node()]
 [NodeFlowPort( "Input", "", true )]
 [NodeFlowPort( "Output", "", false )]
 public class AutoNodeProperty : Node
@@ -394,7 +394,8 @@ public class AutoNodeProperty : Node
 	/// </summary>
 	public AutoNodeProperty( Guid guid, FlowChart flowChart, bool allowCircularConnection ) : base( guid, flowChart, allowCircularConnection )
 	{
-
+		Header = "AutoInOutFlow";
+		HeaderBackgroundColor = Brushes.DarkBlue;
 	}
 
 	#endregion // Constructor
@@ -495,7 +496,7 @@ One dynamic input PropertyNode, and one dynamic output PropertyNode are created.
 	public double Double;
 };
 
-[Node( "DynamicNodeProperty", HeaderBackgroundColor = "DarkBlue", HeaderFontColor = "White" )]
+[Node()]
 [NodeFlowPort( "Input", "", true )]
 [NodeFlowPort( "Output", "", false )]
 public class DynamicNodeProperty : Node
@@ -551,5 +552,3 @@ public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Gui
 Elements of NodeGraph are categorized by Model-View-ViewModel. ALL Model instances are created by NodeGraphManager, it also create ViewModel instances. And ViewModels determine their Views.
 
 Model class specify type of ViewModel, and appearances info is determined statically by attributes or dynamically by calling methods of NodeGraphManager.
-
-In next articles, I will explain about Styling with Custom ViewModel and methods for Serialization/Deserialization.

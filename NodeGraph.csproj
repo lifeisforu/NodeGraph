@@ -65,6 +65,12 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\NumericTextBox.cs" />
+    <Compile Include="Converters\ByteToStringConverter.cs" />
+    <Compile Include="Converters\DoubleToStringConverter.cs" />
+    <Compile Include="Converters\FloatToStringConverter.cs" />
+    <Compile Include="Converters\LongToStringConverter.cs" />
+    <Compile Include="Converters\ShortToStringConverter.cs" />
     <Compile Include="History\CreateConnectorCommand.cs" />
     <Compile Include="History\CreateNodeCommand.cs" />
     <Compile Include="History\CreateNodePortCommand.cs" />
@@ -75,6 +81,7 @@
     <Compile Include="History\NodeGraphCommand.cs" />
     <Compile Include="History\NodeGraphHistory.cs" />
     <Compile Include="History\ZoomAndPanCommand.cs" />
+    <Compile Include="Converters\IntToStringConverter.cs" />
     <Compile Include="Model\Connector.cs" />
     <Compile Include="Model\ConnectorAttribute.cs" />
     <Compile Include="Model\FlowChartAttribute.cs" />

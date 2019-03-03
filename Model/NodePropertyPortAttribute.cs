@@ -1,5 +1,6 @@
 ﻿using NodeGraph.ViewModel;
 using System;
+using System.Windows.Media;
 
 namespace NodeGraph.Model
 {
@@ -9,12 +10,17 @@ namespace NodeGraph.Model
 		public Type ValueType;
 		public Type ViewModelType = typeof( NodePropertyPortViewModel );
 		public object DefaultValue;
+		public bool HasEditor;
 
-		public NodePropertyPortAttribute( string displayName, Type valueType, bool isInput, object defaultValue ) : base( displayName, isInput )
+		public NodePropertyPortAttribute( string displayName, bool isInput, Type valueType, object defaultValue, bool hasEditor ) : base( displayName, isInput )
 		{
 			if( null != defaultValue )
 			{
-				if( defaultValue.GetType() != valueType )
+				if( ( valueType == typeof( Color ) ) && ( defaultValue.GetType() == typeof( string ) ) )
+				{
+					defaultValue = ColorConverter.ConvertFromString( defaultValue as string );
+				}
+				else if( defaultValue.GetType() != valueType )
 				{
 					throw new ArgumentException( "Type of value is not same as ValueType." );
 				}
@@ -30,6 +36,7 @@ namespace NodeGraph.Model
 			DefaultValue = defaultValue;
 			AllowMultipleInput = false;
 			AllowMultipleOutput = true;
+			HasEditor = hasEditor;
 
 			if( !typeof( NodePropertyPortViewModel ).IsAssignableFrom( ViewModelType ) )
 			{

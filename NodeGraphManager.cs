@@ -1,6 +1,7 @@
 ﻿using NodeGraph.Model;
 using NodeGraph.View;
 using NodeGraph.ViewModel;
+using PropertyTools.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -201,7 +202,8 @@ namespace NodeGraph
 					{
 						foreach( var attr in nodePropertyAttrs )
 						{
-							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.ValueType, attr.DefaultValue, propertyInfo.Name,
+							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput,
+								attr.ValueType, attr.DefaultValue, propertyInfo.Name, attr.HasEditor,
 								( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType,
 								attr.DisplayName, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
 						}
@@ -218,7 +220,8 @@ namespace NodeGraph
 					{
 						foreach( var attr in nodePropertyAttrs )
 						{
-							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput, attr.ValueType, attr.DefaultValue, fieldInfo.Name,
+							NodePropertyPort port = CreateNodePropertyPort( false, Guid.NewGuid(), node, attr.IsInput,
+								attr.ValueType, attr.DefaultValue, fieldInfo.Name, attr.HasEditor,
 								( null != propertyPortViewModelTypeOverride ) ? propertyPortViewModelTypeOverride : attr.ViewModelType,
 								attr.DisplayName, attr.AllowMultipleInput, attr.AllowMultipleOutput, attr.IsPortEnabled, attr.IsEnabled );
 						}
@@ -366,10 +369,10 @@ namespace NodeGraph
 			else if( isPropertyPort )
 			{
 				NodePropertyPort propertyPort = referencePort as NodePropertyPort;
-				CreateNodePropertyPort( false, Guid.NewGuid(), node, true, propertyPort.ValueType, propertyPort.Value, "Input",
+				CreateNodePropertyPort( false, Guid.NewGuid(), node, true, propertyPort.ValueType, propertyPort.Value, "Input", false,
 					propertyPortViewModelTypeOverride,
 					"", false, false, true, true );
-				CreateNodePropertyPort( false, Guid.NewGuid(), node, false, propertyPort.ValueType, propertyPort.Value, "Output",
+				CreateNodePropertyPort( false, Guid.NewGuid(), node, false, propertyPort.ValueType, propertyPort.Value, "Output", false,
 					propertyPortViewModelTypeOverride,
 					"", false, false, true, true );
 			}
@@ -672,7 +675,7 @@ namespace NodeGraph
 		/// <param name="defaultValue">Default property value.</param>
 		// <param name="portViewModelTypeOverride">ViewModelType to override.</param>
 		/// <returns>Created NodePropertyPort instance.</returns>
-		public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, bool isInput, Type valueType, object defaultValue, string name,
+		public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, bool isInput, Type valueType, object defaultValue, string name, bool hasEditor,
 			Type portViewModelTypeOverride = null, string displayName = "", bool allowMultipleInput = false, bool allowMultipleOutput = true, bool isPortEnabled = true, bool isEnabled = true )
 		{
 			//----- exceptions.
@@ -684,7 +687,7 @@ namespace NodeGraph
 
 			// create propertyPort model.
 			NodePropertyPort port = Activator.CreateInstance( typeof( NodePropertyPort ),
-				new object[] { guid, node, isInput, valueType, defaultValue, name } ) as NodePropertyPort;
+				new object[] { guid, node, isInput, valueType, defaultValue, name, hasEditor } ) as NodePropertyPort;
 			port.DisplayName = displayName;
 			port.AllowMultipleInput = allowMultipleInput;
 			port.AllowMultipleOutput = allowMultipleOutput;
@@ -1727,9 +1730,10 @@ namespace NodeGraph
 						{
 							string name = reader.GetAttribute( "Name" );
 							Type valueType = Type.GetType( reader.GetAttribute( "ValueType" ) );
+							bool hasEditor = bool.Parse( reader.GetAttribute( "HasEditor" ) );
 
 							NodePropertyPort port = CreateNodePropertyPort(
-								true, guid, node, isInput, valueType, null, name, vmType );
+								true, guid, node, isInput, valueType, null, name, hasEditor, vmType );
 							port.ReadXml( reader );
 							port.OnDeserialize();
 						}

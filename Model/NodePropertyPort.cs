@@ -23,6 +23,7 @@ namespace NodeGraph.Model
 		#region Fields
 
 		public readonly bool IsDynamic;
+		public readonly bool HasEditor;
 		protected FieldInfo _FieldInfo;
 		protected PropertyInfo _PropertyInfo;
 
@@ -75,7 +76,7 @@ namespace NodeGraph.Model
 				}
 			}
 		}
-
+		
 		public Type ValueType { get; private set; }
 
 		#endregion // Properties
@@ -85,10 +86,11 @@ namespace NodeGraph.Model
 		/// <summary>
 		/// Never call this constructor directly. Use GraphManager.CreateNodePropertyPort() method.
 		/// </summary>
-		public NodePropertyPort( Guid guid, Node node, bool isInput, Type valueType, object value, string name ) : 
+		public NodePropertyPort( Guid guid, Node node, bool isInput, Type valueType, object value, string name, bool hasEditor ) : 
 			base( guid, node, isInput )
 		{
 			Name = name;
+			HasEditor = hasEditor;
 
 			Type nodeType = node.GetType();
 			_FieldInfo = nodeType.GetField( Name );
@@ -108,20 +110,30 @@ namespace NodeGraph.Model
 			base.WriteXml( writer );
 
 			writer.WriteAttributeString( "ValueType", ValueType.AssemblyQualifiedName );
+			writer.WriteAttributeString( "HasEditor", HasEditor.ToString() );
 
-			var serializer = new XmlSerializer( ValueType );
+			Type realValueType = ValueType;
+			if( null != Value )
+			{
+				realValueType = Value.GetType();
+			}
+			writer.WriteAttributeString( "RealValueType", realValueType.AssemblyQualifiedName );
+
+			var serializer = new XmlSerializer( realValueType );
 			serializer.Serialize( writer, Value );
 		}
 
 		public override void ReadXml( XmlReader reader )
 		{
 			base.ReadXml( reader );
+
+			Type realValueType = Type.GetType( reader.GetAttribute( "RealValueType" ) );
 			
 			while( reader.Read() )
 			{
 				if( XmlNodeType.Element == reader.NodeType )
 				{
-					var serializer = new XmlSerializer( ValueType );
+					var serializer = new XmlSerializer( realValueType );
 					Value = serializer.Deserialize( reader );
 					break;
 				}

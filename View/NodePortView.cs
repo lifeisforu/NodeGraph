@@ -142,13 +142,7 @@ namespace NodeGraph.View
 
 		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
 		{
-			if( ( "Model" == e.PropertyName ) ||
-				( "Connectors" == e.PropertyName ) ||
-				( "IsPortEnabled" == e.PropertyName ) ||
-				( "IsEnabled" == e.PropertyName ) )
-			{
-				SynchronizeProperties();
-			}
+			SynchronizeProperties();
 		}
 
 		#endregion // Events

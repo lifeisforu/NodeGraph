@@ -407,9 +407,10 @@ namespace NodeGraph.Model
 						{
 							string name = reader.GetAttribute( "Name" );
 							Type valueType = Type.GetType( reader.GetAttribute( "ValueType" ) );
+							bool hasEditor = bool.Parse( reader.GetAttribute( "HasEditor" ) );
 
 							NodePropertyPort port = NodeGraphManager.CreateNodePropertyPort(
-								true, guid, node, isInput, valueType, null, name, vmType );
+								true, guid, node, isInput, valueType, null, name, hasEditor, vmType );
 							port.ReadXml( reader );
 						}
 						else

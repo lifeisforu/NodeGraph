@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Graph"
     xmlns:v="clr-namespace:NodeGraph.View"
+	xmlns:c="clr-namespace:NodeGraph.Controls"
 	xmlns:e="clr-namespace:NodeGraph.Externals"
 	xmlns:pt="http://propertytools.org/wpf"
 	xmlns:vm="clr-namespace:NodeGraph.ViewModel">
@@ -167,18 +168,29 @@
 					<Grid Height="25">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition x:Name="_Column0Width" Width="Auto"/>
-							<ColumnDefinition x:Name="_Column2Width" Width="*"/>
+							<ColumnDefinition x:Name="_Column1Width" Width="*"/>
 						</Grid.ColumnDefinitions>
 						<ContentControl x:Name="PART_Port" Grid.Column="0"
 										Style="{StaticResource FilledPort}" 
-										VerticalAlignment="Center" HorizontalAlignment="Stretch"
+										VerticalAlignment="Center" HorizontalAlignment="Left"
 										Foreground="White"/>
-						<TextBlock x:Name="PART_PortTextBlock" Grid.Column="1" IsHitTestVisible="False"
-								   Text="{Binding Model.DisplayName}" Foreground="White" TextAlignment="Left" 
-								   VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+						<ContentControl x:Name="_TextAndEditor" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition x:Name="_InnerColumn0Width" Width="Auto"/>
+									<ColumnDefinition x:Name="_InnerColumn1Width" Width="*"/>
+								</Grid.ColumnDefinitions>
+								<ContentPresenter x:Name="_PortPropertyEditor" Grid.Column="0"
+												  Visibility="{TemplateBinding PropertyEditorVisibility}" 
+												  Content="{TemplateBinding PropertyEditor}"
+												  VerticalAlignment="Center" HorizontalAlignment="Left"/>
+								<TextBlock x:Name="_PortTextBlock" Grid.Column="1" IsHitTestVisible="False"
+										   Text="{Binding Model.DisplayName}" Foreground="White" TextAlignment="Left" Margin="3,0,3,0"
+										   HorizontalAlignment="Left"/>
+							</Grid>
+						</ContentControl>
 						<Popup IsOpen="{TemplateBinding ToolTipVisibility}" IsHitTestVisible="False">
-							<TextBlock x:Name="PART_ToolTip" IsHitTestVisible="False"
-									   Margin="3" Foreground="Red" Text="{TemplateBinding ToolTipText}" />
+							<TextBlock x:Name="PART_ToolTip" IsHitTestVisible="False" Margin="3" Foreground="Red" Text="{TemplateBinding ToolTipText}" />
 						</Popup>
 					</Grid>
 					<ControlTemplate.Triggers>
@@ -187,20 +199,28 @@
 						</Trigger>
 						<Trigger Property="IsInput" Value="False">
 							<Setter TargetName="_Column0Width" Property="Width" Value="*"/>
-							<Setter TargetName="_Column2Width" Property="Width" Value="Auto"/>
+							<Setter TargetName="_Column1Width" Property="Width" Value="Auto"/>
 							<Setter TargetName="PART_Port" Property="Grid.Column" Value="1"/>
 							<Setter TargetName="PART_Port" Property="HorizontalAlignment" Value="Right"/>
-							<Setter TargetName="PART_PortTextBlock" Property="Grid.Column" Value="0"/>
-							<Setter TargetName="PART_PortTextBlock" Property="HorizontalAlignment" Value="Stretch"/>
-							<Setter TargetName="PART_PortTextBlock" Property="TextAlignment" Value="Right"/>
+							<Setter TargetName="_TextAndEditor" Property="Grid.Column" Value="0"/>
+							<Setter TargetName="_TextAndEditor" Property="HorizontalAlignment" Value="Right"/>
+							<Setter TargetName="_InnerColumn0Width" Property="Width" Value="*"/>
+							<Setter TargetName="_InnerColumn1Width" Property="Width" Value="Auto"/>
+							<Setter TargetName="_PortPropertyEditor" Property="Grid.Column" Value="1"/>
+							<Setter TargetName="_PortTextBlock" Property="Grid.Column" Value="0"/>
+							<Setter TargetName="_PortPropertyEditor" Property="HorizontalAlignment" Value="Right"/>
+							<Setter TargetName="_PortTextBlock" Property="HorizontalAlignment" Value="Right"/>
+							<Setter TargetName="_PortTextBlock" Property="TextAlignment" Value="Right"/>
+
+							<Setter TargetName="_PortTextBlock" Property="TextAlignment" Value="Right"/>
 						</Trigger>
 						<Trigger Property="IsMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
-							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="Orange"/>
+							<Setter TargetName="_PortTextBlock" Property="Foreground" Value="Orange"/>
 						</Trigger>
 						<Trigger Property="IsConnectorMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="DarkOrange"/>
-							<Setter TargetName="PART_PortTextBlock" Property="Foreground" Value="DarkOrange"/>
+							<Setter TargetName="_PortTextBlock" Property="Foreground" Value="DarkOrange"/>
 						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>
@@ -498,7 +518,7 @@
 									</ListView.ItemTemplate>
 								</ListView>
 							</Grid>
-							
+
 						</Grid>
 					</Border>
 				</ControlTemplate>

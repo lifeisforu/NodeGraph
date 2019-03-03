@@ -121,12 +121,7 @@ namespace NodeGraph.View
 
 		protected virtual void ViewModelPropertyChanged( object sender, System.ComponentModel.PropertyChangedEventArgs e )
 		{
-			if( ( "Model" == e.PropertyName ) ||
-				( "IsSelected" == e.PropertyName ) ||
-				( "Connectors" == e.PropertyName ) )
-			{
-				SynchronizeProperties();
-			}
+			SynchronizeProperties();
 		}
 
 		#endregion // Events

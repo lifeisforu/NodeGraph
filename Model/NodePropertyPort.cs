@@ -166,7 +166,7 @@ namespace NodeGraph.Model
 		{
 			if( null != Value )
 			{
-				if( Value.GetType() != ValueType )
+				if( !ValueType.IsAssignableFrom( Value.GetType() ) )
 				{
 					throw new ArgumentException( "Type of value is not same as typeOfvalue." );
 				}

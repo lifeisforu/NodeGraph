@@ -9,7 +9,7 @@ This library is inspired by a BlueprintEditor of UnrealEngine4. Below image show
 
 A node can be divided as 3 parts, shown in below image; Node itself, FlowPorts, PropertyPorts.
 
-![](/Documents/Images/NodeParts.png)
+![](https://github.com/lifeisforu/NodeGraph/raw/master/Documents/Images/NodeParts.png)
 
 * A FlowPort is used for specifying a execution flow between two nodes. The connection can be made for a FlowPort with different direction. For example, an input FlowPort can be connected with an output FlowPort.
 * A PropertyPort is used for specifying data-transfer between two nodes. The connection can be made for a PropertyPort with differenct direction. For example, an input PropertyPort can be connected with an output PropertyPort.

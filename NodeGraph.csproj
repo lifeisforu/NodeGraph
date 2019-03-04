@@ -149,7 +149,7 @@
   <ItemGroup>
     <Resource Include="Resources\Images\Executed.png" />
     <Resource Include="Resources\Images\Executing.png" />
-    <Resource Include="Resources\Images\Unexecuted.png" />
+    <Resource Include="Resources\Images\Failed.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

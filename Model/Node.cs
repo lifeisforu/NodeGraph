@@ -523,8 +523,9 @@ namespace NodeGraph.Model
 
 	public enum NodeExecutionState
 	{
-		Unexecuted,
+		None,
 		Executing,
-		Executed
+		Executed,
+		Failed,
 	}
 }

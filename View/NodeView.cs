@@ -76,33 +76,34 @@ namespace NodeGraph.View
 
 		#region Constructors
 
+		private BitmapImage LoadBitmapImage( Uri uri )
+		{
+			BitmapImage image = new BitmapImage();
+			image.BeginInit();
+			image.UriSource = uri;
+			image.CacheOption = BitmapCacheOption.OnLoad;
+			image.EndInit();
+			return image;
+		}
+
 		public NodeView()
 		{
 			DataContextChanged += NodeView_DataContextChanged;
 			Loaded += NodeView_Loaded;
 			Unloaded += NodeView_Unloaded;
 
-			_ExecutionStateImages = new BitmapImage[ 3 ];
-			BitmapImage image = new BitmapImage();
-			image.BeginInit();
-			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Unexecuted.png" );
-			image.CacheOption = BitmapCacheOption.OnLoad;
-			image.EndInit();
-			_ExecutionStateImages[ 0 ] = image;
+			_ExecutionStateImages = new BitmapImage[ 4 ];
 
-			image = new BitmapImage();
-			image.BeginInit();
-			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executing.png" );
-			image.CacheOption = BitmapCacheOption.OnLoad;
-			image.EndInit();
-			_ExecutionStateImages[ 1 ] = image;
+			_ExecutionStateImages[ 0 ] = new BitmapImage();
 
-			image = new BitmapImage();
-			image.BeginInit();
-			image.UriSource = new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executed.png" );
-			image.CacheOption = BitmapCacheOption.OnLoad;
-			image.EndInit();
-			_ExecutionStateImages[ 2 ] = image;
+			_ExecutionStateImages[ 1 ] = LoadBitmapImage( 
+				new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executing.png" ) );
+
+			_ExecutionStateImages[ 2 ] = LoadBitmapImage(
+				new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Executed.png" ) );
+
+			_ExecutionStateImages[ 3 ] = LoadBitmapImage(
+				new Uri( "pack://application:,,,/NodeGraph;component/Resources/Images/Failed.png" ) ); ;
 		}
 
 		#endregion // Constructors

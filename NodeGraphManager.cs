@@ -561,6 +561,70 @@ namespace NodeGraph
 				NodePropertyPorts.Remove( guid );
 		}
 
+		private static void FindConnectedPortsInternal( NodePort port, List<NodePort> outConnectedPorts )
+		{
+			if( null == port )
+			{
+				return;
+			}
+
+			if( 0 < port.Connectors.Count )
+			{
+				if( port.IsInput )
+				{
+					foreach( var connector in port.Connectors )
+					{
+						NodePort nextPort = connector.StartPort;
+						Node nextNode = nextPort.Owner;
+						if( nextNode.ViewModel is RouterNodeViewModel )
+						{
+							if( nextPort is NodePropertyPort )
+							{
+								FindConnectedPortsInternal( nextNode.InputPropertyPorts[ 0 ], outConnectedPorts );
+							}
+							else if( nextPort is NodeFlowPort )
+							{
+								FindConnectedPortsInternal( nextNode.InputFlowPorts[ 0 ], outConnectedPorts );
+							}
+						}
+						else
+						{
+							outConnectedPorts.Add( nextPort );
+						}
+					}
+				}
+				else
+				{
+					foreach( var connector in port.Connectors )
+					{
+						NodePort nextPort = connector.EndPort;
+						Node nextNode = nextPort.Owner;
+						if( nextNode.ViewModel is RouterNodeViewModel )
+						{
+							if( nextPort is NodePropertyPort )
+							{
+								FindConnectedPortsInternal( nextNode.OutputPropertyPorts[ 0 ], outConnectedPorts );
+							}
+							else if( nextPort is NodeFlowPort )
+							{
+								FindConnectedPortsInternal( nextNode.OutputFlowPorts[ 0 ], outConnectedPorts );
+							}
+						}
+						else
+						{
+							outConnectedPorts.Add( nextPort );
+						}
+					}
+				}
+			}
+		}
+
+		public static void FindConnectedPorts( NodePort port, out List<NodePort> outConnectedPorts )
+		{
+			outConnectedPorts = new List<NodePort>();
+			FindConnectedPortsInternal( port, outConnectedPorts );
+		}
+
 		#endregion Port
 
 		#region FlowPort
@@ -1865,7 +1929,7 @@ namespace NodeGraph
 				Node node = pair.Value;
 				if( flowChart == node.Owner )
 				{
-					node.ExecutionState = NodeExecutionState.Unexecuted;
+					node.ExecutionState = NodeExecutionState.None;
 				}
 			}
 		}

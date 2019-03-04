@@ -20,6 +20,8 @@ namespace NodeGraph.ViewModel
 
 		public NodeView View;
 
+		public readonly Type NodeViewType;
+
 		#endregion // Fields
 
 		#region Properties

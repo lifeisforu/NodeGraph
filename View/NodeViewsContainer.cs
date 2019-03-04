@@ -9,15 +9,47 @@ namespace NodeGraph.View
 {
 	public class NodeViewsContainer : ItemsControl
     {
+		#region Fields
+
+		private Type _ViewType = null;
+
+		#endregion // Fields
+
 		#region Overrides ItemsControl
+
+		protected override bool IsItemItsOwnContainerOverride( object item )
+		{
+			NodeViewModel viewModel = item as NodeViewModel;
+
+			var attrs = item.GetType().GetCustomAttributes( typeof( NodeViewModelAttribute ), false ) as NodeViewModelAttribute[];
+
+			if( 0 == attrs.Length )
+			{
+				throw new Exception( "A NodeViewModelAttribute must exist for NodeViewModel class." );
+			}
+			else if( 1 < attrs.Length )
+			{
+				throw new Exception( "A NodeViewModelAttribute must exist only one." );
+			}
+
+			_ViewType = attrs[ 0 ].ViewType;
+
+			return base.IsItemItsOwnContainerOverride( item );
+		}
 
 		protected override void PrepareContainerForItemOverride( DependencyObject element, object item )
 		{
 			base.PrepareContainerForItemOverride( element, item );
 
 			var attrs = item.GetType().GetCustomAttributes( typeof( NodeViewModelAttribute ), false ) as NodeViewModelAttribute[];
-			if( 1 != attrs.Length )
-				throw new Exception( "A NodeViewModelAttribute must exist for NodeViewModel class" );
+			if( 0 == attrs.Length )
+			{
+				throw new Exception( "A NodeViewModelAttribute must exist for NodeViewModel class." );
+			}
+			else if( 1 < attrs.Length )
+			{
+				throw new Exception( "A NodeViewModelAttribute must exist only one." );
+			}
 
 			FrameworkElement fe = element as FrameworkElement;
 
@@ -39,7 +71,7 @@ namespace NodeGraph.View
 
 		protected override DependencyObject GetContainerForItemOverride()
 		{
-			return new NodeView();
+			return Activator.CreateInstance( _ViewType ) as DependencyObject;
 		}
 
 		#endregion // Overrides ItemsControl

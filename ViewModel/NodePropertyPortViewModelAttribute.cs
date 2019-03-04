@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeGraph.View;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,7 @@ namespace NodeGraph.ViewModel
 	[AttributeUsage( AttributeTargets.Class )]
 	public class NodePropertyPortViewModelAttribute : Attribute
 	{
-		public string ViewStyleName;
-		public NodePropertyPortViewModelAttribute( string viewStyleName = "DefaultNodePropertyPortViewStyle" )
-		{
-			ViewStyleName = viewStyleName;
-		}
+		public string ViewStyleName = "DefaultNodePropertyPortViewStyle";
+		public Type ViewType = typeof( NodePropertyPortView );
 	}
 }

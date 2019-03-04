@@ -5,7 +5,7 @@
         <id>Lifeisforu.NodeGraph</id>
 
         <!-- The package version number that is used when resolving dependencies -->
-        <version>0.2.1</version>
+        <version>0.3.0</version>
 
         <!-- Authors contain text that appears directly on the gallery -->
         <authors>lifeisforu</authors>
@@ -33,7 +33,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
         <!-- Any details about this particular release -->
-        <releaseNotes>First upload</releaseNotes>
+        <releaseNotes>Views can be overrided by ViewModel's attribute.</releaseNotes>
 
         <!-- 
             The description can be used in package manager UI. Note that the

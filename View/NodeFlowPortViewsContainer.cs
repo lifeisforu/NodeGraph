@@ -18,6 +18,12 @@ namespace NodeGraph.View
 {
 	public class NodeFlowPortViewsContainer : ItemsControl
 	{
+		#region Fields
+
+		private Type _ViewType = null;
+
+		#endregion // Fields
+
 		#region Properties
 
 		public bool IsInput
@@ -31,6 +37,26 @@ namespace NodeGraph.View
 		#endregion // Properties
 
 		#region Overrides ItemsControl
+
+		protected override bool IsItemItsOwnContainerOverride( object item )
+		{
+			NodeFlowPortViewModel viewModel = item as NodeFlowPortViewModel;
+
+			var attrs = item.GetType().GetCustomAttributes( typeof( NodeFlowPortViewModelAttribute ), false ) as NodeFlowPortViewModelAttribute[];
+
+			if( 0 == attrs.Length )
+			{
+				throw new Exception( "A NodeFlowPortViewModelAttribute must exist for NodeFlowPortViewModel class." );
+			}
+			else if( 1 < attrs.Length )
+			{
+				throw new Exception( "A NodeFlowPortViewModelAttribute must exist only one." );
+			}
+
+			_ViewType = attrs[ 0 ].ViewType;
+
+			return base.IsItemItsOwnContainerOverride( item );
+		}
 
 		protected override void PrepareContainerForItemOverride( DependencyObject element, object item )
 		{
@@ -60,7 +86,7 @@ namespace NodeGraph.View
 
 		protected override DependencyObject GetContainerForItemOverride()
 		{
-			return new NodeFlowPortView( IsInput );
+			return Activator.CreateInstance( _ViewType, new object[] { IsInput } ) as DependencyObject;
 		}
 
 		#endregion // Overrides ItemsControl

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NodeGraph.ViewModel
 {
-	[NodeViewModel( "RouterNodeViewStyle" )]
+	[NodeViewModel( ViewStyleName = "RouterNodeViewStyle" )]
 	public class RouterNodeViewModel : NodeViewModel
 	{
 		#region Constructor

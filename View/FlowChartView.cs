@@ -488,6 +488,8 @@ namespace NodeGraph.View
 			}
 
 			_PrevMousePos = mousePos;
+
+			e.Handled = true;
 		}
 
 		protected override void OnMouseLeave( MouseEventArgs e )
@@ -715,13 +717,13 @@ namespace NodeGraph.View
 
 			MouseArea area = MouseArea.None;
 
-			if( absPosition.X < ( absTopLeft.X + 2.0 ) )
+			if( absPosition.X < ( absTopLeft.X + 4.0 ) )
 				area |= MouseArea.Left;
-			if( absPosition.X > ( absBottomRight.X - 2.0 ) )
+			if( absPosition.X > ( absBottomRight.X - 4.0 ) )
 				area |= MouseArea.Right;
-			if( absPosition.Y < ( absTopLeft.Y + 2.0 ) )
+			if( absPosition.Y < ( absTopLeft.Y + 4.0 ) )
 				area |= MouseArea.Top;
-			if( absPosition.Y > ( absBottomRight.Y - 2.0 ) )
+			if( absPosition.Y > ( absBottomRight.Y - 4.0 ) )
 				area |= MouseArea.Bottom;
 
 			return area;

@@ -1194,9 +1194,9 @@ namespace NodeGraph
 			Point startLocation = flowChartView.PointToScreen( new Point( 0, 0 ) );
 
 			System.Drawing.Rectangle rect = new System.Drawing.Rectangle(
-				( int )startLocation.X, ( int )startLocation.Y,
-				( int )( startLocation.X + flowChartView.ActualWidth ),
-				( int )( startLocation.Y + flowChartView.ActualHeight ) );
+				( int )startLocation.X + 2, ( int )startLocation.Y + 2,
+				( int )( startLocation.X + flowChartView.ActualWidth ) - 2,
+				( int )( startLocation.Y + flowChartView.ActualHeight ) - 2 );
 			ClipCursor( ref rect );
 		}
 

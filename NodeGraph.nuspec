@@ -5,7 +5,7 @@
         <id>Lifeisforu.NodeGraph</id>
 
         <!-- The package version number that is used when resolving dependencies -->
-        <version>0.3.0</version>
+        <version>0.3.1</version>
 
         <!-- Authors contain text that appears directly on the gallery -->
         <authors>lifeisforu</authors>
@@ -33,7 +33,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
         <!-- Any details about this particular release -->
-        <releaseNotes>Views can be overrided by ViewModel's attribute.</releaseNotes>
+        <releaseNotes>Areas have been adjusted for ClipCursor and Edge-Dragging</releaseNotes>
 
         <!-- 
             The description can be used in package manager UI. Note that the
@@ -45,7 +45,7 @@
         <copyright>Copyright ©2019 lifeisforu</copyright>
 
         <!-- Tags appear in the gallery and can be used for tag searches -->
-        <tags>wpf nodegraph visualscript flowchart blueprint</tags>
+        <tags>wpf node graph visual script flowchart blueprint</tags>
 
         <!-- Dependencies are automatically installed when the package is installed -->
         <dependencies>

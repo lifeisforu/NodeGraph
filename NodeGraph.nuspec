@@ -5,7 +5,7 @@
         <id>Lifeisforu.NodeGraph</id>
 
         <!-- The package version number that is used when resolving dependencies -->
-        <version>0.3.1</version>
+        <version>0.3.2</version>
 
         <!-- Authors contain text that appears directly on the gallery -->
         <authors>lifeisforu</authors>
@@ -33,7 +33,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
         <!-- Any details about this particular release -->
-        <releaseNotes>Areas have been adjusted for ClipCursor and Edge-Dragging</releaseNotes>
+        <releaseNotes>1. Visibility-bug of PropertyEditor has been fixed when property-port is deserialized.
+2. Supporting for editable-display-name for property-port has been added by double-clicking.</releaseNotes>
 
         <!-- 
             The description can be used in package manager UI. Note that the

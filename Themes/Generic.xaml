@@ -184,9 +184,15 @@
 												  Visibility="{TemplateBinding PropertyEditorVisibility}" 
 												  Content="{TemplateBinding PropertyEditor}"
 												  VerticalAlignment="Center" HorizontalAlignment="Left"/>
-								<TextBlock x:Name="_PortTextBlock" Grid.Column="1" IsHitTestVisible="False"
-										   Text="{Binding Model.DisplayName}" Foreground="White" TextAlignment="Left" Margin="3,0,3,0"
-										   HorizontalAlignment="Left"/>
+								<pt:EditableTextBlock x:Name="PART_Header"
+													  Grid.Column="1"
+													  Text="{Binding Model.DisplayName, Mode=TwoWay}"
+													  Focusable="True"
+													  Foreground="White" 
+													  TextAlignment="Left" 
+													  Margin="3,0,3,0"
+													  VerticalAlignment="Center"
+													  HorizontalAlignment="Left"/>
 							</Grid>
 						</ContentControl>
 						<Popup IsOpen="{TemplateBinding ToolTipVisibility}" IsHitTestVisible="False">
@@ -207,20 +213,20 @@
 							<Setter TargetName="_InnerColumn0Width" Property="Width" Value="*"/>
 							<Setter TargetName="_InnerColumn1Width" Property="Width" Value="Auto"/>
 							<Setter TargetName="_PortPropertyEditor" Property="Grid.Column" Value="1"/>
-							<Setter TargetName="_PortTextBlock" Property="Grid.Column" Value="0"/>
+							<Setter TargetName="PART_Header" Property="Grid.Column" Value="0"/>
 							<Setter TargetName="_PortPropertyEditor" Property="HorizontalAlignment" Value="Right"/>
-							<Setter TargetName="_PortTextBlock" Property="HorizontalAlignment" Value="Right"/>
-							<Setter TargetName="_PortTextBlock" Property="TextAlignment" Value="Right"/>
+							<Setter TargetName="PART_Header" Property="HorizontalAlignment" Value="Right"/>
+							<Setter TargetName="PART_Header" Property="TextAlignment" Value="Right"/>
 
-							<Setter TargetName="_PortTextBlock" Property="TextAlignment" Value="Right"/>
+							<Setter TargetName="PART_Header" Property="TextAlignment" Value="Right"/>
 						</Trigger>
 						<Trigger Property="IsMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="Orange"/>
-							<Setter TargetName="_PortTextBlock" Property="Foreground" Value="Orange"/>
+							<Setter TargetName="PART_Header" Property="Foreground" Value="Orange"/>
 						</Trigger>
 						<Trigger Property="IsConnectorMouseOver" Value="True">
 							<Setter TargetName="PART_Port" Property="Foreground" Value="DarkOrange"/>
-							<Setter TargetName="_PortTextBlock" Property="Foreground" Value="DarkOrange"/>
+							<Setter TargetName="PART_Header" Property="Foreground" Value="DarkOrange"/>
 						</Trigger>
 						<Trigger Property="IsPortEnabled" Value="False">
 							<Setter TargetName="PART_Port" Property="Visibility" Value="Hidden"/>

@@ -2,6 +2,7 @@
 한국분은 [An introduction for WPF NodeGraph( Korean )](https://github.com/lifeisforu/NodeGraph/wiki/An-introduction-for-WPF-NodeGraph(-Koeran-)) 를 참고하세요.
 
 Sample Project : https://github.com/lifeisforu/NodeGraph/raw/master/Documents/NodeGraphCalculator.zip
+Nuget Release : [![NuGet Release](https://img.shields.io/nuget/v/Lifeisforu.NodeGraph.svg)](https://www.nuget.org/packages/Lifeisforu.NodeGraph/)
 
 WPF control librarty for node graph.
 

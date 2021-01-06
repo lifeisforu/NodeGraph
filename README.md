@@ -114,7 +114,7 @@ Then, you can add a namespace in XAML of a Visual element. As you can see above,
 	xmlns:ngv="clr-namespace:NodeGraph.View;assembly=NodeGraph"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid&gt;
+    <Grid>
 	<ngv:FlowChartView DataContext="{Binding Path=FlowChartViewModel, 
                               RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"/>
      </Grid>
@@ -156,7 +156,7 @@ NodeGraphManager.CreateFlowChart() is defined as below.
 ```cs
 "NodeGraph/NodeGraphManager.cs"
 
-<code>/// &lt;summary&gt;
+/// &lt;summary&gt;
 /// Create FlowChart with FlowChartViewModel.
 /// &lt;/summary&gt;
 /// &lt;param name="isDeserializing"&gt;Is in deserializing routine? 
@@ -164,16 +164,17 @@ NodeGraphManager.CreateFlowChart() is defined as below.
 /// &lt;param name="guid"&gt;Guid of this FlowChart.&lt;/param&gt;
 /// &lt;param name="flowChartModelType"&gt;Type of FlowChart to be created.&lt;/param&gt;
 /// &lt;returns&gt;Created FlowChart instance&lt;/returns&gt;
-public static FlowChart CreateFlowChart( bool isDeserializing, Guid guid, Type flowChartModelType )</code></pre>
+public static FlowChart CreateFlowChart( bool isDeserializing, Guid guid, Type flowChartModelType )<
+```
 
 About all other parameters, I'll explain them later in other articles. Let's look third parameter. It specifices type of FlowChart. It is important, becuase it's attribute determines ViewModel of FlowChart.
 
 For example, a basic FlowChart class is defined as below.
 
-<pre>
+```cs
 "NodeGraph/Model/FlowChart.cs"
 
-<code>[FlowChart()]
+[FlowChart()]
 public class FlowChart : ModelBase
 {
     [ ... ]

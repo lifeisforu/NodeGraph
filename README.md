@@ -103,10 +103,9 @@ Creating FlowChartView is start by adding NodeGraph.dll assembly as your project
 
 Then, you can add a namespace in XAML of a Visual element. As you can see above, Model, View, ViewModel namespaces exsit. So you should add namespace for View. In my case, I have added name of "ngv". And then you can add "FlowChartView".
 
-<pre>
 "NodeGraphSamples/MainWindow.xaml"
-
-<code>&lt;Window x:Class="NodeGraphSamples.MainWindow"
+```cs
+<Window x:Class="NodeGraphSamples.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -114,21 +113,22 @@ Then, you can add a namespace in XAML of a Visual element. As you can see above,
         xmlns:local="clr-namespace:NodeGraphSamples"
 	xmlns:ngv="clr-namespace:NodeGraph.View;assembly=NodeGraph"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"&gt;
-    &lt;Grid&gt;
-	&lt;ngv:FlowChartView DataContext="{Binding Path=FlowChartViewModel, 
-                              RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"/&gt;
-    &lt;/Grid&gt;
-&lt;/Window&gt;</code></pre>
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+	<ngv:FlowChartView DataContext="{Binding Path=FlowChartViewModel, 
+                              RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}"/>
+     </Grid>
+</Window>
+```
 
 ## Creating and binding FlowChart
 
 All Model instances in NodeGrpah could be created only by NodeGraphManager.
 
-<pre>
+```cs
 "NodeGraphSamples/MainWindow.xaml.cs"
 
-<code>public NodeGraph.ViewModel.FlowChartViewModel FlowChartViewModel
+public NodeGraph.ViewModel.FlowChartViewModel FlowChartViewModel
 {
 	get { return ( NodeGraph.ViewModel.FlowChartViewModel )GetValue( FlowChartViewModelProperty ); }
 	set { SetValue( FlowChartViewModelProperty, value ); }
@@ -146,16 +146,17 @@ private void MainWindow_Loaded( object sender, RoutedEventArgs e )
 	FlowChartViewModel = flowChart.ViewModel;
 
 	[ ... ]
-}</code></pre>
+}
+```
 
 If you create FlowChart instance, FlowChartViewModel is created automatically with it. So you can bind it.
 
 NodeGraphManager.CreateFlowChart() is defined as below.
 
-<pre>
+```cs
 "NodeGraph/NodeGraphManager.cs"
 
-<code>/// &lt;summary&gt;
+/// &lt;summary&gt;
 /// Create FlowChart with FlowChartViewModel.
 /// &lt;/summary&gt;
 /// &lt;param name="isDeserializing"&gt;Is in deserializing routine? 
@@ -163,28 +164,28 @@ NodeGraphManager.CreateFlowChart() is defined as below.
 /// &lt;param name="guid"&gt;Guid of this FlowChart.&lt;/param&gt;
 /// &lt;param name="flowChartModelType"&gt;Type of FlowChart to be created.&lt;/param&gt;
 /// &lt;returns&gt;Created FlowChart instance&lt;/returns&gt;
-public static FlowChart CreateFlowChart( bool isDeserializing, Guid guid, Type flowChartModelType )</code></pre>
+public static FlowChart CreateFlowChart( bool isDeserializing, Guid guid, Type flowChartModelType )<
+```
 
 About all other parameters, I'll explain them later in other articles. Let's look third parameter. It specifices type of FlowChart. It is important, becuase it's attribute determines ViewModel of FlowChart.
 
 For example, a basic FlowChart class is defined as below.
 
-<pre>
+```cs
 "NodeGraph/Model/FlowChart.cs"
 
-<code>[FlowChart()]
+[FlowChart()]
 public class FlowChart : ModelBase
 {
     [ ... ]
 }
-</code></pre>
+```
 
 FlowChartAttribute class is defined as below.
 
-<pre>
+```cs
 "NodeGraph/Model/FlowChartAttribute.cs"
 
-<code>
 [AttributeUsage( AttributeTargets.Class )]
 public class FlowChartAttribute : Attribute
 {
@@ -195,7 +196,8 @@ public class FlowChartAttribute : Attribute
 		if( !typeof( FlowChartViewModel ).IsAssignableFrom( ViewModelType ) )
 			throw new ArgumentException( "ViewModelType of FlowChartAttribute must be subclass of FlowChartViewModel" );
 	}
-}</code></pre>
+}
+```
 
 If you want, you can override ViewModelType. CreateFlowChart() will get ViewModel from the attribute.
 
@@ -209,10 +211,10 @@ Now, let's create nodes. By now, we don't have UI which could create nodes. So, 
 
 First, add ContextMenu-related event handlers to MainWindow.
 
-<pre>
+```cs
 "NodeGraphSamples/MainWindow.xaml.cs"
 
-<code>private void MainWindow_Loaded( object sender, RoutedEventArgs e )
+private void MainWindow_Loaded( object sender, RoutedEventArgs e )
 {
 	[ ... ]
 
@@ -222,14 +224,15 @@ First, add ContextMenu-related event handlers to MainWindow.
 	NodeGraphManager.BuildPropertyPortContextMenu += NodeGraphManager_BuildPropertyPortContextMenu;
 
 	[ ... ]
-}</code></pre>
+}
+```
 
 Then, when NodeGraphManager_BuildFlowChartContextMenu event invoked, add menu items to ContextMenu.
 
-<pre>
+```cs
 "NodeGraphSamples/MainWindow.xaml.cs"
 
-<code>List&lt;Type&gt; _NodeTypes = new List&lt;Type&gt;()
+List&lt;Type&gt; _NodeTypes = new List&lt;Type&gt;()
 {
 	typeof( Model.AutoOutputFlow ),
 	typeof( Model.AutoInOutFlow ),
@@ -264,7 +267,7 @@ private bool NodeGraphManager_BuildFlowChartContextMenu( object sender, BuildCon
 
 	return ( 0 < items.Count );
 }
-</code></pre>
+```
 
 In above code snippets, types in _NodeTypes are pre-defined nodes I have been created. The mechanism is simple. While iterating _NodeTypes, get NodeAttribute attribute from each type. NodeAttribute contains appearances info of the node, among them, select "Header" field and set it as Header of MenuItem. And pass node's type to CommandParameter. It is to create a node with the type, when we click the menu item. _ContextMenuLocation is used for position of the node that will be created.
 
@@ -274,10 +277,10 @@ Now, you can see ContextMenu when you click mouse right button.
 
 What will happen, if you click "Create AutoOutputFlow" item. Let's find out.
 
-<pre>
+```cs
 "NodeGraphSamples/MainWindow.xaml.cs"
 
-<code>protected virtual void FlowChart_ContextMenuItem_Click( object sender, RoutedEventArgs e )
+protected virtual void FlowChart_ContextMenuItem_Click( object sender, RoutedEventArgs e )
 {
 	MenuItem menuItem = sender as MenuItem;
 	Type nodeType = menuItem.CommandParameter as Type;
@@ -289,16 +292,16 @@ What will happen, if you click "Create AutoOutputFlow" item. Let's find out.
 
 	Node node = NodeGraphManager.CreateNode(
 		false, Guid.NewGuid(), FlowChartViewModel.Model, nodeType, nodePos.X, nodePos.Y, 0 );
-}</code></pre>
+}
+```
 
 As mentioned earlier, "ALL" Model instances must be created by NodeGraphManager. In here, we could call NodeGraphManager.CreateNode() method.
 
 This method is defined as below.
 
-<pre>
+```cs
 "NodeGraph/NodeGraphManager.cs"
 
-<code>
 /// &lt;summary&gt;
 /// Create Node with NodeViewModel.
 /// &lt;/summary&gt;
@@ -319,7 +322,8 @@ This method is defined as below.
 public static Node CreateNode( bool isDeserializing, Guid guid, FlowChart flowChart, 
     Type nodeType, double x, double y, int ZIndex,
     Type nodeViewModelTypeOverride = null, Type flowPortViewModelTypeOverride = null, 
-    Type propertyPortViewModelTypeOverride = null )</code></pre>
+    Type propertyPortViewModelTypeOverride = null )
+```
 
 In this method, it has not only Node type but also XXXOverride types. Becuase I predict that, in the case of Node, ViewModel of Nodes are frequently replaced with other type of ViewModel, so I make additional ViewModel types. About the exmaple of this case, I will explain it later in other articles.
 
@@ -331,10 +335,10 @@ Anyway, if you click "Create AutoOutputFlow", you can see that a node named "Aut
 
 Let's see an implementation of this class.
 
-<pre>
+```cs
 "NodeGraphSample/Model/AutoOutputFlow"
 
-<code>[Node()]
+[Node()]
 [NodeFlowPort( "Output", "", false )]
 public class AutoOutputFlow : Node
 {
@@ -350,16 +354,17 @@ public class AutoOutputFlow : Node
 	}
 
 	#endregion // Constructor
-}</code></pre>
+}
+```
 
 So Simple!!! There are two attributes and one construtor. You just need to define a class with attributes.
 
 In Constructor you can specify Header, HeaderBackgroundColor, HeaderFontColor, and in NodeAttribute you can specify ViewModel.
 
-<pre>
+```cs
 "NodeGraph/Model/NodeAttribute"
 
-<code>[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum )]
+[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum )]
 public class NodeAttribute : Attribute
 {
 	public Type ViewModelType = typeof( NodeViewModel );
@@ -375,16 +380,16 @@ public class NodeAttribute : Attribute
 			throw new ArgumentException( "ViewModelType of NodeAttribute must be subclass of NodeViewModel" );
 	}
 }
-</code></pre>
+```
 
 ## Creating FlowPort
 
 There is an output FlowPort in AutoOutputFlow node. It is automatically added by adding attribute like below.
 
-<pre>
+```cs
 "NodeGraph/Model/NodeFlowPortAttribute.cs"
 
-<code>[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum, AllowMultiple = true ) ]
+[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum, AllowMultiple = true ) ]
 public class NodeFlowPortAttribute : NodePortAttribute
 {
 	public Type ViewModelType = typeof( NodeFlowPortViewModel );
@@ -398,14 +403,15 @@ public class NodeFlowPortAttribute : NodePortAttribute
 		if( !typeof( NodeFlowPortViewModel ).IsAssignableFrom( ViewModelType ) )
 			throw new ArgumentException( "ViewModelType of NodeFlowPortAttribute must be subclass of NodeFlowPortViewModel" );
 	}
-}</code></pre>
+}
+```
 
 NodeFlowPortAttribute is derived from NodePortAttribute. It defines common appearances and behavior of a port.
 
-<pre>
+```cs
 "NodeGraph/Model/NodePortAttribute.cs"
 
-<code>[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum )]
+[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum )]
 public class NodePortAttribute : Attribute
 {
 	public string Name = string.Empty;
@@ -419,7 +425,8 @@ public class NodePortAttribute : Attribute
 		DisplayName = displayName;
 		IsInput = isInput;
 	}
-}</code></pre>
+}
+```
 
 ## Creating PropertyPort
 
@@ -429,10 +436,10 @@ Now, Let's create a node with PropertyPort. If you click "Create AutoNodePropert
 
 As you can expect, this is acheived by adding simple attribute.
 
-<pre>
+```cs
 "NodeGraphSamples/Model/AutoNodeProperty.cs"
 
-<code>[Node()]
+[Node()]
 [NodeFlowPort( "Input", "", true )]
 [NodeFlowPort( "Output", "", false )]
 public class AutoNodeProperty : Node
@@ -472,14 +479,15 @@ public class AutoNodeProperty : Node
 	}
 
 	#endregion // Constructor
-}</code></pre>
+}
+```
 
 NodePropertyPortAttribute is derived from NodePortAttribute. And it is defined as below.
 
-<pre>
+```cs
 "NodeGraphSamples/Model/NodePropertyPortAttribute.cs"
 
-<code>[AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
+[AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
 public class NodePropertyPortAttribute : NodePortAttribute
 {
 	public Type Type;
@@ -496,7 +504,8 @@ public class NodePropertyPortAttribute : NodePortAttribute
 		if( !typeof( NodePropertyPortViewModel ).IsAssignableFrom( ViewModelType ) )
 			throw new ArgumentException( "ViewModelType of NodePropertyAttribute must be subclass of NodePropertyPortViewModel" );
 	}
-}</code></pre>
+}
+```
 
 ## Creating FlowPort dynamically
 
@@ -506,10 +515,10 @@ By now, I have introduced about static creation of FlowPort by using attributes.
 
 Two FlowPorts are statically created by attributes, and 1 FlowPort( DynamicMulipleOutput ) is dynamically created.
 
-<pre>
+```cs
 "NodeGraphSamples/Model/DynamicOutputFlow.cs"
 
-<code>[Node( "DynamicOutputFlow", HeaderBackgroundColor = "Maroon", HeaderFontColor = "White" )]
+[Node( "DynamicOutputFlow", HeaderBackgroundColor = "Maroon", HeaderFontColor = "White" )]
 [NodeFlowPort( "Input", "AutoInput", true )]
 [NodeFlowPort( "Output", "AutoOutput", false )]
 public class DynamicOutputFlow : Node
@@ -526,14 +535,15 @@ public class DynamicOutputFlow : Node
 	}
 
 	#endregion // Overrides Node.
-}</code></pre>
+}
+```
 
 In OnCreate() method, you can see that NodeGraphManager.CreateNodeFlowPort() create a port. Most parameters are same with fields of attributes.
 
-<pre>
+```cs
 "NodeGraph/NodeGraphManager.cs"
 
-<code>/// &lt;summary&gt;
+/// &lt;summary&gt;
 /// Create NodeFlowPort with NodeFlwoPortViewModel.
 /// &lt;/summary&gt;
 /// &lt;param name="isDeserializing"&gt;Is in deserializing routine? 
@@ -549,7 +559,8 @@ In OnCreate() method, you can see that NodeGraphManager.CreateNodeFlowPort() cre
 /// &lt;returns&gt;Created NodeFlwoPort instance.&lt;/returns&gt;
 public static NodeFlowPort CreateNodeFlowPort( bool isDeserializing, Guid guid, Node node, string name, 
     string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, 
-    Type portViewModelTypeOverride = null )</code></pre>
+    Type portViewModelTypeOverride = null )
+```
 
 ## Creating PropertyPort dynamically
 
@@ -559,10 +570,10 @@ PropertyPort can be also created dynamically. If you click "Create DynamicNodePr
 
 One dynamic input PropertyNode, and one dynamic output PropertyNode are created.
 
-<pre>
+```cs
 "NodeGraphSamples/Model/DynamicNodeProperty.cs"
 
-<code>public struct MyStruct
+public struct MyStruct
 {
 	public bool Bool;
 	public int Int32;
@@ -592,14 +603,15 @@ public class DynamicNodeProperty : Node
 	}
 
 	#endregion // Overrides Node
-}</code></pre>
+}
+```
 
 You can see that NodeGraphManager.CreateNodePropertyPort() creates nodes.
 
-<pre>
+```cs
 "NodeGraph/NodeGraphManager.cs"
 
-<code>/// &lt;summary&gt;
+/// &lt;summary&gt;
 /// Create PropertyPort with PropertyPortViewModel.
 /// &lt;/summary&gt;
 /// &lt;param name="isDeserializing"&gt;Is in deserializing routine? 
@@ -617,8 +629,8 @@ You can see that NodeGraphManager.CreateNodePropertyPort() creates nodes.
 /// &lt;returns&gt;Created NodePropertyPort instance.&lt;/returns&gt;
 public static NodePropertyPort CreateNodePropertyPort( bool isDeserializing, Guid guid, Node node, string name, 
     string displayName, bool isInput, bool allowMultipleInput, bool allowMultipleOutput, 
-    Type valueType, object defaultValue, Type portViewModelTypeOverride = null )</code></pre>
-
+    Type valueType, object defaultValue, Type portViewModelTypeOverride = null )
+```
 
 ## Conclusion
 
